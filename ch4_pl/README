@@ -1,0 +1,132 @@
+*INTRODUCTION
+
+This directory contain Prolog, data and output files for the self-applicable
+partial evaluator for the flow-chart language described in Ch. 4 of "Partial
+Evaluation and Automatic Program Generation", by Neil D. Jones, Carsten K.
+Gomard and Peter Sestoft, Prentice-Hall, 1993.  It allows generation of all
+the Futamura projections.
+
+The Prolog code runs under SWI-Prolog (swipl) Version 1.5.0.  It should be
+easy to get the code to run under other prologs as I have tried to avoid using
+any Prolog builtins which were not available in the original DEC-10 Prolog.
+
+
+*CONTENTS
+
+This directory contains the following files:
+
+README		This file.
+cogen.fc	A mix-generated compiler-generator.
+cogen.in	Input to the cogen to make it generate a TM compiler.
+comp.fc		A mix-generated compiler for a Turing machine language.
+comp.in		A Turing machine program input to the comp.
+int.pl		Prolog interpreter for the flow-chart language.
+mix.fc		The mix program in the flow-chart language.
+mix.pl		Utility Prolog routines required by mix.fc.
+mixmix.in	Input to mix to generate cogen.
+mixtmInt.in	Input to mix to generate comp.
+self.in		Input to cogen to regenerate itself.
+stats.txt	Statistics (times & sizes) of various runs.
+sum.fc		A simple program to test int.pl.
+target.fc	The mix-compiled version of the Turing machine program.
+tm.fc		An interpreter for the TM language.
+tm.pl		Utility Prolog routines required by tm.fc.
+tmInput.in	The input tape to the Turing machine program.
+tmInttmPrg.in	Input to mix to cause it to generate target.
+tmPrg.tm	The Turing machine program.	
+tmPrgtmInput.in	Input to the TM interpreter.
+util.pl		Prolog utility procs.  Provided for portability.
+
+*RUNNING THE CODE
+
+The following annotatated (using !) log shows using SWI Prolog (swipl) for
+generating the three Futamura projections.  (Because of the layers of
+interpretation involved, the program is SLOW!  Depending on your Prolog and
+your machine, you may have to wait a few minutes for the higher Futamura
+projections to be computed.)
+
+------------------------------------------------------------------------
+!Start prolog using 4M local stk, 2M global, 1M trail, turning off
+!tty-editing as I run within emacs.
+% swipl -L4096 -G2048 -T1024 -tty 
+Welcome to SWI-Prolog (Version 1.5.0, October 1990)
+Copyright (c) 1990, University of Amsterdam.  All rights reserved.
+
+!Consult program files.  int MUST be consulted first.
+!If your Prolog is primitive you may need to provide the extension as
+!'int.pl', etc.
+1 ?- [int, mix, tm, util].
+int compiled, 0.22 sec, 17,504 bytes.
+mix compiled, 0.17 sec, 13,656 bytes.
+tm compiled, 0.00 sec, 1,076 bytes.
+util compiled, 0.03 sec, 952 bytes.
+
+Yes
+!int(FCFile) is the usual top-level goal, causing it to interpret the 
+!flow-chart language program in file FCFile.
+2 ?- int('mix.fc').	!Interpret flow-chart language mix.
+Enter input (file(F) for input from file F; [] to quit): file('tmInttmPrg.in').
+!Generate target by mixing TM interpreter with TM program.
+!Output deleted.
+
+Enter input (file(F) for input from file F; [] to quit): file('mixtmInt.in').
+!Generate compiler by mixing mix with TM interpreter.
+!Output deleted.
+
+Enter input (file(F) for input from file F; [] to quit): file('mixmix.in').
+!Generate cogen by mixing mix with itself.
+!Output deleted.
+
+Enter input (file(F) for input from file F; [] to quit): [].
+
+------------------------------------------------------------------------
+
+If you wanted to run the generated compiler-generator you would use
+the top-level goal int('cogen.fc') with the input file 'self.in'.
+
+
+*HACKING THE CODE
+
+Most of the code is reasonably documented.  I have made heavy use of logical
+variables in parts of the code to let Prolog do some of my work.
+
+I have used conc/3 and is_member/2 as totally equivalent to the usual
+append/3 and member/2.  The reason for that is to let a non-Prolog person
+run this code on a Prolog which does not provide these predicates, while
+avoiding name-clashes with those Prologs that do.  For the same reasons I
+have avoided using any of swipl's set predicates, or its gensym/2.
+
+Possible portability problems include the statistics(cputime, _) calls in
+int.pl: I am unsure what other Prologs use.  If the interpreter returns `no'
+after running for a while, this may be the problem.  Change the calls to
+your local variant.
+
+When developing the code, I occasionally got internal errors from swipl.
+The error message implied that there may be a bug in swipl's
+garbage-collection routines; increasing the stack sizes avoided the
+problem.  Using the stack sizes shown above, I have successfully run the
+code under swipl 1.5 on a DecStation (MIPS) and under swipl 1.7 on a
+SPARCstation IPC.
+
+I am somewhat defensive about my (over?)use of if-then-else as I get the
+feeling that "real" Prolog programmers scorn their use. IMHO, even tho'
+if-then-else has an ugly syntax, its use should be recommended as it is a
+higher-level construct than explicitly inserting the equivalent (red) cuts
+into the code.  The higher-level allows easier comprehension in the same way
+that a program in an imperative language which uses structured constructs is
+more comprehensible than the equivalent one which uses gotos.  Also in the
+absence of soft-cuts, one may need to introduce auxiliary predicates if
+if-then-else is avoided.  Because of the ugly syntax however, I have used
+explicit cuts when an important predicate needs to do a switch on an
+argument (by putting cuts in the necks of different clauses of the
+predicate).
+
+*CONTACT INFORMATION
+
+Report questions/problems to the address below.  I can't promise that I will
+get to them right away, as I am busy with other stuff. (The site is somewhat
+flaky; so if you can't get through try again.)
+
+-zerksis umrigar
+umrigar@cs.binghamton.edu
+(607) 729-5919

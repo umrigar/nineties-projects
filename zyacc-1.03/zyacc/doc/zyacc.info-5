@@ -1,0 +1,1161 @@
+This is Info file zyacc.info, produced by Makeinfo-1.64 from the input
+file zyacc.texi.
+
+
+File: zyacc.info,  Node: Error Recovery,  Next: Context Dependency,  Prev: Algorithm,  Up: Top
+
+Error Recovery
+**************
+
+   It is not usually acceptable to have a program terminate on a parse
+error.  For example, a compiler should recover sufficiently to parse the
+rest of the input file and check it for errors; a calculator should
+accept another expression.
+
+   In a simple interactive command parser where each input is one line,
+it may be sufficient to allow `yyparse' to return 1 on error and have
+the caller ignore the rest of the input line when that happens (and
+then call `yyparse' again).  But this is inadequate for a compiler,
+because it forgets all the syntactic context leading up to the error.
+A syntax error deep within a function in the compiler input should not
+cause the compiler to treat the following line like the beginning of a
+source file.
+
+   You can define how to recover from a syntax error by writing rules to
+recognize the special token `error'.  This is a terminal symbol that is
+always defined (you need not declare it) and reserved for error
+handling.  The Zyacc parser generates an `error' token whenever a
+syntax error happens; if you have provided a rule to recognize this
+token in the current context, the parse can continue.
+
+   For example:
+
+     stmnts
+       : /* empty string */
+       | stmnts '\n'
+       | stmnts exp '\n'
+       | stmnts error '\n'
+       ;
+
+   The fourth rule in this example says that an error followed by a
+newline makes a valid addition to any `stmnts'.
+
+   What happens if a syntax error occurs in the middle of an `exp'?  The
+error recovery rule, interpreted strictly, applies to the precise
+sequence of a `stmnts', an `error' and a newline.  If an error occurs in
+the middle of an `exp', there will probably be some additional tokens
+and subexpressions on the stack after the last `stmnts', and there will
+be tokens to read before the next newline.  So the rule is not
+applicable in the ordinary way.
+
+   But Zyacc can force the situation to fit the rule, by discarding
+part of the semantic context and part of the input.  First it discards
+states and objects from the stack until it gets back to a state in
+which the `error' token is acceptable.  (This means that the
+subexpressions already parsed are discarded, back to the last complete
+`stmnts'.)  At this point the `error' token can be shifted.  Then, if
+the old look-ahead token is not acceptable to be shifted next, the
+parser reads tokens and discards them until it finds a token which is
+acceptable.  In this example, Zyacc reads and discards input until the
+next newline so that the fourth rule can apply.
+
+   The choice of error rules in the grammar is a choice of strategies
+for error recovery.  A simple and useful strategy is simply to skip the
+rest of the current input line or current statement if an error is
+detected:
+
+     stmnt
+       : error ';'  /* on error, skip until ';' is read */
+
+   It is also useful to recover to the matching close-delimiter of an
+opening-delimiter that has already been parsed.  Otherwise the
+close-delimiter will probably appear to be unmatched, and generate
+another, spurious error message:
+
+     primary
+       : '(' expr ')'
+       | '(' error ')'
+       ...
+       ;
+
+   Error recovery strategies are necessarily guesses.  When they guess
+wrong, one syntax error often leads to another.  In the above example,
+the error recovery rule guesses that an error is due to bad input
+within one `stmnt'.  Suppose that instead a spurious semicolon is
+inserted in the middle of a valid `stmnt'.  After the error recovery
+rule recovers from the first error, another syntax error will be found
+straightaway, since the text following the spurious semicolon is also
+an invalid `stmnt'.
+
+   To prevent an outpouring of error messages, the parser will output
+no error message for another syntax error that happens shortly after
+the first; only after three consecutive input tokens have been
+successfully shifted will error messages resume.
+
+   Note that rules which accept the `error' token may have actions, just
+as any other rules can.
+
+   You can make error messages resume immediately by using the macro
+`yyerrok' in an action.  If you do this in the error rule's action, no
+error messages will be suppressed.  This macro requires no arguments;
+`yyerrok;' is a valid C statement.
+
+   The previous look-ahead token is reanalyzed immediately after an
+error.  If this is unacceptable, then the macro `yyclearin' may be used
+to clear this token.  Write the statement `yyclearin;' in the error
+rule's action.
+
+   For example, suppose that on a parse error, an error handling
+routine is called that advances the input stream to some point where
+parsing should once again commence.  The next symbol returned by the
+lexical scanner is probably correct.  The previous look-ahead token
+ought to be discarded with `yyclearin;'.
+
+   The macro `YYRECOVERING' stands for an expression that has the value
+1 when the parser is recovering from a syntax error, and 0 the rest of
+the time.  A value of 1 indicates that error messages are currently
+suppressed for new syntax errors.
+
+
+File: zyacc.info,  Node: Context Dependency,  Next: Debugging,  Prev: Error Recovery,  Up: Top
+
+Handling Context Dependencies
+*****************************
+
+   The Zyacc paradigm is to parse tokens first, then group them into
+larger syntactic units.  In many languages, the meaning of a token is
+affected by its context.  Although this violates the basic Zyacc
+paradigm, a relatively clean way to handle context dependencies is by
+using semantic tests (*note Semantic Tests::.).  This section documents
+other techniques (known as "kludges") which may enable you to write
+Zyacc parsers for such languages.
+
+* Menu:
+
+* Semantic Tokens::             Token parsing can depend on the semantic context.
+* Lexical Tie-ins::             Token parsing can depend on the syntactic context.
+* Tie-in Recovery::             Lexical tie-ins have implications for how
+                        error recovery rules must be written.
+
+   (Actually, "kludge" means any technique that gets its job done but is
+neither clean nor robust.)
+
+
+File: zyacc.info,  Node: Semantic Tokens,  Next: Lexical Tie-ins,  Prev: Context Dependency,  Up: Context Dependency
+
+Semantic Info in Token Types
+============================
+
+   The C language has a context dependency: the way an identifier is
+used depends on what its current meaning is.  For example, consider
+this:
+
+     foo (x);
+
+   This looks like a function call statement, but if `foo' is a typedef
+name, then this is actually a declaration of `x'.  How can a Zyacc
+parser for C decide how to parse this input?
+
+   The method used in GNU C is to have two different token types,
+`IDENTIFIER' and `TYPENAME'.  When `yylex' finds an identifier, it
+looks up the current declaration of the identifier in order to decide
+which token type to return: `TYPENAME' if the identifier is declared as
+a typedef, `IDENTIFIER' otherwise.
+
+   The grammar rules can then express the context dependency by the
+choice of token type to recognize.  `IDENTIFIER' is accepted as an
+expression, but `TYPENAME' is not.  `TYPENAME' can start a declaration,
+but `IDENTIFIER' cannot.  In contexts where the meaning of the
+identifier is *not* significant, such as in declarations that can
+shadow a typedef name, either `TYPENAME' or `IDENTIFIER' is
+accepted--there is one rule for each of the two token types.
+
+   This technique is simple to use if the decision of which kinds of
+identifiers to allow is made at a place close to where the identifier is
+parsed.  But in C this is not always so: C allows a declaration to
+redeclare a typedef name provided an explicit type has been specified
+earlier:
+
+     typedef int foo, bar, lose;
+     static foo (bar);        /* redeclare `bar' as static variable */
+     static int foo (lose);   /* redeclare `foo' as function */
+
+   Unfortunately, the name being declared is separated from the
+declaration construct itself by a complicated syntactic structure--the
+"declarator".
+
+   As a result, the part of Zyacc parser for C needs to be duplicated,
+with all the nonterminal names changed: once for parsing a declaration
+in which a typedef name can be redefined, and once for parsing a
+declaration in which that can't be done.  Here is a part of the
+duplication, with actions omitted for brevity:
+
+     initdcl
+       : declarator maybeasm '=' init
+       | declarator maybeasm
+       ;
+     
+     notype_initdcl
+       : notype_declarator maybeasm '=' init
+       | notype_declarator maybeasm
+       ;
+
+Here `initdcl' can redeclare a typedef name, but `notype_initdcl'
+cannot.  The distinction between `declarator' and `notype_declarator'
+is the same sort of thing.
+
+   There is some similarity between this technique and a lexical tie-in
+(described next), in that information which alters the lexical analysis
+is changed during parsing by other parts of the program.  The
+difference is here the information is global, and is used for other
+purposes in the program.  A true lexical tie-in has a special-purpose
+flag controlled by the syntactic context.
+
+
+File: zyacc.info,  Node: Lexical Tie-ins,  Next: Tie-in Recovery,  Prev: Semantic Tokens,  Up: Context Dependency
+
+Lexical Tie-ins
+===============
+
+   One way to handle context-dependency is the "lexical tie-in": a flag
+which is set by Zyacc actions, whose purpose is to alter the way tokens
+are parsed.
+
+   For example, suppose we have a language vaguely like C, but with a
+special construct `hex (HEX-EXPR)'.  After the keyword `hex' comes an
+expression in parentheses in which all integers are hexadecimal.  In
+particular, the token `a1b' must be treated as an integer rather than
+as an identifier if it appears in that context.  Here is how you can do
+it:
+
+     %{
+     int hexflag;
+     %}
+     %%
+     ...
+     expr
+       : IDENTIFIER
+       | constant
+       | HEX '('
+           { hexflag = 1; }
+         expr ')'
+           { hexflag = 0; $$ = $4; }
+       | expr '+' expr
+           { $$ = make_sum ($1, $3); }
+       ...
+       ;
+     
+     constant
+       : INTEGER
+       | STRING
+       ;
+
+Here we assume that `yylex' looks at the value of `hexflag'; when it is
+nonzero, all integers are parsed in hexadecimal, and tokens starting
+with letters are parsed as integers if possible.
+
+   The declaration of `hexflag' shown in the C declarations section of
+the parser file is needed to make it accessible to the actions (*note
+The C Declarations Section: C Declarations.).  You must also write the
+code in `yylex' to obey the flag.
+
+
+File: zyacc.info,  Node: Tie-in Recovery,  Prev: Lexical Tie-ins,  Up: Context Dependency
+
+Lexical Tie-ins and Error Recovery
+==================================
+
+   Lexical tie-ins make strict demands on any error recovery rules you
+have.  *Note Error Recovery::.
+
+   The reason for this is that the purpose of an error recovery rule is
+to abort the parsing of one construct and resume in some larger
+construct.  For example, in C-like languages, a typical error recovery
+rule is to skip tokens until the next semicolon, and then start a new
+statement, like this:
+
+     stmt
+       : expr ';'
+       | IF '(' expr ')' stmt { ... }
+       ...
+       | error ';' { hexflag = 0; }
+       ;
+
+   If there is a syntax error in the middle of a `hex (EXPR)'
+construct, this error rule will apply, and then the action for the
+completed `hex (EXPR)' will never run.  So `hexflag' would remain set
+for the entire rest of the input, or until the next `hex' keyword,
+causing identifiers to be misinterpreted as integers.
+
+   To avoid this problem the error recovery rule itself clears
+`hexflag'.
+
+   There may also be an error recovery rule that works within
+expressions.  For example, there could be a rule which applies within
+parentheses and skips to the close-parenthesis:
+
+     expr
+       : ...
+       | '(' expr ')' { $$ = $2; }
+       | '(' error ')'
+       ...
+
+   If this rule acts within the `hex' construct, it is not going to
+abort that construct (since it applies to an inner level of parentheses
+within the construct).  Therefore, it should not clear the flag: the
+rest of the `hex' construct should be parsed with the flag still in
+effect.
+
+   What if there is an error recovery rule which might abort out of the
+`hex' construct or might not, depending on circumstances?  There is no
+way you can write the action to determine whether a `hex' construct is
+being aborted or not.  So if you are using a lexical tie-in, you had
+better make sure your error recovery rules are not of this kind.  Each
+rule must be such that you can be sure that it always will, or always
+won't, have to clear the flag.
+
+
+File: zyacc.info,  Node: Debugging,  Next: Invocation,  Prev: Context Dependency,  Up: Top
+
+Debugging Your Parser
+*********************
+
+   Zyacc provides facilities to get a debugger compiled into your
+program.  The resulting program can be debugged in several different
+ways:
+
+  1. You can interact with the program using a command-line interface
+     and control it using simple single letter debugging commands.
+     This approach has the disadvantage that debugger I/O is
+     interspersed with the I/O of your program.
+
+  2. As in (1) above, but separate processes are used to run your
+     program and the debugger interface.  These processes communicate
+     using a socket-based interface.  Hence the program being debugged
+     can be on a computer different from the one on which you are doing
+     the debugging, or it could be on the same one (the usual case).
+     When debugging and running your program on the same computer, you
+     can run your program in one window and debug it from another
+     window.  This avoids the problem in (1) where debugger and program
+     I/O are interspersed.
+
+  3. As in (2) above, but the interaction uses a GUI java-based
+     application, rather than a command-line interface.  Most of the
+     facilities of the command-line interface are available via the GUI.
+
+  4. By specifying certain environmental variables when you run your
+     program, you can get it to generate HTML files which can then be
+     accessed using any Web browser.  The GUI used in (3) is then run
+     as a java applet by accessing the generated HTML files using your
+     favorite Web browser.  This approach has the advantage that the
+     GUI can automatically use your Web browser to display the current
+     state of the parser in the HTML files generated using the `--HTML'
+     option (*note Invoking Zyacc: Invocation.).
+
+
+* Menu:
+
+* Building Debugging Parsers::
+* Environmental Variables::
+* Debugging Parsers Using a Textual Interface::
+* Debugging Parsers Using a Graphical User Interface::
+* Tradeoffs between Debugging Approaches::
+
+
+File: zyacc.info,  Node: Building Debugging Parsers,  Next: Environmental Variables,  Prev: Debugging,  Up: Debugging
+
+Building Debugging Parsers
+==========================
+
+   To build a parser which can be debugged, it is necessary to define a
+C preprocessor symbol when compiling the generated parser and to link
+your program with the Zyacc library.  Optionally, if you would like
+token semantics to be printed out, then you need to define an auxiliary
+function.
+
+* Menu:
+
+* Compiling Debugging Parsers::
+* Linking Debugging Parsers::
+* Printing Token Semantics::
+
+
+File: zyacc.info,  Node: Compiling Debugging Parsers,  Next: Linking Debugging Parsers,  Prev: Building Debugging Parsers,  Up: Building Debugging Parsers
+
+Compiling Debugging Parsers
+---------------------------
+
+   To enable compilation of debugging facilities, you must define the C
+preprocessor macro `YY_ZYACC_DEBUG' to be nonzero when you compile the
+parser.  This can be done in any of the following ways:
+
+  1. You can define the `YY_ZYACC_DEBUG' macro in the C-declarations
+     section of section 1 of your Zyacc source file.
+
+  2. You can use the `-t' or `--debug' option when you run Zyacc (*note
+     Invoking Zyacc: Invocation.).  This results in a definition of
+     `YY_ZYACC_DEBUG' automatically being added to the generated parser.
+
+  3. You can define the `YY_ZYACC_DEBUG' macro on the compiler command
+     line when you compile the generated parser.  For most compilers,
+     this can typically be done by specifying the option
+     `-DYY_ZYACC_DEBUG'.
+
+
+   The third approach is the recommended approach as it defers the
+debugging decision to the latest possible point in the build process.
+
+   For compatibility with other parser generators, the macro `YYDEBUG'
+can be used instead of `YY_ZYACC_DEBUG'.  Zyacc provides
+`YY_ZYACC_DEBUG' in addition to `YYDEBUG' for the following reason:
+`YYDEBUG' is also used to turn on debugging in lex-based scanner
+generators; if a project uses both lex and yacc, and its compilation is
+controlled by a Makefile then it can sometimes be inconvenient to turn
+on debugging in the parser but not in the scanner, or vice-versa.
+
+
+File: zyacc.info,  Node: Linking Debugging Parsers,  Next: Printing Token Semantics,  Prev: Compiling Debugging Parsers,  Up: Building Debugging Parsers
+
+Linking Debugging Parsers
+-------------------------
+
+   A debugging parser must be linked with the Zyacc library.  Depending
+on your system, you may also need to link it with the networking
+library -- typically you need to specify `-lsocket' and `-lnsl' on the
+link command-line.  For most compilers, this is typically done using
+the `-L' option (for specifying the library path) and the `-l' option
+(for specifying the library name).  For example, if your project
+consists of a parser with object file `parse.o' and some helper
+functions in `helpers.o' and the Zyacc library is installed in the `lib'
+subdirectory of your home directory, then a typical link command line
+is:
+
+     	cc parse.o helpers.o -L$HOME/lib -lzyacc -lsocket -lnsl -o my_prj
+   It is usually necessary that the `-L' and `-l' options occur *after*
+the object files.
+
+
+File: zyacc.info,  Node: Printing Token Semantics,  Prev: Linking Debugging Parsers,  Up: Building Debugging Parsers
+
+Printing Token Semantics
+------------------------
+
+   If you would like to have the debugger print out tokens using their
+semantics (rather than the token names), then you need to define a
+function to print them out.  If your function is SEMFN, then it should
+have the prototype
+     void SEMFN(FILE *out, int tokNum, void *yylvalP);
+   and should print in `FILE' out, the semantics associated with the
+token whose token number is `tokNum' and whose `yylval' semantic value
+(*note Token Values::.) is pointed to by `yylvalP'.
+
+   You may call this function whatever you like.  You should
+communicate the name of the function to Zyacc by defining (in the C
+declarations section of the source file) the C preprocessor macro
+`YY_SEM_FN' to the chosen name.
+
+   If you are only using the textual interface, then this function may
+print anything you wish.  However, if you wish to use the GUI, then it
+is imperative that the function *not print any newlines*.
+
+   If you are using the GUI, then you may also want to define the C
+macro `YY_SEM_MAX' to specify the maximum number of characters your
+semantic function will print.  If you do not define this macro, then a
+default value is used.
+
+
+File: zyacc.info,  Node: Environmental Variables,  Next: Debugging Parsers Using a Textual Interface,  Prev: Building Debugging Parsers,  Up: Debugging
+
+Environmental Variables
+=======================
+
+   Since the program being run is *your* program and Zyacc has no
+control over the arguments accepted by your program from the
+command-line, all arguments to the debugger are provided via
+environmental variables.
+
+   If your shell is derived from the C-shell (`csh', `tcsh', etc), then
+you can specify an environmental variable using the `setenv' command.
+For example,
+     	setenv	ZYDEBUG_PORT 1
+
+   If your shell is derived from the Bourne-shell (`sh', `ksh', `bash',
+etc), then you can specify an environmental variable using the `export'
+command.  For example,
+     	export	ZYDEBUG_PORT=1
+
+   If you prefer to avoid cluttering up your environment with gratuitous
+definitions, then the `sh'-based derivatives provide a neat
+alternative.  You can simply type the variable definitions immediately
+before the name of your program, as illustrated by the following
+example:
+     	ZYDEBUG_PORT=1 my_prg my_arg1 my_arg2
+
+   The environmental variables used by the Zyacc debugger are listed
+below.  They are discussed in more detail later.
+
+`ZYDEBUG_APPLET'
+     Specifies the name of a applet to be generated by the debugger.
+
+`ZYDEBUG_CODEBASE'
+     Specifies the relative path to the java-based GUI debugger.
+
+`ZYDEBUG_HTMLBASE'
+     Specifies the relative path to the HTML files describing your
+     parser.
+
+`ZYDEBUG_PORT'
+     Suggests a socket port to be used by the debugger.
+
+`ZYDEBUG_SRCBASE'
+     Specifies the relative path to the source file for your parser.
+
+
+File: zyacc.info,  Node: Debugging Parsers Using a Textual Interface,  Next: Debugging Parsers Using a Graphical User Interface,  Prev: Environmental Variables,  Up: Debugging
+
+Debugging Parsers Using a Textual Interface
+===========================================
+
+   Parsers can be debugged using a textual interface with a single
+process for both your program and the debugging interface, or by using a
+separate process for your program and a separate process for the
+debugger interface.  The single process alternative is fine as long as
+your program does not generate any terminal I/O.  If your program does
+generate terminal I/O, then sorting out your program's I/O from the
+debugger's I/O could get messy and multi-process debugging is to be
+preferred.
+
+   In a networked environment, the multi-process debugger also allows
+*remote debugging*, with the program being debugged running on one
+computer and the debugging interface running on another computer.  For
+this to work, your network environment must support BSD-style sockets,
+-- this is usually the case for most modern systems.
+
+* Menu:
+
+* Starting a Single Process Textual Debugger::
+* Starting a Multiple Process Textual Debugger::
+* Textual Debugger Commands::
+
+
+File: zyacc.info,  Node: Starting a Single Process Textual Debugger,  Next: Starting a Multiple Process Textual Debugger,  Prev: Debugging Parsers Using a Textual Interface,  Up: Debugging Parsers Using a Textual Interface
+
+Starting a Single Process Textual Debugger
+------------------------------------------
+
+   To debug your program using a single process textual interface you
+must first compile and link your program as outlined in *Note Building
+Debugging Parsers::.  Then you should start your program the way your
+normally do specifying any command-line arguments required.  You should
+not specify any environmental variables.  Your program starts up as
+normal and when the parsing function `yyparse' is first entered, the
+debugger takes control and allows you to interact with it using the
+debugger commands (*note Textual Debugger Commands::.).  (As mentioned
+earlier, if your program does any terminal I/O, then the debugger
+interaction will be interspersed with the interaction with your
+program).
+
+
+File: zyacc.info,  Node: Starting a Multiple Process Textual Debugger,  Next: Textual Debugger Commands,  Prev: Starting a Single Process Textual Debugger,  Up: Debugging Parsers Using a Textual Interface
+
+Starting a Multiple Process Textual Debugger
+--------------------------------------------
+
+   To debug your program using a textual interface with multiple
+processes you must first compile and link your program as outlined in
+*Note Building Debugging Parsers::.  To start your program, you should
+define the environmental variables described below and then start your
+program the way your normally do specifying any command-line arguments
+required.  To make the debugger start in multiple-process mode, the
+environmental variable (*note Environmental Variables::.)
+`ZYDEBUG_PORT' must be defined when the program is started.  The value
+specified for `ZYDEBUG_PORT' should be a suggested socket port number
+to use: Zyacc merely uses it as a starting point in its search for a
+free socket and it is usually best to specify it simply as 1.  Once it
+finds a free port, it outputs its number to the terminal as follows:
+     	zydebug port: 6001
+   Given the port number, you can start that portion of the debugger
+which communicates with your program.  To do this, you should run the
+`zydebug' program (which should have been installed along with Zyacc)
+giving it the above socket number:
+     	zydebug 6001
+   If you want to run `zydebug' on a computer different from the one
+where your program is running then simply type:
+     	zydebug HOST PORT
+   where HOST is the network address (hostname or dotted IP address) of
+the computer on which your program is running, and PORT is the port
+number output when you started your program.  For example, if I started
+the program above on host `alpha.romeo.com', I would use:
+     	zydebug alpha.romeo.com 6001
+
+
+File: zyacc.info,  Node: Textual Debugger Commands,  Prev: Starting a Multiple Process Textual Debugger,  Up: Debugging Parsers Using a Textual Interface
+
+Textual Debugger Commands
+-------------------------
+
+   Irrespective of the manner in which you start the debugger, the
+commands it accepts are always the same: a single letter followed by an
+optional argument.  These commands allow you to specify breakpoints and
+displaypoints.  When the parser encounters a "breakpoint" the debugger
+suspends execution of the parser and allows you to interact with it.
+When the parser encounters a `displaypoint', the debugger displays
+information about the state of the parse.  The concepts of
+displaypoints and breakpoints are orthogonal -- i.e. it is possible to
+display information at a point in the parse without suspending parser
+execution at that point, or vice-versa.
+
+   The commands which are relevant to human users are the following:
+
+`b [BREAKSPEC]'
+     Set or list breakpoint(s) as specified by BREAKSPEC.
+
+     At a breakpoint, the parser stops and the user can type in commands
+     (it may or may not display its current state, depending on whether
+     or not a displaypoint is set too).  If breakSpec is omitted then
+     list all breakpoints.  breakSpec can have one of the following
+     forms with the specified meaning:
+
+    `TERM'
+          Terminal with name TERM is about to be shifted.
+
+    `NON_TERM'
+          Any rule with LHS nonterminal named NON_TERM is about to be
+          reduced.
+
+    `RULE_NUM'
+          Rule number RULE_NUM is about to be reduced.
+
+    `%n'
+          Reduce action on any nonterminal.
+
+    `%t'
+          Shift action on any terminal.
+
+    `*'
+          Both shift and reduce actions.
+
+`B [BREAKSPEC]'
+     Clear breakpoint(s) as specified by BREAKSPEC.
+
+     At a breakpoint, the parser stops and the user can type in commands
+      (it may or may not display its current state, depending on
+     whether or   not a displaypoint is set too).  If BREAKSPEC is
+     omitted then clear all   breakpoints.  BREAKSPEC is as specified
+     for the `b' command.
+
+`c [TEMPORARYBREAKSPEC]'
+     Continue execution until a breakpoint is entered.
+
+     If TEMPORARYBREAKSPEC is specified, then it specifies a temporary
+     break   point which is automatically cleared whenever the next
+     breakpoint is   entered. TEMPORARYBREAKSPEC can have the same form
+     as BREAKSPEC   for the `b' command.
+
+`d [DISPLAYSPEC]'
+     Set or list displaypoint(s) as specified by DISPLAYSPEC.
+
+     At a displaypoint, the parser displays its current state (it may or
+      may not stop to let the user interact with it, depending on
+     whether or   not a breakpoint is set too).  If displaySpec is
+     omitted then list   all displaypoints.  DISPLAYSPEC can have the
+     same form as   BREAKSPEC for the `b' command.
+
+`D [DISPLAYSPEC]'
+     Clear displaypoint(s) as specified by DISPLAYSPEC.
+
+     At a displaypoint, the parser displays its current state (it may or
+      may not stop to let the user interact with it, depending on
+     whether or   not a breakpoint is set too).  If displaySpec is
+     omitted then clear   all displaypoints.  DISPLAYSPEC can have the
+     same form as   BREAKSPEC for the `b' command.
+
+`h [CMD]'
+     Print help on single-letter command CMD.  If CMD is omitted,
+     give help on all commands.
+
+`l [LISTSPEC]'
+     List terminals, non-terminals or rules as specified by LISTSPEC.
+
+     If LISTSPEC is omitted, then all rules are listed.  Otherwise
+     LISTSPEC can be one of the following:
+
+    `%n'
+          List all non-terminal symbols.
+
+    `%t'
+          List all terminal symbols.
+
+    `RULE_NUM'
+          List rule with number RULE_NUM.
+
+`m [DEPTH]'
+     Set maximum DEPTH printed for the stack.
+
+     If depth is 0 or omitted, then entire stack is printed.
+
+`n'
+     Execute parser till next shift action.
+
+     Equivalent to `c %t'.
+
+`p'
+     Print current parser state.
+
+`q'
+     Quit debugger and run parser without debugging.
+
+`s'
+`<blank line>'
+     Single-step parser to next shift or reduce action.
+
+     Equivalent to `c *'.
+
+
+File: zyacc.info,  Node: Debugging Parsers Using a Graphical User Interface,  Next: Tradeoffs between Debugging Approaches,  Prev: Debugging Parsers Using a Textual Interface,  Up: Debugging
+
+Debugging Parsers Using a Graphical User Interface
+==================================================
+
+   It is also possible to use a java-based GUI to debug parsers
+generated by Zyacc.  This can be done in two ways:
+
+  1. The GUI can be used as a standalone java application.  To do this,
+     you should have a java runtime system installed on your computer.
+
+  2. The GUI can be used as an applet from within a web browser which
+     supports java.
+
+
+* Menu:
+
+* Starting a GUI Debugger as a Java Application::
+* Starting a GUI Debugger as a Java Applet::
+* Using the Debugger GUI::
+
+
+File: zyacc.info,  Node: Starting a GUI Debugger as a Java Application,  Next: Starting a GUI Debugger as a Java Applet,  Prev: Debugging Parsers Using a Graphical User Interface,  Up: Debugging Parsers Using a Graphical User Interface
+
+Starting a GUI Debugger as a Java Application
+---------------------------------------------
+
+   To debug your program using a GUI java application you must first
+compile and link your program as outlined in *Note Building Debugging
+Parsers::.  To use the GUI as a standalone application, you should first
+start your program the way your normally do, specifying any command-line
+arguments required.  The following environmental variables (*note
+Environmental Variables::.) are used by your program to control the
+setup of the debugger.
+
+`ZYDEBUG_PORT'
+     This is required.  As discussed earlier (*note Starting a Multiple
+     Process Textual Debugger::.), it's value is best specified simply
+     as `1'.
+
+`ZYDEBUG_SRCBASE'
+     This should be the relative path to the parser source file (the
+     `.y' file) from the directory which is current when the parsing
+     function `yyparse' is first entered.  (The directory in which
+     `yyparse' is entered is usually the same directory in which your
+     program executable resides, assuming that your program has not
+     performed any `chdir()' calls and that you started the program in
+     the directory in which it resides).  If it not specified, it is
+     assumed that your parser source file lives in the directory the
+     parsing function was in when it was first entered.
+
+   When your program starts it will output the port number of the
+socket it has connected to; for example:
+     	zydebug port: 6001
+   This port number will be used to connect the GUI to your executing
+program.
+
+   To start the GUI, you must run the java runtime system on your
+machine, telling it where to find the java classfiles referenced by
+`zdu.zydebug.ZYDebug' which form the GUI and providing it with
+arguments telling it how to connect to your executing program.  The
+exact procedures may be different on your machine, but as of this
+writing, the most common setup is as follows:
+
+   Java is started by simply using the command `java'.  For the `java'
+command to work it must be in your `PATH' (*note Environmental
+Variables::.) or you should specify the full path name.  For java to
+find the java classfiles for the debugger, those files must be in your
+`CLASSPATH' (*note Environmental Variables::.).  Finally, you must
+specify the port number output by your program, (optionally preceeded by
+the hostname or dotted IP address of the computer on which your program
+is running, if it is different from the one on which you are running the
+GUI).
+
+   The following example shows the starting a debugger GUI under a
+`csh' or derivatives.
+
+
+     % setenv CLASSPATH /usr/local/share/classes
+     % java zdu.zydebug.ZYDebug 6001 &
+
+   Under `sh' or derivatives, the following command can be used to
+connect to a program running on a different machine:
+     $ CLASSPATH=/usr/local/share/classes java zdu.zydebug.ZYDebug pear 6001 &
+   where `pear' is the name of the machine on which the program is
+running.
+
+
+File: zyacc.info,  Node: Starting a GUI Debugger as a Java Applet,  Next: Using the Debugger GUI,  Prev: Starting a GUI Debugger as a Java Application,  Up: Debugging Parsers Using a Graphical User Interface
+
+Starting a GUI Debugger as a Java Applet
+----------------------------------------
+
+   A java applet can only be run by being embedded within an HTML file
+which provides the environment in which the applet lives.  Among other
+things, the HTML file provides the arguments to the applet.
+
+   The debugging applet talks to the program being debugged using a
+socket referred to by a port number.  Since this port number can vary
+for different executions of the program being debugged, it has to be
+provided as an argument to the applet.  As an applet gets its argument
+from its associated HTML file, and this particular port number argument
+can be different for different executions of the program being debugged,
+the HTML file associated with the debugging applet has to be generated
+dynamically.
+
+   The HTML file is generated by your enhanced program when it is
+started (actually a second HTML file is generated as well).  Using
+environmental variables (*note Environmental Variables::.) you can
+specify the names of the HTML files, as well as paths to various other
+resources required by the applet.
+
+   To debug your program using a GUI java applet you must first compile
+and link your program as outlined in *Note Building Debugging
+Parsers::.  You should then start your program the way your normally
+do, specifying any command-line arguments required.  The following
+environmental variables (*note Environmental Variables::.) are used by
+your program to control the setup of the debugger.
+
+`ZYDEBUG_APPLET'
+     This is required.  It specifies the root name used for the
+     generated HTML documents which are used to access the debugging
+     applet.
+
+`ZYDEBUG_CODEBASE'
+     This should provide the path to the debugger's java classfiles
+     relative to the directory where the generated HTML documents live
+     (relative to the `DOCBASE' directory in java terminology).  If not
+     specified, then it is assumed that the java classfiles reside in
+     the same directory as the generated HTML documents.
+
+`ZYDEBUG_HTMLBASE'
+     This should provide the path to the parser's HTML description files
+     generated using the `--HTML' option *note Invoking Zyacc:
+     Invocation.), relative to the directory where the generated HTML
+     documents live (relative to the `DOCBASE' directory in java
+     terminology).  If not specified, then it is assumed that the HTML
+     description files reside in the same directory as the generated
+     HTML documents.
+
+`ZYDEBUG_PORT'
+     This is not required.  As discussed earlier *Note Starting a
+     Multiple Process Textual Debugger::, it's value is best specified
+     simply as `1'.
+
+`ZYDEBUG_SRCBASE'
+     This is exactly as for the standalone GUI application.  It should
+     be the relative path to the parser source file (the `.y' file)
+     from the directory which is current when the parsing function
+     `yyparse' is first entered.  (The directory in which `yyparse' is
+     entered is usually the same directory in which your program
+     executable resides, assuming that your program has not performed
+     any `chdir()' calls and that you started the program in the
+     directory in which it resides).  If it not specified, it is
+     assumed that your parser source file lives in the directory the
+     parsing function was in when it was first entered.
+
+   Usually, the parser source file and the HTML description files are in
+the same directory as the program executable and all you need to specify
+are `ZYDEBUG_APPLET' and `ZYDEBUG_CODEBASE'.
+
+   Consider the following more complicated situation:
+
+   * You would like to put the generated HTML files in `$HOME/tmp' with
+     the name `XXX'.
+
+   * The java classfiles reside in `/usr/local/share/classes'.
+
+   * The HTML files describing the parser and the source file reside in
+     the parent directory of the directory in which you start the
+     program.
+
+   * Your enhanced executable program is called `foo' and takes a
+     single argument `bar'.
+
+   Under `csh' and derivatives, you can use the following sequence of
+commands:
+
+     setenv ZYDEBUG_APPLET $HOME/tmp/XXX
+     setenv CODEBASE /usr/local/share/classes
+     setenv HTMLBASE `pwd`/..
+     setenv SRCBASE `pwd`/..
+     ./foo bar
+
+   Under `sh' and derivatives, the following command suffices:
+
+     ZYDEBUG_APPLET=$HOME/tmp/XXX CODEBASE=/usr/local/share/classes \
+       HTMLBASE=`pwd`/.. SRCBASE=`pwd`/.. \
+       ./foo bar
+
+   Having generated the HTML files, you can now use a browser to start
+the debugger's GUI and debug your parser.  There are two methods of
+doing this available in most browsers:
+
+   * View the generated HTML file using the local file access option
+     provided by most browsers.  This will work only if you are using
+     the browser on the same machine as the one on which your program
+     is executing.
+
+   * View the generated HTML file as a regular remote URL.  For this to
+     work, all the files required by the applet (the java classfiles,
+     the parser source file, and the HTML description files) must be
+     accessible by the HTTP daemon on the remote machine.  This usually
+     requires that they be within a public html area.
+
+
+File: zyacc.info,  Node: Using the Debugger GUI,  Prev: Starting a GUI Debugger as a Java Applet,  Up: Debugging Parsers Using a Graphical User Interface
+
+Using the Debugger GUI
+----------------------
+
+   As the applet is talking to your compiled program which has not been
+modified in any way, it is not possible to have the applet restart your
+program once it has completed its parse.  Instead you will have to
+restart the parser and the debugger's GUI applet.
+
+   The applet has four main windows.  Clockwise from the top-left they
+are the following:
+
+*Parse Forest Window*
+     Shows the current parse-forest.  The nodes on top are the nodes
+     currently on the stack.  Terminal nodes are in red, non-terminal
+     nodes are in green and error nodes are in pink.  The last active
+     node is highlighted in yellow.  Each node contains text of the form
+     S`/'SYM, where S is the state at which that node was created and
+     SYM is the grammar symbol or token semantics corresponding to the
+     node.  *The nodes in the top row correspond to nodes currently on
+     the parse stack*.
+
+     Each non-leaf node in the forest is clickable.  Clicking on such a
+     node hides all its subtrees; clicking again on that node displays
+     the subtrees again.  This can be useful as the parse tree
+     typically gets pretty large for practical parsers.
+
+*Trace Window*
+     Shows the parse stack in gray (each entry is in the same format as
+     a parse tree node), the current lookahead in red and the following
+     action in blue.
+
+*Breakpoint Window*
+     This allows you to set/clear breakpoints on all or selected
+     nonterminals and terminals.  Clicking a line in the window sets a
+     breakpoint on the symbol displayed on that line; clicking it again
+     clears the breakpoint.  The currently selected breakpoints are
+     highlighted.
+
+*Source Window*
+     Shows the parser source file.  During a reduction, the line
+     corresponding to the reduction is highlighted.
+
+   The debugger is controlled by the following controls:
+
+*Shadows Checkbox*
+     This checkbox controls whether or not the parser shows crude
+     shadows while displaying the parse forest.  It is useful to avoid
+     having shadows cluttering up the display of large forests.
+
+*Update Checkbox*
+     Selecting this checkbox results in the parser displaying the
+     current state in the LR(0) machine in a browser frame.  For this
+     to work, the parser should have been generated using the `--HTML'
+     option (*note Invocation::.), and the environmental variable
+     `ZYDEBUG_HTMLBASE' should have been specified when the parser was
+     started.
+
+*Step Button*
+     Steps the parser by a single step.
+
+*Next Button*
+     Steps the parser to the next shift action.
+
+*Continue Button*
+     Steps the parser till the next breakpoint.  If no breakpoints are
+     set, then the parser runs to completion.  As mentioned above, it
+     is not possible to restart the parser.
+
+
+File: zyacc.info,  Node: Tradeoffs between Debugging Approaches,  Prev: Debugging Parsers Using a Graphical User Interface,  Up: Debugging
+
+Tradeoffs between Debugging Approaches
+======================================
+
+   The popular adage "a picture is worth a thousand words" may be true
+in the real world, but with the primitive visualization techniques used
+by the GUI debugger, it may not hold for the GUI debugger.  For
+practical parsers, the parse forest displayed by the debugger rapidly
+becomes unmanageable, even after hiding many large subtrees.  If the
+large amount of screen real estate taken up by the parse forest was
+occupied instead by words more information might be conveyed.
+
+   It is probably best to use the GUI debugger only under the following
+conditions:
+
+   * Only a limited amount of text is being parsed -- this prevents
+     inordinate growth of the displayed parse forest.
+
+   * To explain and understand the operation of parsers in general and
+     LALR(1) parsers in particular.
+
+   * You are a novice and don't feel like climbing the learning curve
+     hillock represented by the textual commands.
+
+   Another problem with GUI debugging is that it can be quite slow as
+the java GUI has to build up the parse forest, trace output, etc.  I
+have not had a chance to analyze its performance, but I would not be
+surprised if it is spending a fair amount of time merely collecting
+garbage.
+
+   For debugging most practical parsers, I would recommend the textual
+interface.
+
+
+File: zyacc.info,  Node: Invocation,  Next: Known Incompatibilities with Bison,  Prev: Debugging,  Up: Top
+
+Invoking Zyacc
+**************
+
+   The command line needed to invoke Zyacc has the format:
+
+     zyacc [OPTIONS LIST] YACC-FILE [YACC-FILE...]
+
+   Here YACC-FILE specifies the name(s) of the grammar file, usually
+ending in `.y'.  Unless the `--output' or `--yacc' options are
+specified, the name of the generated parser file is created by replacing
+the `.y' with `.tab.c'.  Thus, the `zyacc foo.y' filename yields
+`foo.tab.c', and the `zyacc hack/foo.y' filename yields
+`hack/foo.tab.c'.
+
+   * If no YACC-FILEs are specified on the command line, then a help
+     message is printed on the standard output.
+
+   * If multiple YACC-FILESs are specified, then their concatenation is
+     treated as a single logical file.
+
+   * A YACC-FILE specified by the single character `-' stands for the
+     standard input.
+
+* Menu:
+
+* Option Conventions::
+* Option Sources::
+* Zyacc Options::
+* Data Search List::
+
+
+File: zyacc.info,  Node: Option Conventions,  Next: Option Sources,  Prev: Invocation,  Up: Invocation
+
+Option Conventions
+==================
+
+   A word which constitutes a command-line argument has two possible
+types: it is a "option word" if it begin with a `-' or `--' (with
+certain exceptions noted below), or if it follows an option word which
+requires an argument.  Otherwise it is a "non-option word".  An option
+word specifies the value of a Zyacc option; a non-option word specifies
+a file name.
+
+   * Options with short single character names must begin with a single
+     `-'.
+
+   * Options with long multiple-character names must begin with `--'.
+     The name can consists of any alphanumeric characters along with
+     `-' and `_' characters.
+
+   * When a option is specified using a long name, it is sufficient to
+     specify an unambiguous prefix of its name.
+
+   * If an option has a value which must be one of several prespecified
+     values, then it is sufficient to specify an unambiguous prefix of
+     the value, in a manner similar to long option names.
+
+   * It is possible to specify an option value in the same word as the
+     option name.  For short option names, there should not be any
+     intervening characters between the short name and the value.  For
+     long option names, the long name should be separated from the
+     value using a single `=' character.
+
+   * If an option has an *optional* value, then the value must be
+     provided in the same word as the option name, as outlined above.
+
+   * If an option has a *required* value, then the value may be
+     provided in the same word as the option name as outlined above, or
+     it may be provided in the next word.  In the latter case, the
+     entire next word is taken to be the value (even if it looks like
+     an option starting with `-' or `--').
+
+   * Short names for multiple options which are not allowed to have any
+     values may be combined into a single word.  For example, if Zyacc
+     had options `-l' and `-7' which were not allowed to have any values
+     (it does not), then instead of specifying them using two words as
+     `-l -7', they can be specified using a single word `-l7'.
+
+   * If an option is given two incompatible values, then the option
+     which is specified later dominates.
+
+   * If the option consisting simply of the two characters `--' is
+     specified, then all the remaining words on the command line will
+     not be treated as options irrespective of whether they start with
+     `-' or `--'.  This makes it possible to specify file names
+     starting with a `-'.
+
+   * Option words and non-option words may be arbitrarily interspersed.
+
+   * Command-line options always override the options specified
+     elsewhere (*note Option Sources::.).
+
+
+File: zyacc.info,  Node: Option Sources,  Next: Zyacc Options,  Prev: Option Conventions,  Up: Invocation
+
+Option Sources
+==============
+
+   Besides the command-line, Zyacc can read its options from several
+different sources.  In order of increasing priority these sources are
+the following:
+
+   * The file `zyacc.opt'.  The file should contain only option names
+     and values separated by whitespace (newline counts as whitespace).
+     In addition it may contain comments enclosed within `/*' and
+     `*/'.  The file is searched for using Zyacc's search list (*note
+     Data Search List::.).
+
+     The use of this file for setting defaults, makes it possible for a
+     site to setup default options for Zyacc different from its builtin
+     defaults.  It also makes it easy to drop Zyacc into a GUI toolset
+     where options are set using a graphical user interface.
+
+   * The environment variable `ZYACC_OPTIONS'.  If this variable is
+     set, then its value should contain only options and option values
+     separated by whitespace as on the command-line.  The procedure for
+     setting environment variables depends on the system you are using:
+     under the UNIX shell `csh' the `setenv' command can be used, under
+     the MS-DOS command-interpreter the `set' command can be used;
+     under the UNIX shell `sh' or `ksh' the `export' command can be
+     used.
+
+   * It is also possible to specify options directly within the Zyacc
+     source file using the `%option' directives (*note Zyacc
+     Declarations::.).
+
+   Options specified by the environment variable `ZYACC_OPTIONS'
+overrides the options specified in the `zyacc.opt' file.  Options
+specified in the Zyacc source file override options specified in the
+`zyacc.opt' file or `ZLEX_OPTIONS' environment variable.  Finally,
+command-line options always override options specified by all other
+sources.
+

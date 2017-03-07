@@ -1,0 +1,53 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Known Incompatibilities with Bison</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_10.html">previous</A>, <A HREF="zyacc_12.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<H1><A NAME="SEC124" HREF="zyacc_toc.html#SEC124">Known Incompatibilities with Bison</A></H1>
+<P>
+The following lists Bison features which are not available or work
+differently in Zyacc:
+<P>
+<UL>
+
+<LI>
+In Bison multi-character literals are enclosed within double-quotes, whereas
+Zyacc uses single-quotes for both single and multi-character literals.  The
+Bison approach is more consistent with C; the Zyacc approach avoids making
+another character special (the Zyacc approach predates the public release of
+this feature in Bison).
+
+<LI>
+Zyacc does not have any public interface to retrieve a token number given
+its name, similar to Bison's <CODE>yytname</CODE> table.
+
+<LI>
+Zyacc does not support Bison's <CODE>YYBACKUP()</CODE> macro.
+
+<LI>
+Bison allows the use of <CODE>%type</CODE> declarations to declare the types of
+terminal symbols, even though the manual seems to imply that <CODE>%type</CODE>
+can be used only for declaring the types of nonterminals.  This feature
+appears useful.
+
+<LI>
+Zyacc's debugging facilities are quite different from Bison's trace
+facility. 
+
+</UL>
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_10.html">previous</A>, <A HREF="zyacc_12.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

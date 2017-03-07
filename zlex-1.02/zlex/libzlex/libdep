@@ -1,0 +1,56 @@
+#!/usr/local/bin/perl
+
+#File:    libdep
+#Purpose: Script to extract the dependencies of library functions.
+#
+#Copyright (C) 1995 Zerksis D. Umrigar
+#
+#See the file LICENSE for copying and distribution conditions.
+#THERE IS ABSOLUTELY NO WARRANTY FOR THIS PROGRAM.
+
+#Usage: libdep LIB_FILE GREP_RE
+#This script extracts the file dependencies for each library function 
+#from LIB_FILE whose name matches the grep regular expression GREP_RE.
+#Specifically, for each matching external library function FUNCTION, 
+#it outputs a line of the form
+#FUNCTION: File1 File2 ...
+#where File1, File2, ... are the files which will be needed when FUNCTION
+#is called by the application.
+
+if (@ARGV != 2 || ! -f $ARGV[0]) {
+  die "Usage: libdep LIB_FILE GREP_RE\n";
+}
+
+#We use GNU nm here.  Ok, since this script will usually be run before
+#distribution.
+open(NM, "nm -A --format=posix " . $ARGV[0] . " | grep '" . $ARGV[1] . "' |");
+
+#Each line in <NM> is of the form:
+#libzlex.a[FILENAME]: FUNCTION TYPE <Garbage>
+#where TYPE is either 'T' for defined or 'U' for undefined.
+
+while (<NM>) {
+  $_ =~ /.+\[(.+)\].+(yy[a-zA-Z0-9_]*)\ ([TU]).+/;
+  $f= $1; $s= $2; $t= $3; $f =~ s/\.o$/.c/;
+  if ($s =~ /.*16/) {
+  }
+  elsif ($t eq "T") {
+    $defs{$s}= $f;	        #$defs{fn} is file function fn is defined in.
+  }
+  else {
+    $uses{$f}.= $s . ' ';	#$uses{f} are functions, file f uses.
+  }
+}
+
+foreach $d (sort(keys(%defs))) {
+  $names= $defs{$d};
+  for (@files= ($defs{$d}); @files; shift(@files)) {
+    for (@fnUses= split(' ', $uses{$files[0]}); @fnUses; shift(@fnUses)) {
+      if (index($names, $defs{$fnUses[0]}) == -1) {
+	$names.= ' ' . $defs{$fnUses[0]}; 
+	push(@files, ($defs{$fnUses[0]}));
+      }
+    }
+  }
+  printf("%s: %s\n", $d, $names);
+}

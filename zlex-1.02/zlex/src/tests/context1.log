@@ -1,0 +1,4 @@
+ abcd [RULE 2]  123 [RULE 1] 
+ AbCd [RULE 3] #! 1 [RULE 1] 
+ 12 [RULE 4]  cde [RULE 2]  123 [RULE 1] 
+ ab12ef12cd123d12 [RULE 5]  3 [RULE 1] 

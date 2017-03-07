@@ -1,0 +1,189 @@
+ab2a AB23 _as321_32
+123 1 19
+12l 1l 1LU 1Ul 1323u
+012l 021u 012UL 021Lu 027uL
+0x12AB 0xbF12u 0x4aL 0x4ACDelU
+12.32 12. .23e12 12.32e+12 12.92E-823 21.3e21l 42.0e-21L 12.eF .1e+23f
+12.32aswe+we-2 423.2.e12.e-42sa
+"as\n\a\x12\\\'\"\"" ""
+L"" L"\\\n\x12\012\"\'\""
+'\\' '\n' '\'' '\a'
+L'\\' L'\n' L'abc' L'\\\'' L'\012\x12'
+"as\n\a\x12\\\'\"\"
+L"" L"\\\n\x12\012\"\'\"
+' ' '\t
+L' ' L'\t
+  		 
+  ## define
+ /**/"a\""
+->++--<<>><=>===!=&&||*=/=%=+=-=<<=>>=&=^=|=...
++-*/%^&|!()[]{}
+cecho.l:25: yytext= `ab2a'.
+cecho.l:100: yytext= ` '.
+cecho.l:25: yytext= `AB23'.
+cecho.l:100: yytext= ` '.
+cecho.l:25: yytext= `_as321_32'.
+cecho.l:103: yytext= `
+'.
+cecho.l:28: yytext= `123'.
+cecho.l:100: yytext= ` '.
+cecho.l:28: yytext= `1'.
+cecho.l:100: yytext= ` '.
+cecho.l:28: yytext= `19'.
+cecho.l:103: yytext= `
+'.
+cecho.l:31: yytext= `12l'.
+cecho.l:100: yytext= ` '.
+cecho.l:31: yytext= `1l'.
+cecho.l:100: yytext= ` '.
+cecho.l:37: yytext= `1LU'.
+cecho.l:100: yytext= ` '.
+cecho.l:37: yytext= `1Ul'.
+cecho.l:100: yytext= ` '.
+cecho.l:34: yytext= `1323u'.
+cecho.l:103: yytext= `
+'.
+cecho.l:43: yytext= `012l'.
+cecho.l:100: yytext= ` '.
+cecho.l:46: yytext= `021u'.
+cecho.l:100: yytext= ` '.
+cecho.l:49: yytext= `012UL'.
+cecho.l:100: yytext= ` '.
+cecho.l:49: yytext= `021Lu'.
+cecho.l:100: yytext= ` '.
+cecho.l:49: yytext= `027uL'.
+cecho.l:103: yytext= `
+'.
+cecho.l:52: yytext= `0x12AB'.
+cecho.l:100: yytext= ` '.
+cecho.l:58: yytext= `0xbF12u'.
+cecho.l:100: yytext= ` '.
+cecho.l:55: yytext= `0x4aL'.
+cecho.l:100: yytext= ` '.
+cecho.l:61: yytext= `0x4ACDelU'.
+cecho.l:103: yytext= `
+'.
+cecho.l:64: yytext= `12.32'.
+cecho.l:100: yytext= ` '.
+cecho.l:64: yytext= `12.'.
+cecho.l:100: yytext= ` '.
+cecho.l:64: yytext= `.23e12'.
+cecho.l:100: yytext= ` '.
+cecho.l:64: yytext= `12.32e+12'.
+cecho.l:100: yytext= ` '.
+cecho.l:64: yytext= `12.92E-823'.
+cecho.l:100: yytext= ` '.
+cecho.l:67: yytext= `21.3e21l'.
+cecho.l:100: yytext= ` '.
+cecho.l:67: yytext= `42.0e-21L'.
+cecho.l:100: yytext= ` '.
+cecho.l:73: yytext= `12.eF'.
+cecho.l:100: yytext= ` '.
+cecho.l:70: yytext= `.1e+23f'.
+cecho.l:103: yytext= `
+'.
+cecho.l:73: yytext= `12.32aswe+we-2'.
+cecho.l:100: yytext= ` '.
+cecho.l:73: yytext= `423.2.e12.e-42sa'.
+cecho.l:103: yytext= `
+'.
+cecho.l:76: yytext= `"as\n\a\x12\\\'\"\""'.
+cecho.l:100: yytext= ` '.
+cecho.l:76: yytext= `""'.
+cecho.l:103: yytext= `
+'.
+cecho.l:79: yytext= `L""'.
+cecho.l:100: yytext= ` '.
+cecho.l:79: yytext= `L"\\\n\x12\012\"\'\""'.
+cecho.l:103: yytext= `
+'.
+cecho.l:82: yytext= `'\\''.
+cecho.l:100: yytext= ` '.
+cecho.l:82: yytext= `'\n''.
+cecho.l:100: yytext= ` '.
+cecho.l:82: yytext= `'\'''.
+cecho.l:100: yytext= ` '.
+cecho.l:82: yytext= `'\a''.
+cecho.l:103: yytext= `
+'.
+cecho.l:85: yytext= `L'\\''.
+cecho.l:100: yytext= ` '.
+cecho.l:85: yytext= `L'\n''.
+cecho.l:100: yytext= ` '.
+cecho.l:85: yytext= `L'abc''.
+cecho.l:100: yytext= ` '.
+cecho.l:85: yytext= `L'\\\'''.
+cecho.l:100: yytext= ` '.
+cecho.l:85: yytext= `L'\012\x12''.
+cecho.l:103: yytext= `
+'.
+cecho.l:88: yytext= `"as\n\a\x12\\\'\"\"
+'.
+cecho.l:79: yytext= `L""'.
+cecho.l:100: yytext= ` '.
+cecho.l:91: yytext= `L"\\\n\x12\012\"\'\"
+'.
+cecho.l:82: yytext= `' ''.
+cecho.l:100: yytext= ` '.
+cecho.l:94: yytext= `'\t
+'.
+cecho.l:85: yytext= `L' ''.
+cecho.l:100: yytext= ` '.
+cecho.l:97: yytext= `L'\t
+'.
+cecho.l:100: yytext= `  		 '.
+cecho.l:103: yytext= `
+'.
+cecho.l:106: yytext= `  #'.
+cecho.l:186: yytext= `#'.
+cecho.l:100: yytext= ` '.
+cecho.l:25: yytext= `define'.
+cecho.l:103: yytext= `
+'.
+cecho.l:100: yytext= ` '.
+cecho.l:109: yytext= `/*'.
+cecho.l:76: yytext= `"a\""'.
+cecho.l:103: yytext= `
+'.
+cecho.l:120: yytext= `->'.
+cecho.l:123: yytext= `++'.
+cecho.l:126: yytext= `--'.
+cecho.l:129: yytext= `<<'.
+cecho.l:132: yytext= `>>'.
+cecho.l:135: yytext= `<='.
+cecho.l:138: yytext= `>='.
+cecho.l:141: yytext= `=='.
+cecho.l:144: yytext= `!='.
+cecho.l:147: yytext= `&&'.
+cecho.l:150: yytext= `||'.
+cecho.l:153: yytext= `*='.
+cecho.l:156: yytext= `/='.
+cecho.l:159: yytext= `%='.
+cecho.l:162: yytext= `+='.
+cecho.l:165: yytext= `-='.
+cecho.l:168: yytext= `<<='.
+cecho.l:171: yytext= `>>='.
+cecho.l:174: yytext= `&='.
+cecho.l:177: yytext= `^='.
+cecho.l:180: yytext= `|='.
+cecho.l:183: yytext= `...'.
+cecho.l:103: yytext= `
+'.
+cecho.l:186: yytext= `+'.
+cecho.l:186: yytext= `-'.
+cecho.l:186: yytext= `*'.
+cecho.l:186: yytext= `/'.
+cecho.l:186: yytext= `%'.
+cecho.l:186: yytext= `^'.
+cecho.l:186: yytext= `&'.
+cecho.l:186: yytext= `|'.
+cecho.l:186: yytext= `!'.
+cecho.l:186: yytext= `('.
+cecho.l:186: yytext= `)'.
+cecho.l:186: yytext= `['.
+cecho.l:186: yytext= `]'.
+cecho.l:186: yytext= `{'.
+cecho.l:186: yytext= `}'.
+cecho.l:103: yytext= `
+'.
+--EOF.

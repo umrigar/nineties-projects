@@ -1,0 +1,58 @@
+<HTML><HEAD>
+<TITLE>LL(1) Parser Applet: Output Windows</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>LL(1) Parser Applet: Output Windows</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/28 17:16:42 umrigar"
+</FONT>
+
+<P>The LL(1) parser displays its output in three windows:
+
+<DL>
+
+<LI><DT><A NAME="tree"><B>Parse Tree Window</B></A><DD>
+
+The top window displays the parse tree as it is being constructed.  Nodes
+which are still on the <A HREF="ll1intro.html#parse-stack">parse stack</A>
+are shown in green (tracing the green nodes from the bottom to the top gives
+the contents of the stack).  When a node is removed from the parse stack,
+it's color is changed to red.  As the parser is stepped, the window will
+always display the current node of interest which is highlighted in yellow.
+
+
+<LI><DT><A NAME="ll1table"><B>LL(1) Parse Table Window</B></A><DD>
+
+This shows the LL(1) <A HREF="ll1intro.html#parse-table">parse table</A>.
+The table contains rule numbers.  When a nonterminal is being predicted, the
+appropriate row (indexed by nonterminal) and column (indexed by terminal)
+are highlighted to show the predicted rule.  Since a LL(1) parse table does
+not need any rows indexed by terminal symbols, no row in the table is
+highlighted when a terminal is being predicted.
+
+<LI><DT><A NAME="trace"><B>Trace Window</B></A><DD>
+
+This window shows the trace history in the format used in classical compiler
+texts.  Each trace line consists of the stack (in green) followed by the
+input (in black) which is yet to be processed.  The current lookahead token
+is always the first token in the unexpended input.  The stack is the reverse
+of what remains to be seen in the current <A
+HREF="gramintro.html#sentential-form">sentential form</A>.  The stack
+contents correspond to the green nodes in the parse tree.
+
+</DL>
+
+<P> Each window displays a brief description of itself for a short period
+after the mouse pointer enters it.
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+</BODY>
+
+</HTML>

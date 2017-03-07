@@ -1,0 +1,14 @@
+`a' declared.
+`b' declared.
+`c' declared.
+Multiple declaration of `a'.
+`d' declared.
+Multiple declaration of `b'.
+`a' used.
+`a' used.
+`b' used.
+`c' used.
+`a' used.
+`d' used.
+`x' not declared.
+`q' not declared.

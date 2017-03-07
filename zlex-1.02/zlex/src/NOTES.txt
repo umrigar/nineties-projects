@@ -1,0 +1,305 @@
+ACTIONS
+
+Note that there are four ACTION-spaces in this program:
+
+
+Source Action Numbers:
+
+These correspond to the actions in the source file.  "Action" # 0
+corresponds to the definitions in section 1; "action" # 1 corresponds to
+local definitions at the start of section 2 (before any patterns); action 2,
+... correspond to the actual user actions.  Hence when the '|' action is
+used, successive patterns will have the same source action number.  Note
+that the way the scanner for zlex is constructed, it will always deliver
+tokens for source actions 0 and 1, irrespective of whether the source file
+has any such actions.
+
+
+Pattern Action Numbers
+
+Pattern action # 0 will correspond to the sentinel action (a
+special action for sentinel processing).  If there are n-patterns in the
+source file, then actions 1, ..., n will be the actions for those
+patterns.  Note that if say patterns 34, 35, and 36 (origin-1) share the
+same source action (using '|' actions after patterns 34 and 35), then
+pattern action #s 34, 35 and 36 will all map to a single source action #.
+
+Action (n + 1) will always be the default action (usually ECHO).
+
+If the scanner uses yylineno, then the action after the default action
+is the yylineno action.
+
+The actions for a context pattern c looks something like this:
+
+	case c:
+	  Adjust yyleng to discard context;
+	  User specified action (or goto if '|' was action).
+
+
+Mapped Action Numbers:
+
+When there are intra-token patterns, the pattern actions #s are mapped
+so as to ensure that the mapped action #s for the intra-token patterns
+are less than the mapped action #s of all other patterns.  This allows
+easy prioritizing of intra-token actions over regular actions.
+
+Specifically, if there are m intra-token patterns, then they are
+mapped to {1, ..., m} in order.  The non intra-token patterns are
+mapped in order to {m + 1, ... }.  
+
+
+Offset Action Numbers: 
+
+As patterns are processed, actions are just regarded as special input
+symbols occurring at the end of each pattern.  The real input symbols are
+stored as class patterns, numbered from 0...(nPatLeaves - 1), where
+nPatLeaves is the number of occurrences of character-classes (not
+necessarily distinct) in *ALL* of the patterns.  To distinguish the actions
+from class patterns, the mapped action number is offset by nPatLeaves to
+form a offset action number.  Hence if there are 84 pattern leaves among all
+the patterns, the offset action number for mapped action # 5 will be 5 + 84
+= 89.
+
+RIGHT CONTEXT PATTERNS
+
+Given a right context pattern:
+
+	pat/context
+
+If either pat or context matches only strings of fixed length, then we
+scan for the catenation `pat context'; then we easily backup over the
+context using the fixed length information.
+
+If both pat and context are of variable length, the situation is
+somewhat more complex.  We still scan for the catenation `pat context'.
+However after the initial scan has succeeded, we search for the boundary
+between pat and context.  If the string which matches `pat context' is
+of length n, our method will scan `pat context' at least twice and in
+the worst-case O(n) times.
+
+We add a new state patStart and its successors such that all strings
+accepted starting at patStart match only pat.  Similarly we add a new
+state contextStart for context.  This results in two new automata for
+pat and context, whose states are disjoint from other states in the
+scanner.
+
+When `pat context' has accepted a string X, we then use the two new
+automata to split it into its two components.  Specifically, starting in
+state patStart we scan X for the longest match for pat.  Then starting
+in state contextStart we scan the remainder of X for context; if this
+scan succeeds at the end of X (which will be so, except for "dangerous
+trailing contexts"), we're done; else we backup the pat scan to the next
+longest match and continue.
+
+The worst case for this method arises, when scanning for a pattern like
+a+/aab+c matching a string like `aaabc'.  In this case, the first scan
+for the catenation of pat and context will pick out `aaabc'.  The first
+scan using the pattern automaton will establish a pattern `aaa' and a
+tentative context `bc'.  However the context automaton will fail on
+`bc'.  When the pattern automaton is backed up, it matches `aa', but the
+context automaton still fails on matching the remaining `abc'.  A final
+backup of the pattern automaton to match a single `a', results in a
+context of `aabc' on which the context automaton succeeds.
+
+Note that this method recognizes the longest possible pat in cases of
+"dangerous trailing context" like `a+/a+'.
+
+Is it possible to have a better algorithm using some of the ideas from
+string matching, to handle potential overlaps between the end of pat and
+the start of context?
+
+STATE REMAPPING
+
+After the scanner automaton is constructed, states are remapped so
+that they are ordered (<) as follows:
+
+	S0: Start states.
+	S1: Non-accepting states with legal transitions.
+	S2: Accepting states with legal transitions.
+	S3: Accepting states with no legal transitions.
+	S4: Jam state (non-accepting with no legal transitions).
+
+When scanning for a token, we transit the automaton until we enter a
+state whose state number is greater than max(S2).  When backing up, we
+backup over all states with numbers smaller than the min(S2) (backing up
+over the jam-state has to be special-cased).
+
+We only store the DFA next function for states in S0, S1 and S2.
+
+INTRA-TOKEN PATTERNS
+
+Intra-token patterns are recognized within tokens.  Syntactically, they
+start with a '+'.  They are subject to the following severe
+restrictions:
+
+- They cannot contain any left or right context: hence no '^' or '$'
+anchors, no start-states, and no right context patterns are allowed.
+
+- They can match only fixed length patterns: hence no '*', '+', or '?'
+operators are allowed.
+
+- They cannot share their actions with other patterns: i.e., '|' is not
+allowed as a action.
+
+During construction of the scanner automaton, intra-token patterns are
+recognized in every state of the automaton except the states for the
+context and pattern automata introduced for variable-right-context
+patterns.  Any state s which has an intra-token action is split into
+two: s' which merely has the (first) intra-token action, no other
+actions, no transitions; and s" which is just like s except that all
+intra-token actions are removed.  s' is referred to as a
+intra-token state whereas s" is referred to as a alternate state.
+
+In the state remapping described previously, S3 (which was the set of
+accepting states without legal transitions) is further partitioned into
+two classes S3' and S3", such that states in S3' are all the intra-token
+states, whereas no state in S3" is a intra-token state.  This makes all
+the intra-token states contiguous, making it easy to store them
+efficiently in the generated scanner.
+
+Hence during the normal scanning process, we will sometimes enter
+intra-token states.  When we go to perform the action, the code for
+the intra-token action is specified as follows:
+
+The code produced for intra-token action consists of three segments:
+
+	Pre intra-token action
+	User-specified intra-token action
+	Post intra-token action
+
+Pre intra-token action saves the yytext, yyleng (of a partial token).
+It sets the scanner state to the alternate state for the current
+intra-token state.
+
+The user intra-token action can contain any actions like updating global
+variables, etc.  It can also contain the action YY_BACKUP(len, string)
+where len < length of the intra-token pattern and string is a C-string.  The
+effect of YY_BACKUP(len, string) is to replace the last len characters of
+yytext with string and backup the scan to that point.  To simplify the
+current implementation, we require that strlen(string) <= len.
+
+The post action reenters the inner scanning loop.
+
+Note that the effect of the above is that the shortest intra-token
+patterns are recognized first.
+
+REJECT
+
+The original REJECT scheme used a table indexed by state # which produced a
+sequence of output actions for alternate patterns which could match the same
+length of the input; each sequence was terminated by a special action which
+used the scanner stack to reject to shorter lexemes.  REJECT was merely a
+macro which did a goto to the label corresponding to this code.
+
+The new REJECT scheme redefines the macro REJECT for each source action.
+During scanner construction, the scanner figures out for each source action
+the action for the next alternate pattern which matches the same length
+input.  In general, this alternate action can depend on the state.  Then for
+*EACH* source action it redefines REJECT as follows:
+
+#undef REJECT
+#define REJECT \
+  do { \
+    if (yyState == s11 || yyState == s12 || ...) REJ1 \
+    if (yyState == s21 || yyState == s22 || ...) REJ2 \
+    ...
+    if (yyState == sI1 || yyState == sI2 || ...) REJI \
+    REJN \		
+  } while (0)
+
+Each REJi is of the form `{ yyAct= alternateAction; goto yyDoAction; }'
+which carries out alternateAction for the same length input; or `goto
+yyBackup' which uses the scanner stack to backup to matching shorter input.
+Typically, there are no if-tests in a REJECT macro definition.
+
+			       CODE SCANNER
+
+As the code scanner traverses the DFA, states are represented as locations
+in the code rather than explicit state numbers.  Each state is encoded using
+either a linear search, binary search or switch depending on the number of
+its distinct successor states and their distribution.
+
+OVERSCAN
+
+When an accepting state jams the course of action is clear:
+backup the input by a single character and carry out the action for the
+state.  When a non-accepting state jams we need to backup to the last
+accepting state and carry out its action.
+
+In the table scanner we did this by using the scanner stack.  However, in
+the code scanner we can get by without a stack:
+
+First note that because of the implicit pattern, a start state will
+never be terminal; i.e. a transition will always be taken off a
+start-state.
+
+The distance from state s1 to s2 is defined to be the number of
+transitions required to get from s1 to s2 on all paths between s1 and
+s2.  It is defined only if the number of transitions is the same for all
+paths from s1 to s2.
+
+Because of the presence of the implicit pattern, all states at
+distance 1 from start-states will be accepting states.
+
+The accept-predecessors of a state s are the set of accepting states
+s' such that there is a path from some start state to s such that s'
+is the last accepting state on that path.  This implies that if s is
+an accepting state then the accept-predecessors of s is the set {s}.
+
+A state s is a action-known state iff the distances to s from each of
+its accept-predecessors are the same and all its accept predecessors are
+the same state (previously, instead of the second clause, we required
+that the actions for each of its accept-predecessors are the same, but
+that is not enough for a scanner with REJECTs; the new definition is
+stronger in preventing states from being action-known, but in practice
+will probably not make much of a difference).  A state which is not
+action-known is said to be action-unknown.
+
+A consequence of the above definitions is that only non-accepting
+states can be action-unknown states.
+
+An accepting state requires recording iff there is a path from it to an
+action-unknown state which does not pass through any accepting states.
+When the scanner transits an accepting state which requires recording,
+we record the state and input position in some scanner variables.
+
+If the scanner hits a jam transition in a action-unknown state, we use
+the previously recorded scanner variables to backup the scanner to the
+recorded input position and perform the recorded action.  If the scanner
+hits a jam transition in a action-known state, we merely backup the
+input by the accepting distance and perform the known action.
+
+REJECT
+
+Rejecting to same length lexemes can be handled exactly as for the table
+scanner.  Rejecting to shorter length lexemes is still done with a transfer
+`goto yyBackup'.  However the code at the `yyBackup' label is different
+from that for the table scanner.
+
+The code at yyBackup first unterminates `yytext'.  Then it saves the
+last character of `yytext' and then sets it to the sentinel character,
+recording the sentinel cause as `BACKUP_SENTINEL'.  It then restarts
+the scanner from the *START* of `yytext'.
+
+When the rescan hits the sentinel character, it will enter the sentinel
+code as usual.  When the sentinel code realizes that it was a
+BACKUP_SENTINEL, it restores the character originally at the sentinel
+position.  It then transfers to the jam state for the current state.
+
+The above somewhat convoluted scheme allows full REJECTs without using
+any stack which would slow down regular scanning.  It does have the
+disadvantage that repeated REJECTs will result in repeated rescans for
+each time the length of the matched lexeme is reduced.  More seriously,
+the current code will not work correctly if the action which contains
+the REJECT previously did a BEGIN --- the rescan will start from the new
+start state.  It may be possible to remedy this problem without
+affecting the critical path by modifying the BEGIN action to remember
+the previous start state (this is not currently done).
+
+
+
+
+
+
+
+

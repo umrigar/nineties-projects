@@ -1,0 +1,360 @@
+<HTML><HEAD>
+<TITLE>ParsDemo Implementation Notes </TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>ParsDemo Implementation Notes </H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/30 14:30:50 umrigar"
+</FONT>
+
+<P> Browse the <A HREF=".">source directory</A>
+
+<P> This note documents the overall design of the <CODE>ParsDemo</CODE>
+program.  It assumes that the reader is familiar with the operation of the
+program.
+
+<P> Most of the classes which constitute the program are individually
+trivial.  Some of them have <CODE>javadoc</CODE> style documentation, but I
+did not use that style of documentation much as I found it too bureaucratic
+and more suited for documenting the external interfaces of packages.  This
+note documents how all the classes fit together.
+
+<P> Initially, an attempt was made to separate the GUI aspects of the
+program from the parsing aspects of the program.  Though this
+attempt was not entirely successful, the classes can be separated into 4
+broad categories:
+
+<DL>
+
+<DT><B>Container classes</B></DD> These may be useful outside this package.
+However, they would need more work to be made usable in a general package.
+
+<DT><B>Domain classes</B><DD> Classes having knowledge of the domain
+being visualized in this program.  Classes in this category implement
+grammars, scanners and parsers.
+
+<DT><B>GUI classes</B><DD> Classes in this category implement several custom
+canvases for displaying the state of the parse.
+
+<DT><B>Interface classes</B><DD> Used to exchange information between the
+domain classes and the top-level classes.
+
+<DT><B>Top-level classes</B><DD> They set up the GUI, start the parsers, and
+take care of synchronizing the parser operation with the GUI display.
+
+</DL>
+
+<H2> Utility Classes </H2>
+
+<P>These are general container classes which may be useful outside this
+package.  
+
+<P><A HREF="Tree.java">Tree</A> supports general n-ary trees.  Each tree
+node can hold an arbitrary information <CODE>Object</CODE>. The
+implementation of a tree-node uses two object references: a
+<CODE>kids</CODE> reference referencing the leftmost kid of a node and a
+<CODE>sibs</CODE> reference referencing the next sibling of the node.  The
+<CODE>sibs</CODE> reference chain is linked through the parent to form a
+circular list (with a flag used to establish when the reference goes up from
+sibling to parent).  These references make arbitrary tree navigation
+possible, though care has to be taken when a subtree is added/removed from a
+node.  In particular, care should be taken that <STRONG>a subtree is never
+simultaneously linked into more than one tree</STRONG>, else strange things
+will happen.  The class can probably use some debugging code to check for
+such anomalous situations. 
+
+<P> Currently, other classes are derived from <CODE>Tree</CODE>.  It is
+probably better to merely treat <CODE>Tree</CODE> as a general hierarchical
+<CODE>Object</CODE> container.
+
+<P><A HREF="Table2.java">Table2</A> is an abstract class supporting
+2-dimensional tables.  A row/column index can be any arbitrary
+<CODE>Object</CODE>, as can the contents of each cell.  The table is
+accessed and updated using <CODE>get()</CODE> and <CODE>put()</CODE> methods
+respectively.  Since the table is expected to be sparse, the <A
+HREF="SparseTable2.java">SparseTable2</A> implementation uses a hashtable
+indexed by a auxiliary <A HREF="RowCol.java">RowCol</A> class.  A blank
+entry is represented using a <CODE>null</CODE> <CODE>Object</CODE>.
+
+<H2> Domain Classes </H2>
+
+<P> A grammar is represented using the abstract <A
+HREF="Grammar.java">Grammar</A> class.  This class must be subclassed for a
+concrete grammar.  Grammar symbols (<A HREF="GramSym.java">GramSym</A>) and
+rules are maintained by the <A HREF="Terminal.java">Terminal</A>, <A
+HREF="NonTerm.java">NonTerm</A> and <A HREF="Rule.java">Rule</A> classes.
+Conceptually, these classes are inner classes (in the sense of Java 1.1) of
+the <CODE>Grammar</CODE> class.  The <CODE>Grammar</CODE> class exports
+special grammar symbols like <CODE>EOF</CODE> which every grammar should
+have.  It also has special protected interfaces for its subclasses to create
+the grammar symbols and rules.
+
+<P> Rule RHS's are stored within an array within the <CODE>Grammar</CODE>
+class.  Hence an <EM>item</EM> (in the LR-item sense) is merely an index
+into this array.
+
+<P> The example program contains two concrete grammars which are
+instantiations of the <A HREF="Grammar.java">Grammar</A> class: <A
+HREF="SimpCompSRGram.java">SimpCompSRGram</A> and <A
+HREF="SimpCompLL1Gram.java">SimpCompLL1Gram</A> (the latter is merely the
+former with left-recursion removed).  Each concrete grammar exports its
+terminals and nonterminals to the rest of the package.
+
+<P> The general interface of a scanner is encapsulated via the abstract
+class <A HREF="Scanner.java">Scanner</A> which is setup to deliver <A
+HREF="Token.java">Token</A>'s.  This <CODE>Scanner</CODE> class defines
+tokens which every scanner should have like <CODE>EOF_TOK</CODE> The program
+contains a single instantiation of this <CODE>Scanner</CODE>: the <A
+HREF="SimpCompScanner.java">SimpCompScanner</A> class.  This class exports
+the token values for all its multi-character tokens (single-character fixed
+tokens have as token values the value of the character).
+
+<P> Parsing is done using a separate thread from the user-interface thread.
+The required synchronization and interface with the rest of the program are
+defined by the abstract <A HREF="StepParser.java">StepParser</A> class.
+Each subclass of <CODE>StepParser</CODE> must implement a
+<CODE>parse()</CODE> method and a <CODE>update()</CODE> method.  The
+<CODE>parse()</CODE> method should perform a parse according to the parse
+algorithm specified by the client.  After each parse step, the concrete
+<CODE>parse()</CODE> method should call the <CODE>waitToStep()</CODE> method
+in it superclass.  The <CODE>waitToStep()</CODE> method in
+<CODE>StepParser</CODE> waits until the GUI thread has read the results of
+the last step, before calling the <CODE>update()</CODE> method to update the
+results.  The concrete <CODE>update()</CODE> method provided by each parse
+algorithm implementation should update the parser data structures.  If a
+parse-error is detected, a <A HREF="ParseException.java">ParseException</A>
+is thrown; to stop a parser which is currently running, a <A
+HREF="ParseResetException.java">ParseResetException</A> is thrown.  The
+exception-handling approach was chosen to handle these conditions, because
+it makes it easy to bale out of a recursive-descent parser.
+
+<P> This <CODE>StepParser</CODE> class is further refined into <A
+HREF="RecDescent.java">RecDescent</A>, <A
+HREF="LL1Parser.java">LL1Parser</A> and <A HREF="SRParser.java">SRParser</A>
+classes: these classes implement the basic parsing algorithms.  The parsers
+use a parse stack (<A HREF="ParseStk.java">ParseStk</A>) which has entries
+of types derived from <A HREF="ParseStkEntry.java">ParseStkEntry</A>.  At
+minimum, each parse-stack entry will contain a parse tree having entries of
+type <A HREF="ParseNode.java">ParseNode</A>.
+
+<P> <A HREF="RecDescent.java">RecDescent</A> is an abstract class in that it
+is independent of any particular grammar.  <A
+HREF="SimpCompRecDescent.java">SimpCompRecDescent</A> contains a concrete
+recursive-descent parser derived from <CODE>RecDescent</CODE>.  To allow the
+program to display the current line in this parser, it is generated from its
+source (<A HREF="SimpCompRecDescent.jpp">.jpp</A> file by using the
+C-preprocessor to expand macros which grab the line number (among other
+things).
+
+<P> The <A HREF="LL1Parser.java">LL1Parser</A> implements the basic LL(1)
+parsing algorithm by interpreting an abstract <A
+HREF="LL1Table.java">LL1Table</A>.  The example program contains a concrete
+<CODE>LL1Table</CODE> in the class <A
+HREF="SimpCompLL1Table.java">SimpCompLL1Table</A>.  The parse-stack contains
+<A HREF="LL1ParseStkEntry.java">LL1ParseStkEntry</A>.'s which are derived
+from <CODE>ParseStkEntry</CODE>, to additionally contain the current rule
+number and grammar symbol.
+
+<P> The <A HREF="SRParser.java">SRParser</A> implements the basic
+shift-reduce parsing algorithm by interpreting an abstract <A
+HREF="SRTable.java">SRTable</A> with entries of type <A
+HREF="SRAct.java">SRAct</A>.  The example program contains a concrete
+<CODE>SRTable</CODE> in the class <A
+HREF="SimpCompSRTable.java">SimpCompSRTable</A>.  The parse-stack contains
+<A HREF="SRParseStkEntry.java">SRParseStkEntry</A>.'s which are derived from
+<CODE>ParseStkEntry</CODE>, to additionally contain the state # of the
+corresponding <A HREF="SRState.java">SRState</A>.
+
+
+<H2> GUI Classes </H2>
+
+<P> Most of the widgets used in the GUI are standard <CODE>awt</CODE>
+widgets, but three of them are custom-canvases.  These correspond to the
+parse trace display, the parse tree/forest display, and the parse
+table/program display.  The last two displays also have the capability of
+having portions of selected, to highlight certain objects: this is achieved
+using the <A HREF="Selectable.java">Selectable</A> interface.
+
+<P> The canvas which all other custom canvases build on is implemented in
+the <A HREF="ScrollableCanvas.java">ScrollableCanvas</A> class.
+Conceptually, this class contains a <CODE>Canvas</CODE> with two
+<CODE>Scrollbars</CODE>.  The implementation uses a <A
+HREF="ScrollPanel.java">ScrollPanel</A> derived from <CODE>Panel</CODE>.
+When any instance of <CODE>ScrollableCanvas</CODE> is to be inserted into a
+container, it is its <CODE>ScrollPanel</CODE> member (obtained using
+<CODE>getComponent()</CODE>) which must be inserted instead.  This canvas
+also implements crude mouse hints by means of a image its subclasses are
+free to provide.
+
+<P> A <A HREF="TextCanvas.java">TextCanvas</A> is derived from
+<CODE>ScrollableCanvas</CODE> to contain lines of text.  It implements the
+above <CODE>SelectableCanvas</CODE> interface to allow a single line to be
+selected.  It uses auxiliary classes <A HREF="TextMark.java">TextMark</A>
+and <A HREF="TextLine.java">TextLine</A>.
+
+<P> A <A HREF="FileCanvas.java">FileCanvas</A> is a trivial subclass of
+<CODE>TextClass</CODE>, which initializes itself from a
+<CODE>FileInputStream</CODE>.  It is used to display the program in the
+recursive descent parser.
+
+<P> A <A HREF="Table2Canvas.java">Table2Canvas</A> is derived from
+<CODE>ScrollableCanvas</CODE> to contain a <A HREF="Table2.java">Table2</A>.
+It implements the above <CODE>SelectableCanvas</CODE> interface to allow
+rows/columns to be selected.  Scrolling this canvas keeps the table headings
+visible.  It is used for displaying the parse tables for the LL(1) and SR
+parsers.
+
+
+<P> A <A HREF="TraceCanvas.java">TraceCanvas</A> is derived from
+<CODE>ScrollableCanvas</CODE> and uses an auxiliary <A
+HREF="Trace.java">Trace</A> class to display the parse trace for all three
+parsers.  The stack string displayed as part of the trace is obtained by
+applying the <CODE>toString()</CODE> method to the <A
+HREF="ParseStk.java">ParseStk</A> class: the <CODE>toString()</CODE> method
+prints out the stack entries appropriate to the class of
+<CODE>ParseStk</CODE>.  The input string displayed as part of the trace is
+obtained by using the <CODE>restInput()</CODE> method on a scanner
+concatenated to the current lookahead.
+
+<P> Laying out of trees is achieved by the <A
+HREF="OffsetTree.java">OffsetTree</A> class which is derived from a <A
+HREF="Tree.java">Tree</A> (of all the classes in the program, this is
+probably algorithmically the most complex).  (I believe there is a newer
+paper which may be relevant.  I haven't yet had a chance to look at it:
+S. Moen, "Drawing Dynamic Trees", IEEE Software, July 1990, pp. 21 - 28).
+The <A HREF="TreeCanvas.java">TreeCanvas</A> class actually displays a
+forest of <CODE>OffsetTree</CODE>'s, where the class <A
+HREF="OffsetForest.java">OffsetForest</A> is simply implemented as the
+subtrees of a <OffsetTree> with a invisible root.
+
+<H2> Interface Classes </H2>
+
+<P> <A HREF="ParseDisplay.java">ParseDisplay</A> contains within it
+references to the widgets used to display the state of the parse.  It is
+created by the top-level and passed over to the parser.  When each parse
+step is completed, the parser updates the <CODE>ParseDisplay</CODE> with its
+latest data structures.  <A HREF="ExtFrame.java">ExtFrame</A> is an
+auxiliary class used to capture the external browser context: the parse
+display updates an instance of this class to show the current rule/state in
+an auxiliary brower frame.
+
+<H2> Top-level Classes </H2>
+
+<P> <A HREF="ParsDemo.java">ParsDemo</A> is the main top-level class.  It
+can be invoked either as an applet, as a full-frame applet or from the
+command-line.  Depending on its invocation context, it obtains its single
+argument (the algorithm to run) from either its applet context or from the
+command line.  It creates and lays out all the GUI widgets.  It creates a
+scanner and a parser determined by the specified algorithm.  It creates an
+enabled <CODE>ExtFrame</CODE> object iff it was created directly by a
+browser as an applet.  Finally, it creates a parser thread and starts it.
+It interacts with the parser thread by calling the <CODE>doStep()</CODE>
+function which corresponds to the <CODE>step</CODE> button in the GUI.  It
+implements the <CODE>runnable</CODE> interface to allow starting an
+auxiliary thread to auto-step the parser by a delay controlled by a
+scrollbar.
+
+<P> <A HREF="AppletFrame.java">AppletFrame</A> provides the context to run
+<CODE>ParsDemo</CODE> either from the command-line or as a sub-applet of
+another applet.
+
+<P> <A HREF="FullFrame.java">FullFrame</A> is another applet which merely
+displays a <CODE>start</CODE> button.  When the button is clicked, it starts
+up the <CODE>ParsDemo</CODE> applet in a full-frame.
+
+<H2> Known Bugs and Deficiencies </H2>
+
+<OL>
+
+<LI> When the parser is auto-step'ing (after the <CODE>run</CODE> button has
+been clicked), clicking the <CODE>stop</CODE> button does not stop the
+parser immediately, but only after an additional step.  This detracts from
+the responsiveness of the user-interface.
+
+<LI> If the parser is auto-step'ing (after the <CODE>run</CODE> button has
+been clicked), hitting return in the input text-area, restarts the parser in
+the auto-step mode.  This is somewhat counter-intuitive.
+
+<LI> The <CODE>TreeCanvas</CODE> draws the entire forest it is displaying,
+rather than only the portion which is visible.  This may be problematic on
+slower machines.
+
+</OL>
+
+(2) could be explained away as a feature! 
+
+<H2> Weaknesses </H2>
+
+<OL>
+
+<LI> The event-handling code in <A HREF="ParsDemo.java">ParsDemo</A> has
+evolved, and has gotten extremely clumsy (witness bugs (1) and (2)).  This
+could use a rewrite.
+
+<LI> The algorithm used for <A HREF="OffsetTree.java">OffsetTree</A> class
+is complex enough, that bugs could lurk in there.  I don't yet have a good
+framework for testing GUI programs, except manually.
+
+<LI> This is my first Java program.  Though the language seemed easy to pick
+up, I can't say the same about the libraries.  Since I was learning the
+system as I was going along, portions of the code could use a cleanup.
+
+</OL>
+
+<H2> To Do </H2>
+
+<OL>
+
+<LI> A back button to step the parser backwards would be useful.  The
+recursive descent parser is the most problematic for implementing this.
+Alternatives: 
+
+<OL TYPE=a>
+
+<LI> Keep track of the current # of steps.  Restart the parser from scratch
+and step one fewer than the previous # of steps.  This is pretty horrendous
+from an efficiency point of view, but just might work for the toy languages
+used in a demo and the way hardware is evolving.
+
+<LI> Keep track of incremental information to undo a step.  This is
+relatively easy for the table-driven parsers, but difficult for the
+recursive descent parser.  To get the recursive descent parser program to
+run backwards, the best I can think of is to throw an exception to get out
+of the current function invocation, catching the exception just outside the
+current invocation.  Then rerun that function forwards again.  However, do
+not step into any recursive CALL's, but merely reuse information that was
+saved the first time.
+
+<LI> Use incremental state undo information as in (b), but implement
+the recursive-descent parser using an interpreter, rather than a java
+program.  
+
+</OL>
+
+</OL>
+
+<H2> Using the Source Code </H2>
+
+If you find the source code useful, feel free to reuse it in your projects
+under the terms of the <A HREF=../../COPYINGGPL</A>.  If you do so, please
+drop me a note.
+
+<P> Browse the <A HREF=".">source directory</A>
+
+<HR>
+
+<A TARGET="_parent" HREF="../../index.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up"
+SRC="../../icons/up_motif.gif"></A> 
+
+<BR>
+
+<B>Up:</B> <A TARGET="_parent" HREF="../../index.html">Main Parsing Demo Page</A>
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+</BODY>
+</HTML>

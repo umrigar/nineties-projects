@@ -1,0 +1,2 @@
+cscan1:	A C-scanner which recognizes and returns tokens. It uses
+	start-states for processing comments.

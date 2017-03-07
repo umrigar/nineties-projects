@@ -1,0 +1,144 @@
+DATA
+
+A struct which contains all scanner variables not directly accessible by the
+user.  Contains following:
+
+  --  pointers to user variables
+  --  pointers to user-defined call-back functions
+  --  scanner options (whether --yylineno or --array used)
+  --  sentinel information
+  --  start-state
+  --  start-state stack
+  --  backtrack stack
+  --  yymore() information
+  --  yytext save information (used after unput or buffer switching)
+  --  character to be restored at &yytext[yyleng] at start of next scan 
+      (saveCh).
+
+============================================================================
+BUFFER
+
+Dynamically allocated (except at scanner startup) area containing current
+scanner buffer.
+
+  -- Input file pointer
+  -- Buffer memory parameters: buffer memory start, end, allocated size.
+  -- EOF state
+  -- Current scan state: character pointer cp pointing to next char
+     about to be read, last character read (lastCh) for ^ anchor.
+  -- Character count: # of characters read from file not counting 
+     current contents of buffer
+  -- File positions used for intra-token and yylineno patterns
+
+Two types of buffer: in-memory buffer and file buffer (in the former case,
+the file pointer is NULL).
+
+============================================================================
+INVARIANTS
+
+1.  Soon after we are outside the inner scanning loop, saveCh in the data
+area contains the character to be restored at &yytext[yyleng] at the start
+of the next scan.
+
+2.  yylex() maintains a stack pointer pointing to the next writable location
+on the stack.  The current state is not pushed on top of the stack.  The
+data areas do not maintain the stack pointer explicitly.  Instead it is
+maintained implicitly: if, within a token, yyleng gives the number of
+entries on the stack; if outside a token, then the stack pointer is at the
+base of the stack.
+
+3.  yytext (the pointer version of it, anyway) is always within the buffer
+except if the current buffer is deleted (when it is moved into a save-area
+if --pointer).
+
+4.  We assume that the user cannot change the values of yyleng or the
+pointer version of yytext (the user may however change the contents of what
+yytext points to).
+
+SENTINEL
+
+Sentinel used for following:
+
+--  Initialization.
+
+--  Refreshing buffer from file.
+
+--  Stack overflow checking.
+
+--  yymore() processing.
+
+At the end of many library routines we update the sentinel as follows
+(assuming we are done with initialization):
+
+Compute a stack sentinel position using the current stack size
+and stack pointer (which depends on whether or not we are within
+a token).
+
+Compute a yymore() sentinel position depending on whether we have a yymore()
+action and whether or not it has fired.
+
+Compute the sentinel position as the minimum of the buffer end, stack
+sentinel and yymore sentinel.
+
+When a sentinel character is detected we have the following possibilities:
+
+a) It is not really a sentinel character but a user character which just
+happens to be a sentinel character.
+
+b) The scanner has encountered EOF on its input and the cp is past the
+end of the buffer.
+
+c) None of the above: it really is a sentinel character indicating
+initialization, buffer end, stack overflow or a yymore() action.
+
+Cases (a)--(b) are handled inline within yylex() because they need access to
+too many objects available only within the scanner file.  Case (c) is
+handled out-of-line by a library routine.
+
+HANDLING YYTEXT:
+
+The pointer corresponding to yytext may be changed by library routines.  If
+unput tries to write over yytext, then it is first moved to the start of the
+buffer.  If it is already at the start of the buffer, then the buffer is
+shifted.
+
+LIBRARY INTERFACE:
+
+INT:  Interface (X= available to user; S= available to skeleton; P= private
+      to library).
+
+SENT: Whether sentinel is changed by routine.
+
+TEXT: Whether yytext pointer is changed by routine.
+
+ROUTINE		 INT	SENT	TEXT		REMARKS
+yyCreateBuffer	  X	 No	 No
+yyDeleteBuffer	  X	 No	 Yes	If current buffer, save yyText in 
+					save-area.
+yyFlushBuffer	  X	 Yes	 Maybe	
+yySwitchToBuffer  X	 Yes	 No
+yyMemBuffer	  X	 No	 No
+yyBytesBuffer	  X	 No	 No
+yyStringBuffer	  X	 No	 No
+yyGet		  X	 Maybe   Maybe
+yyLess		  X      Maybe   Maybe
+yyMore		  X      Yes     No
+yyUnput		  X	 Maybe	 Maybe
+yyRestart	  X	 Yes	 No
+yyPopState	  X	 No	 No
+yyPushState	  X	 No	 No
+yyTopState	  X	 No	 No
+yyTerminate	  S	 Yes     Yes
+yyProcessSentinel S	 Yes	 Yes
+yyReplace	  S	 Yes	 Yes
+yyMakeAdjText	  S	 Yes	 Yes
+yyDebugMsg	  S	 No	 No
+yyDefaultMsg	  S	 No	 No
+yyEOFMsg	  S	 No	 No
+yyZlexFatal	  S	 No	 No
+yyMakeBuffer	  P	 No	 No
+yyMoveBytes	  P	 No	 No
+yyMoveText	  P	 No	 Yes
+yySaveText	  P	 No	 Yes
+yyShiftBuffer	  P	 Yes	 Yes
+yyUpdateSentinel  P	 Yes	 No

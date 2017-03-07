@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1 (Feb 5, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>But is it ?</TITLE>
+<META NAME="description" CONTENT="But is it ?">
+<META NAME="keywords" CONTENT="sigplan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="sigplan.css">
+</HEAD>
+<BODY LANG="EN">
+ <A NAME="tex2html46" HREF="node4.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html44" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html38" HREF="node2.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html47" HREF="node4.html">An Example</A>
+<B>Up:</B> <A NAME="tex2html45" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html39" HREF="node2.html">The Basic Idea</A>
+<BR> <P>
+<H1><A NAME="SECTION00030000000000000000">But is it ?</A></H1>
+<P>
+Unfortunately, the two function templates used in the last section
+are not allowed by the C++ Annotated Reference Manual (ARM)
+[<A HREF="node9.html#ellis90">ES90</A>].  On pg. 347 of the ARM there is a categorical
+rule: <BLOCKQUOTE> All <EM>template-arg</EM>s for a function
+template must be <TT>type-argument</TT>s.  </BLOCKQUOTE> We violate
+this rule, since our template arguments are <TT>int</TT>s.  We can
+avoid the problem for the <TT>operator+</TT> function by simply
+redefining <TT>operator+</TT> as a member function of the <TT>Dim</TT>
+class.  However, in the absence of nested template declarations
+(the ARM forbids them), we cannot declare <TT>operator*</TT> to be a
+member function as there does not appear to be any way to bind the
+template arguments of the second operand.  We are left with no
+choice but to use a function template to define <TT>operator*</TT>.
+This makes our programs violate the language definition and
+unacceptable to at least one existing compiler (Borland's BCC
+4.0).  Fortunately, another existing compiler (the Free Software
+Foundation's G++ [<A HREF="node9.html#stallman93">Sta93</A>]) accepts such function
+templates.
+<P>
+The justification presented by the ARM for the problematic rule is
+that template arguments ``must be deduced from actual arguments in
+calls of the template function.''  The rule appears to be too
+strong for its justification; in fact the weaker rule on
+pg. 346 of the ARM <BLOCKQUOTE> Every <EM>template-arg</EM>
+specified in the <EM>template-arg-list</EM> must be used in the
+argument types of a function template.  </BLOCKQUOTE> appears to be
+sufficient, and eliminates our problem.
+<P>
+Another problem with forbidding function templates with non-type
+template arguments, is that it appears impossible to define a
+non-inline function which is a friend of a class which uses
+non-type template arguments.  Also, since there are no
+restrictions on the use of non-type template arguments within
+member functions, permitting their use in function templates
+should not add greatly to the complexity of a compiler.  Hence,
+even if it is not possible to allow such function templates in the
+language definition, compiler writers could permit their use as a
+language extension.
+<P>
+<HR><A NAME="tex2html46" HREF="node4.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html44" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html38" HREF="node2.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html47" HREF="node4.html">An Example</A>
+<B>Up:</B> <A NAME="tex2html45" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html39" HREF="node2.html">The Basic Idea</A>
+<P><ADDRESS>
+<I>zerksis umrigar (zdu@acm.org) <BR>
+Fri Aug  8 15:41:40 EDT 1997</I>
+</ADDRESS>
+</BODY>
+</HTML>

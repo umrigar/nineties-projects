@@ -1,0 +1,58 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define to 1 if cc understands const keyword. */
+#undef CC_CONST
+
+/* Define to 1 if there is a <limits.h> file with the usual definitions. */
+#undef CC_LIMITS
+
+/* Define to 1 if cc understands long double. */
+#undef CC_LONG_DOUBLE
+
+/* Define to 1 if cc understands function prototypes. */
+#undef CC_PROTO
+
+/* Define to 1 if cc understands signed keyword. */
+#undef CC_SIGNED
+
+/* Define to 1 if cc understands ... and there is a <stdarg.h> file. */
+#undef CC_STDARG
+
+/* Define to 1 if cc understands catenation of adjacent string constants. */
+#undef CC_STRCAT
+
+/* Define to 1 if cpp understands # stringify operator. */
+#undef CC_STRINGIFY
+
+/* Define to 1 if cpp understands ## token catenation operator. */
+#undef CC_TOK_CAT
+
+/* Define to 1 if cc understands u and U suffixes for unsigned ints. */
+#undef CC_UINT
+
+/* Define to 1 if cc understands void keyword. */
+#undef CC_VOID
+
+/* Define to 1 if realloc() and free() work on NULL pointers. */
+#undef REALLOC_NULL
+
+/* Define if you have the memcpy function.  */
+#undef HAVE_MEMCPY
+
+/* Define if you have the strchr function.  */
+#undef HAVE_STRCHR
+
+/* Define if you have the <stddef.h> header file.  */
+#undef HAVE_STDDEF_H
+
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H

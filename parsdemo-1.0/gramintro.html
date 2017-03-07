@@ -1,0 +1,238 @@
+<HTML><HEAD>
+<TITLE>Introduction to Grammars and Language Analysis</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Introduction to Grammars and Language Analysis</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/30 13:49:02 umrigar"
+</FONT>
+
+<H2>Grammars</H2>
+
+<P> Any natural language like English or a programming language like Pascal
+has a vocabulary of words.  For example, the vocabulary for Pascal contains
+words like <CODE>for</CODE>, <CODE>x</CODE>, <CODE>;</CODE>, <CODE>:=</CODE>
+or <CODE>1</CODE>. A sentence of the language consists of some sequence of
+words taken from this vocabulary. For example, with the above vocabulary, we
+can compose the legal Pascal statement:
+
+<PRE>
+	x:= 1
+</PRE>
+
+But not all possible sequences over a given vocabulary are legal, as the
+sequences need to meet certain syntactic and semantic restrictions. For
+example, with the Pascal vocabulary, we can construct the sequence of words
+
+<PRE>
+	x:= for 1
+</PRE>
+which is syntactically illegal.
+
+<P> A context free grammar provides a method for specifying which of the
+sentences are syntactically legal and which are syntactically illegal.  A
+context free grammar can be specified by a sequence of rules like the
+following (the rules are numbered for reference):
+
+<PRE>
+1)	program:	stmts '.'
+2)	stmts:		stmt ';' stmts
+3)	stmts:		stmt
+4)	stmt:		ID ':=' expr
+5)	expr:		NUM
+6)	expr:		expr '+' NUM
+</PRE>
+
+Each rule consists of a left-hand side (LHS) and a right-hand side (RHS)
+separated by a colon.  The LHS contains a single symbol, whereas the RHS can
+consist of a (possibly empty) sequence of grammar symbols separated by
+spaces.  Each rule can be viewed as a <EM>rewrite rule</EM>, specifying that
+whenever we have an occurrence of a LHS symbol, it can be rewritten to the
+RHS.  For example, we can rewrite the LHS symbol <CODE>program</CODE> as
+follows:
+
+<PRE>
+	program ==>	stmts .			<R>by rule 1</R>
+                ==>	stmt .			<R>by rule 3</R>
+		==>	ID := expr .		<R>by rule 4</R>
+		==>	ID := NUM .		<R>by rule 5</R>
+</PRE>
+
+Note that the above rewrite sequence or <EM>derivation</EM> terminates as we
+cannot rewrite <CODE>ID</CODE>, <CODE>:=</CODE>, <CODE>NUM</CODE> or
+<CODE>.</CODE> any further because they do not appear on the LHS of any
+rule.  Symbols like these terminate the derivation and are referred to as
+<EM>terminal symbols</EM>.  The other grammar symbols which occur on the LHS
+of grammar rules are referred to as <EM>nonterminal symbols</EM>.  The
+terminal symbols correspond to words in the vocabulary.  The nonterminal
+symbols correspond to legal phrases or sentences formed using words from the
+vocabulary.
+
+<P> The terminal symbols are of two types: terminals which stand for a
+single word in the vocabulary and terminals which stand for a class of
+multiple vocabulary words.  In the grammar, we denote terminals of the 
+former type by enclosing the vocabulary word within quotes  (for example, 
+<CODE>':='</CODE> denotes the single vocabulary word <CODE>:=</CODE>), and
+denote symbols of the latter type with a name which uses only upper-case
+letters (for example, <CODE>ID</CODE> denotes the class of all vocabulary
+words which are identifiers).
+
+<P> Not all the phrases of a language are sentences in the language; for
+example, a Pascal statement by itself (a phrase) is not a legal Pascal
+program (a sentence).  To ensure that a grammar describes only complete
+sentences, we distinguish one nonterminal called the <EM>start
+nonterminal</EM> from all others, and restrict all derivations to start from
+this distinguished start symbol.
+
+<P> We can now define a <A NAME="sentential-form"><EM>sentential
+form</EM></A> of a grammar <VAR>G</VAR> to be any sequence of grammar
+symbols (terminals or nonterminals) derived in 0 or more steps from the
+start symbol of <VAR>G</VAR>.  A <EM>sentence</EM> is a sentential-form
+which contains only terminal symbols.  The language defined by grammar
+<VAR>G</VAR> is the set of all sentences which can be derived from the start
+symbol of <VAR>G</VAR>.
+
+
+<P> To review, a context-free grammar <VAR>G</VAR> consists of a 4-tuple
+&lt;<VAR>N</VAR>, <VAR>T</VAR>, <VAR>R</VAR>, <VAR>S</VAR>&gt;, where
+<VAR>N</VAR> is a set of nonterminal symbols, <VAR>T</VAR> is a set of
+terminal symbols (disjoint from <VAR>N</VAR>), <VAR>R</VAR> is a set of
+rules, and <VAR>S</VAR> is a distinguished start nonterminal belonging to
+<VAR>N</VAR>.  Each rule in <VAR>R</VAR> is of the form <VAR>A</VAR>:
+<VAR>X</VAR>, where <VAR>A</VAR> is a nonterminal in <VAR>N</VAR> and
+<VAR>X</VAR> is a possibly empty sequence of terminal and nonterminal
+symbols.
+
+
+<P> Note that a context-free grammar enforces only syntactic restrictions.
+It does not enforce any semantic restrictions on the sentences to ensure
+that they make sense.  For example, a typical English grammar would allow
+the sentence 
+
+<BLOCKQUOTE>
+
+This page is swimming in the river
+
+</BLOCKQUOTE> 
+
+as grammatically correct, even though it does not make any sense.
+
+<H2>Parse Trees</H2>
+
+Consider a derivation of the sentence
+<PRE>
+	a:= 1 + 2 .
+</PRE>
+in the above grammar (repeated here for reference):
+<PRE>
+1)	program:	stmts .
+2)	stmts:		stmt ; stmts
+3)	stmts:		stmt
+4)	stmt:		ID := expr
+5)	expr:		NUM
+6)	expr:		expr + NUM
+</PRE>
+The derivation proceed as follows:
+<PRE>
+	program ==>	stmts .			<R>by rule 1</R>
+                ==>	stmt .			<R>by rule 3</R>
+		==>	ID := expr .		<R>by rule 4</R>
+		==>	ID := expr + NUM .	<R>by rule 6</R>
+		==>	ID := NUM + NUM         <R>by rule 5</R>
+</PRE>
+This derivation imposes a structure on the sentence which is shown
+by the following <EM>parse tree</EM>:
+<CENTER>
+
+<IMG SRC="parstree.gif" ALIGN=CENTER WIDTH=404 HEIGHT=378 
+     ALT="parse tree figure"  >
+
+</CENTER>
+The root of the parse tree corresponds to the start symbol.  For each step
+in the derivation, when a LHS grammar nonterminal is replaced with the RHS of
+some grammar rule for that LHS, the RHS symbols are added as children to the
+node (shown in red) corresponding to the LHS symbol in the parse tree.
+After the derivation is complete, the leaves of the parse tree (shown in
+cyan) correspond to the terminal symbols in the sentence.
+
+<H2>Language Analysis</H2>
+
+We can analyze the sentences of a language by extracting the
+grammatical structure of the sentence.  This is done by building an explicit
+or implicit parse tree for the sentence.  The language analysis component of
+a system is usually organized as two distinct modules:
+
+<DL>
+
+<DT><B>Scanner</B><DD>
+
+The scanner accepts a stream of characters and breaks it up into words or
+<EM>tokens</EM>.  A token gives the <EM>lexeme</EM> or actual text of the
+word  as well as identifying what kind of word it is.  The kind is usually
+encoded as a small integer.  Hence the declaration for a token would look
+something like the following C <CODE>typedef</CODE>
+<PRE>
+	typedef struct {
+	  char *lexeme;		/* actual characters of token */
+	  int kind;		/* class of token */
+	} Token;
+
+</PRE>
+
+
+<DT><B>Parser</B><DD>
+
+The parser accepts a stream of tokens from the scanner and extracts the
+grammatical structure of the sentence and builds (conceptually at least) a
+parse tree for the sentence.
+</DL>
+
+
+<CENTER>
+
+<IMG SRC="langanal.gif" ALIGN=CENTER WIDTH=463 HEIGHT=79 
+   ALT="language analysis block diagram" >
+
+</CENTER>
+
+<P> The parser can be organized so as to attempt to build a derivation of
+the sentence from the start symbol of the grammar.  This kind of parser is
+referred to as a <EM>top-down parser</EM>, because in terms of the parse
+tree, it is built from the top to the bottom.  Alternately, it can be
+organized so as to attempt to trace out a derivation in reverse, going from
+the sentence to the start symbol.  This kind of parser is
+referred to as a <EM>bottom-up parser</EM>, because in terms of the parse
+tree, it is built from the bottom to the top.  
+
+<P> A top-down parser needs to make two kinds of decisions at each step:
+
+<OL>
+
+<LI> It needs to choose a nonterminal in the frontier of the current
+parse tree to expand next.
+
+<LI> In general, a nonterminal may have several rules associated with
+it.  Hence the parser needs to decide which rule to use to expand the
+nonterminal it chose in (1).
+
+</OL>
+A bottom-up parser needs to make similar decisions.
+
+<P> A common organization used in batch compilers is for the parser to call
+the scanner whenever it is needs another token.  Usually, the parser needs
+to look at one or more tokens to make its parsing decisions: these tokens
+which the parser is examining but not yet consumed are called <EM>lookahead
+tokens</EM>.  Typically, the parser needs to use a single lookahead token.
+
+<P> <FONT Color=#00FF00>Copyright (C) 1997 Zerksis D. Umrigar</FONT>
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+</BODY> 
+</HTML>

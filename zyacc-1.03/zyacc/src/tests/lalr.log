@@ -1,0 +1,257 @@
+                        PARSER DESCRIPTION FILE
+
+                                 RULES
+
+  0: $S: G <EOF> 
+  1: G: E '=' E 
+  2: G: 'f' 
+  3: E: E '+' T 
+  4: E: T 
+  5: T: 'f' 
+  6: T: T '*' 'f' 
+  7: $Err: /* EMPTY */
+                      STATES WITHOUT CLOSURE ITEMS
+
+State   0:	
+  0: $S: . G <EOF> 
+      GOTO   2 on G
+      GOTO   3 on E
+      GOTO   4 on T
+      SHIFT 1 on 'f'
+DEFAULT: Error
+
+State   1:	
+  2: G: 'f' . 
+  5: T: 'f' . 
+      REDUCE 2 (G) on <EOF>
+DEFAULT: REDUCE 5 (T)
+
+State   2:	
+  0: $S: G . <EOF> 
+      SHIFT 5 on <EOF>
+DEFAULT: Error
+
+State   3:	
+  1: G: E . '=' E 
+  3: E: E . '+' T 
+      SHIFT 6 on '='
+      SHIFT 7 on '+'
+DEFAULT: Error
+
+State   4:	
+  4: E: T . 
+  6: T: T . '*' 'f' 
+      SHIFT 8 on '*'
+DEFAULT: REDUCE 4 (E)
+
+State   5:	
+  0: $S: G <EOF> . 
+DEFAULT: REDUCE 0 ($S)
+
+State   6:	
+  1: G: E '=' . E 
+      GOTO  10 on E
+      GOTO   4 on T
+      SHIFT 9 on 'f'
+DEFAULT: Error
+
+State   7:	
+  3: E: E '+' . T 
+      GOTO  11 on T
+      SHIFT 9 on 'f'
+DEFAULT: Error
+
+State   8:	
+  6: T: T '*' . 'f' 
+      SHIFT 12 on 'f'
+DEFAULT: Error
+
+State   9:	
+  5: T: 'f' . 
+DEFAULT: REDUCE 5 (T)
+
+State  10:	
+  1: G: E '=' E . 
+  3: E: E . '+' T 
+      SHIFT 7 on '+'
+DEFAULT: REDUCE 1 (G)
+
+State  11:	
+  3: E: E '+' T . 
+  6: T: T . '*' 'f' 
+      SHIFT 8 on '*'
+DEFAULT: REDUCE 3 (E)
+
+State  12:	
+  6: T: T '*' 'f' . 
+DEFAULT: REDUCE 6 (T)
+
+                       STATES WITH CLOSURE ITEMS
+
+State   0:	
+  2: G: . 'f' 
+  5: T: . 'f' 
+  0: $S: . G <EOF> 
+  1: G: . E '=' E 
+  3: E: . E '+' T 
+  4: E: . T 
+  6: T: . T '*' 'f' 
+      GOTO   2 on G
+      GOTO   3 on E
+      GOTO   4 on T
+      SHIFT 1 on 'f'
+DEFAULT: Error
+
+State   1:	
+  2: G: 'f' . 
+  5: T: 'f' . 
+      REDUCE 2 (G) on <EOF>
+DEFAULT: REDUCE 5 (T)
+
+State   2:	
+  0: $S: G . <EOF> 
+      SHIFT 5 on <EOF>
+DEFAULT: Error
+
+State   3:	
+  1: G: E . '=' E 
+  3: E: E . '+' T 
+      SHIFT 6 on '='
+      SHIFT 7 on '+'
+DEFAULT: Error
+
+State   4:	
+  4: E: T . 
+  6: T: T . '*' 'f' 
+      SHIFT 8 on '*'
+DEFAULT: REDUCE 4 (E)
+
+State   5:	
+  0: $S: G <EOF> . 
+DEFAULT: REDUCE 0 ($S)
+
+State   6:	
+  5: T: . 'f' 
+  1: G: E '=' . E 
+  3: E: . E '+' T 
+  4: E: . T 
+  6: T: . T '*' 'f' 
+      GOTO  10 on E
+      GOTO   4 on T
+      SHIFT 9 on 'f'
+DEFAULT: Error
+
+State   7:	
+  5: T: . 'f' 
+  3: E: E '+' . T 
+  6: T: . T '*' 'f' 
+      GOTO  11 on T
+      SHIFT 9 on 'f'
+DEFAULT: Error
+
+State   8:	
+  6: T: T '*' . 'f' 
+      SHIFT 12 on 'f'
+DEFAULT: Error
+
+State   9:	
+  5: T: 'f' . 
+DEFAULT: REDUCE 5 (T)
+
+State  10:	
+  1: G: E '=' E . 
+  3: E: E . '+' T 
+      SHIFT 7 on '+'
+DEFAULT: REDUCE 1 (G)
+
+State  11:	
+  3: E: E '+' T . 
+  6: T: T . '*' 'f' 
+      SHIFT 8 on '*'
+DEFAULT: REDUCE 3 (E)
+
+State  12:	
+  6: T: T '*' 'f' . 
+DEFAULT: REDUCE 6 (T)
+
+                   STATES ACCESSED BY GRAMMAR SYMBOLS
+
+                  STATES ACCESSED BY TERMINAL SYMBOLS
+
+States accessed by terminal `error'
+	
+States accessed by terminal `<EOF>'
+	5 
+States accessed by terminal `'=''
+	6 
+States accessed by terminal `'f''
+	12 9 1 
+States accessed by terminal `'+''
+	7 
+States accessed by terminal `'*''
+	8 
+States accessed by terminal `$yyBadTok'
+	
+States accessed by terminal `$yyEmptyTok'
+	
+                STATES ACCESSED BY NON-TERMINAL SYMBOLS
+
+States accessed by non-terminal `$S'
+	0 
+States accessed by non-terminal `G'
+	2 
+States accessed by non-terminal `E'
+	10 3 
+States accessed by non-terminal `T'
+	11 4 
+States accessed by non-terminal `$Err'
+	
+                          REDUCTION LOOKAHEADS
+
+SLR lookaheads for reducing by rule 2 (G) in state 1
+	<EOF>
+
+
+LALR lookaheads for reducing by rule 5 (T) in state 1
+	'='
+	'+'
+	'*'
+
+
+SLR lookaheads for reducing by rule 4 (E) in state 4
+	<EOF>
+	'='
+	'+'
+
+
+SLR lookaheads for reducing by rule 0 ($S) in state 5
+
+
+SLR lookaheads for reducing by rule 5 (T) in state 9
+	<EOF>
+	'='
+	'+'
+	'*'
+
+
+SLR lookaheads for reducing by rule 1 (G) in state 10
+	<EOF>
+
+
+SLR lookaheads for reducing by rule 3 (E) in state 11
+	<EOF>
+	'='
+	'+'
+
+
+SLR lookaheads for reducing by rule 6 (T) in state 12
+	<EOF>
+	'='
+	'+'
+	'*'
+
+
+                         USER SPECIFIED ACTIONS
+
+                          USER SPECIFIED TESTS
+

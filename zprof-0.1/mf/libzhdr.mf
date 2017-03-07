@@ -1,0 +1,7 @@
+#Output headers used from libz
+libzhdr:	$(CFILES) $(HFILES)
+		@echo "LIBZ: \
+		  `$(DEPEND_CMD) $(CFILES) | \
+		   tr ' ' '\n' | grep libz | sed -e 's@.*/@@' | sort -u | \
+		   tr '\n' ' ' `"
+

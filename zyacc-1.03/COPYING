@@ -1,0 +1,44 @@
+Zlex: A lex/flex compatible scanner generator.
+
+Copyright (C) 1995 Zerksis D. Umrigar
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation with one ADDENDUM mentioned below; either
+version 2 of the License, or (at your option) any later version.
+     
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+     
+You should have received a copy of the GNU General Public License along
+with this program in the file GPL included in the Zlex distribution; if
+not, write to the Free Software Foundation, Inc., 675 Mass Ave,
+Cambridge, MA 02139, USA.
+
+The addendum to the GNU General Public License is as follows: Permission
+is hereby given to use the output of Zlex in non-free programs.
+
+The reason for the addendum is that the output of Zlex --- the generated
+scanner file --- contains code chunks which are verbatim copies of
+sizable sections of Zlex sources.  These chunks include the code for
+parts of the `yylex' function, as well as code for Zlex library
+functions.  If only the terms of the GPL were to be applied to the code
+within the generated scanner file, the effect would be to restrict the
+use of Zlex output to free software.  Hence this document amends the
+terms of the GNU General Public License to explicitly allow the use of
+the output of Zlex in non-free programs.
+
+The addendum has not been added because of sympathy for people who want
+to make software proprietary.  *Software should be free.* Unfortunately,
+it appears that limiting Zlex's use to free software does little to
+encourage people to make other software free.  So the addendum makes the
+practical conditions for using Zlex match the practical conditions for
+using other free tools.
+
+Questions and comments regarding Zlex can be directed to me at
+umrigar@cs.binghamton.edu
+
+The above conditions were derived from the copying conditions published
+for Bison by the Free Software Foundation, Inc.

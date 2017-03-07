@@ -1,0 +1,172 @@
+@item --16-bit
+Generate a unicode-ready scanner which handles 16-bit characters.
+@xref{Runtime Input Options}.
+
+@item --7-bit
+@itemx -7
+Generate a scanner which handles only 7-bit characters.
+@xref{Runtime Input Options}.
+
+@item --8-bit
+@itemx -8
+Generate a scanner which handles 8-bit characters (default).
+@xref{Runtime Input Options}.
+
+@item --align[=1|0]
+@itemx -a[1|0]
+Generate a scanner which does not use short integer tables 
+(default: @code{0}).
+@xref{Table Scanner Options}.
+
+@item --array[=1|0]
+Implement yytext as an array (default: @code{0}).
+@xref{Runtime Algorithm Options}.
+
+@item --backup-optimize[=1|0]
+Optimize the scanner for patterns which require it to backup 
+(default: @code{0}).
+@xref{Runtime Algorithm Options}.
+
+@item -c
+Deprecated option included for POSIX compliance.
+
+@item --bin-code-param @var{n}
+Binary search in code-scanner if # input ranges <= @var{n} 
+(default: @code{16}).
+@xref{Code Scanner Options}.
+
+@item --code-scan[=1|0]
+Generated scanner encodes DFA in code instead of tables 
+(default: @code{0}).
+@xref{Code Scanner Options}.
+
+@item --compress @var{type}
+@itemx -C @var{type}
+Use table compression of @var{type} @code{no}, @code{comb} or 
+@code{iterative} (default: @code{comb}).
+@xref{Table Scanner Options}.
+
+@item --col-waste-percent @var{percent}
+When --compress=none & --table=state, use a 2-dimensional table with
+the # of columns a power of 2 if the percentage of wasted columns is <= 
+@var{percent} (@code{0} <= @var{percent} and @var{percent} <= 100) 
+(default: @code{50}).
+@xref{Table Scanner Options}.
+
+@item --debug[=1|0]
+@itemx -d[1|0]
+Turn on debugging in generated scanner (default: @code{0}).
+@xref{Miscellaneous Options}.
+
+@item --default-action @var{act}
+@itemx -s @var{act}
+Set default action for unmatched character to @var{act} @code{echo}, 
+@code{error}, @code{fatal} or @code{ignore} 
+(default: @code{echo}).
+@xref{Runtime Algorithm Options}.
+
+@item --ecs[=1|0]
+@itemx -E[1|0]
+@itemx --equiv-classes[=1|0]
+Partition input characters into equivalence classes 
+(default: @code{1}).
+@xref{Runtime Algorithm Options}.
+
+@item --help
+@itemx -h
+Print summary of options and exit.
+@xref{Miscellaneous Options}.
+
+@item --ignore-case[=1|0]
+@itemx -i[1|0]
+@itemx --caseless[=1|0]
+@itemx --case-insensitive[=1|0]
+Generate a case insensitive scanner (default: @code{0}).
+@xref{Runtime Input Options}.
+
+@item --lex-compat
+@itemx -l
+Lex compatibility (equivalent to --array --yylineno --reject).
+@xref{Miscellaneous Options}.
+
+@item --lin-code-param @var{n}
+Linear search in code-scanner if # successors <= @var{n} 
+(default: @code{4}).
+@xref{Code Scanner Options}.
+
+@item --line-dir[=1|0]
+Output #line directives to generated scanner (default: @code{1}).
+@xref{Miscellaneous Options}.
+
+@item -n
+Deprecated option included for POSIX compliance.
+
+@item --output @var{filename}
+@itemx -o @var{filename}
+Generate scanner in file @var{filename} (default: @code{lex.yy.c}).
+@xref{Miscellaneous Options}.
+
+@item --prefix @var{prefix}
+@itemx -P @var{prefix}
+Use @var{prefix} as prefix of certain global names in
+generated scanner 
+(default: @code{yy}).
+@xref{Runtime Algorithm Options}.
+
+@item --sentinel @var{char-code}
+@itemx -S @var{char-code}
+Use character with decimal code @var{char-code} as sentinel 
+(default: @code{0}).
+@xref{Runtime Input Options}.
+
+@item --reject[=1|0]
+Allow REJECT actions in generated scanner (default: @code{1}).
+@xref{Runtime Algorithm Options}.
+
+@item --stdio[=1|0]
+Use standard I/O for all scanner input (default: @code{0}).
+@xref{Runtime Input Options}.
+
+@item --table @var{type}
+@itemx -T @var{type}
+Use table entries of @var{type} @code{address}, 
+@code{difference} or @code{state} (default: @code{state}).
+@xref{Table Scanner Options}.
+
+@item --to-stdout[=1|0]
+@itemx -t[1|0]
+Write generated scanner to stdout (default: @code{0}).
+@xref{Miscellaneous Options}.
+
+@item --trace[=@var{trace_file}]
+@itemx -T[@var{trace_file}]
+Run zlex in trace mode, generating extensive output in file 
+@var{trace_file} which defaults to stdout.
+@xref{Miscellaneous Options}.
+
+@item --transition-compress[=1|0]
+Compress transitions for non-switch states in code scanner 
+(default: @code{0}).
+@xref{Code Scanner Options}.
+
+@item --verbose[=1|0]
+@itemx -v[1|0]
+Generate somewhat verbose statistics describing DFA 
+(default: @code{0}).
+@xref{Miscellaneous Options}.
+
+@item --version
+@itemx -V
+Print version number and exit.
+@xref{Miscellaneous Options}.
+
+@item --whitespace[=1|0]
+@itemx -w[1|0]
+Allow whitespace within lex patterns (default: @code{0}).
+@xref{Miscellaneous Options}.
+
+@item --yylineno[=1|0]
+Maintain count of line number in global variable yylineno 
+(default: @code{0}).
+@xref{Runtime Algorithm Options}.
+

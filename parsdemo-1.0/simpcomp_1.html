@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<HEAD><TITLE>Rules for simpcomp.y</TITLE>
+</HEAD><BODY><H1>Rules for simpcomp.y</H1>
+Automatically generated from simpcomp.y by <A HREF="http://opal.cs.binghamton.edu/~zdu/zyacc">zyacc</A> version 1.03<BR>
+<P>Click <a href="simpcomp.html">here</a> to return to the main menu.
+<PRE>
+<a name= "Rule-0">  0: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-0">$S</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-1">&lt;EOF&gt;</a> 
+<a name= "Rule-1">  1: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a> 
+<a name= "Rule-2">  2: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a> 
+<a name= "Rule-3">  3: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-7">';'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a> 
+<a name= "Rule-4">  4: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-4">ID</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-6">':='</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> 
+<a name= "Rule-5">  5: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-8">'+'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+<a name= "Rule-6">  6: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-9">'-'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+<a name= "Rule-7">  7: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+<a name= "Rule-8">  8: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-10">'*'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+<a name= "Rule-9">  9: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-11">'/'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+<a name= "Rule-10"> 10: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-3">'div'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+<a name= "Rule-11"> 11: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-2">'mod'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+<a name= "Rule-12"> 12: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+<a name= "Rule-13"> 13: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-12">'('</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-13">')'</a> 
+<a name= "Rule-14"> 14: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-4">ID</a> 
+<a name= "Rule-15"> 15: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-5">NUM</a> 
+<a name= "Rule-16"> 16: </a><a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-7">$Err</a>: /* EMPTY */
+</PRE>
+<P>Click <a href="simpcomp.html">here</a> to return to the main menu.
+</BODY>

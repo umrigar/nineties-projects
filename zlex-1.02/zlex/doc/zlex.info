@@ -1,0 +1,170 @@
+This is Info file zlex.info, produced by Makeinfo-1.64 from the input
+file zlex.texi.
+
+
+Indirect:
+zlex.info-1: 87
+zlex.info-2: 49963
+zlex.info-3: 99946
+zlex.info-4: 149187
+zlex.info-5: 198713
+
+Tag Table:
+(Indirect)
+Node: Top87
+Node: Introduction12588
+Node: Scanner Generator Overview13266
+Node: Background17091
+Node: An Example18479
+Node: Enhancements22506
+Node: The Scanning Process25508
+Node: Pattern Conflicts27393
+Node: Scanner Backtracking28864
+Node: Default Action31811
+Node: Input File Structure33831
+Node: Comments35067
+Node: Code Blocks35412
+Node: Declarations Section38165
+Node: Rules Section40493
+Node: Code Section41835
+Node: Line Directives42197
+Node: C Interface Conventions43404
+Node: Naming Conventions44696
+Node: Macros Names45246
+Node: Variable Names46169
+Node: Function Names47104
+Node: Private Names48462
+Node: Scope of Names48845
+Node: Scanner State49963
+Node: Patterns50907
+Node: Meta-Characters51918
+Node: Regular Expressions53110
+Node: Single Characters55483
+Node: Escape Sequences56129
+Node: Character Classes57359
+Node: Named Character Classes60080
+Node: Any Character Except Newline61750
+Node: String Quoting62191
+Node: Regular Expression Macros63290
+Node: Optional Regular Expression65412
+Node: Zero or More Repetitions65867
+Node: One or More Repetitions66437
+Node: Counted Repetition66999
+Node: Concatenation67919
+Node: Union68443
+Node: Operator Precedence69133
+Node: Grouping Regular Expression69672
+Node: Operator Independence70308
+Node: Regular Expression Examples70709
+Node: Ada Comments71219
+Node: Pascal Comments71497
+Node: C Comments72546
+Node: Context Operators75046
+Node: Right Context75560
+Node: Generalized Right Context76324
+Node: End of Line78639
+Node: Right Context Restrictions79096
+Node: Left Context79613
+Node: Start of Line80241
+Node: Start State Patterns81040
+Node: End of File Patterns81794
+Node: Intra-Token Patterns82724
+Node: Whitespace Within Patterns83082
+Node: The Current Lexeme85662
+Node: Lexeme Text86154
+Node: Lexeme Length88400
+Node: Catenating Tokens89861
+Node: Start States92516
+Node: Start State Types93328
+Node: Start State Declarations94773
+Node: Entering a Start State96311
+Node: Current Start State97656
+Node: Start State Stacks98879
+Node: Pushing a Start State99238
+Node: Popping the Start State Stack99946
+Node: Top of the Start State Stack100695
+Node: Start States Example101364
+Node: Using Inclusive Start States103897
+Node: Scanner Input105736
+Node: Input File Pointer107443
+Node: Direct Input108831
+Node: Redefining the Input Macro110081
+Node: The Null Value112145
+Node: Modifying Input113018
+Node: Rescanning Lexeme Text113730
+Node: Unput115285
+Node: Rejecting to the Next Match116733
+Node: Character Count118887
+Node: Current Line Number120477
+Node: Current Column Number122407
+Node: Querying Beginning of Line123319
+Node: Setting Beginning of Line123800
+Node: Scanner Output124560
+Node: Output File Pointer124977
+Node: Echoing the Current Lexeme125898
+Node: Buffer Management126478
+Node: Buffer Type127993
+Node: Current Buffer128466
+Node: Creating a Buffer129232
+Node: Deleting a Buffer130128
+Node: Flushing a Buffer130789
+Node: In Memory Buffer131736
+Node: Bytes Buffer137022
+Node: String Buffer138164
+Node: Switching Buffers139336
+Node: Buffer Management Example140188
+Node: Using Intra-Token Patterns141836
+Node: Intra-Token Pattern Syntax144033
+Node: Actions for Intra-Token Patterns144764
+Node: Backing Up145879
+Node: End-of-File and Termination147154
+Node: Wrapping Up147994
+Node: End-of-file Actions149187
+Node: Terminating a Scanner150576
+Node: Restarting a Scanner151120
+Node: The Main Scanner Function151748
+Node: Main Scanner Function152636
+Node: Declaring the Scanner Function153363
+Node: Initialization154047
+Node: An Action for Every Pattern155367
+Node: Separator Between Actions155809
+Node: Termination Return Value156814
+Node: Pattern Numbers158192
+Node: Debugging158866
+Node: Debugging Control159641
+Node: Debugging Example161786
+Node: Scanner Tracing162717
+Node: Errors163271
+Node: Multiple Scanners164834
+Node: Prefix Option166135
+Node: Redefining Name Macros166943
+Node: Renaming Example168460
+Node: Invoking Zlex169488
+Node: Option Conventions170344
+Node: Option Sources173115
+Node: Options175006
+Node: Runtime Input Options175441
+Node: Runtime Algorithm Options178114
+Node: Code Scanner Options181478
+Node: Table Scanner Options185405
+Node: Miscellaneous Options188089
+Node: Options List190181
+Node: Data Search List194971
+Node: Efficiency196744
+Node: Patterns versus Actions197308
+Node: Maximizing Token Length198194
+Node: Backtracking198713
+Node: Generalized Right Context Efficiency199260
+Node: Distributing Zlex Scanners200514
+Node: Distributing Library Sources201386
+Node: Bugs and Deficiencies204186
+Node: Suspicions204704
+Node: Bug Reports205889
+Node: Syntax of Zlex Programs206981
+Node: Tokens207357
+Node: Grammar208695
+Node: Copying211337
+Node: Concept Index213656
+Node: Name Index222057
+
+End Tag Table

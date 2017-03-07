@@ -1,0 +1,3 @@
+look.y:36: warning: Rule 10 (I) needs lookahead in state 17.
+look.y:36: warning: Rule 18 (N) requires lookahead in state 20.
+look.y:36: warning: Rule 15 (J) does not need lookahead in state 21.

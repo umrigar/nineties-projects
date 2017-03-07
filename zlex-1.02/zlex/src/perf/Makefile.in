@@ -1,0 +1,196 @@
+#Makefile.in produced automatically using GNU-m4.
+#We assume that any make variables defined on the make command-line are
+#passed into a recursive make.
+
+#Name of program.
+PROGRAM=		zlex
+VERSION=		1.02
+
+#DIRECTORIES FOR SOURCES AND BUILD.
+#Source directory controlled by this makefile.
+srcdir=			@srcdir@
+
+#Define VPATH to ensure that source files found even if build directory is
+#different from srcdir.
+VPATH=			@srcdir@
+
+#Top-level source directory for entire package.
+topdir=			@top_srcdir@
+
+#Top-level build directory for package.
+builddir=		@builddir@
+
+#INSTALLATION PATHS.
+#Prefix of path where all architecture-independent files are installed.
+prefix=			@prefix@
+
+#Prefix of path where architecture-dependent files are installed.
+exec_prefix=		@exec_prefix@
+
+#Path where executables are installed.
+bindir=			$(exec_prefix)/bin
+
+#Path where skeleton file and library sources are installed.
+datadir=		$(prefix)/share/$(PROGRAM)
+
+#Path where include files are installed.
+includedir=		$(prefix)/include
+
+#Path where info files are installed.
+infodir=		$(prefix)/info
+
+#Path where libraries are installed.
+libdir=			$(exec_prefix)/lib
+
+#Path where library sources and skeleton are installed.
+libsrcdir=		$(datadir)
+
+#Path where html files are installed.
+docdir=			$(datadir)/doc
+
+SHELL=			/bin/sh
+RM=			rm -f
+AR=			ar
+LN=			ln -f
+MV=			mv
+CAT=			cat
+CMP=			cmp
+SED=			sed
+DEPEND_CMD=		gcc -MM $(CPPFLAGS) $(DFLAGS)
+MAKE_MF_IN=		$(GM4) --include=$(topdir)/mf \
+		        Makefile.m4 >$(srcdir)/Makefile.in
+MAKEINFO=		makeinfo
+TEXI2DVI=		texi2dvi
+TEXI2HTML=		texi2html
+DVI2PS=			dvips
+GM4=			gm4 --prefix-builtins
+RANLIB=			@RANLIB@
+INSTALL=		@INSTALL@
+INSTALL_PROGRAM=	@INSTALL_PROGRAM@
+INSTALL_DATA=		@INSTALL_DATA@
+ZLEX=			zlex
+ZYACC=			zyacc
+ZYACCFLAGS=
+ZLEXFLAGS=
+
+
+#COMPILER CONTROL
+#Make variables which define compiler invocation.
+CC=			@CC@
+
+#Flags to control optimization/debugging.
+CFLAGS=			@CFLAGS@
+
+#Header file search directory and other misc. options for cpp/cc.
+CPPFLAGS=		-I$(srcdir) -I$(LIBZ_SRC) -I$(builddir)
+
+#Extra debugging and optimization options for the C compiler.
+CXXFLAGS=		@CXXFLAGS@
+
+#-D options passed to the C-compiler by configure.
+DEFS=			@DEFS@
+
+#Compose DEFFLAGS as combination of above (plus others if needed).
+#XFLAGS should be project or directory specific flags. DFLAGS are
+#intended to be passed in via the command-line; 
+DEFFLAGS=		$(DEFS) $(XFLAGS) $(DFLAGS)
+
+#Library search used.
+ZLIBS=			-L$(LIBZ_BIN) -lz
+
+LDFLAGS=		@LDFLAGS@
+
+@SET_MAKE@
+
+#Flags to be passed down to recursive compilation makes; 
+#many makes don't do it correctly thru the environment.
+REC_MAKE_FLAGS=	\
+  CFLAGS='$(CFLAGS)' \
+  DFLAGS='$(DFLAGS)' \
+  PROGRAM='$(PROGRAM)' \
+  VERSION='$(VERSION)' \
+  SIGNATURE='Zerksis'
+
+REC_MAKE=	$(MAKE) $(REC_MAKE_FLAGS)
+
+#This ends the configuration section.
+
+#The libz directory is a sibling of the main package directory.
+LIBZ_SRC=		$(topdir)/libz
+LIBZ_BIN=		$(builddir)/libz
+
+
+
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.l
+
+.l:
+	$(ZLEX_SEARCH_PATH) $(LEX) $(LFLAGS) $<
+	$(CC) $(CFLAGS) lex.yy.c $(LIBS) -o $*
+
+all:	crec1.in  crec2.in cscan1.in cscan2.in reject.in
+	./doperf
+
+crec1.in: ../dfa.c
+	$(CAT) ../dfa.c ../dfa.c ../dfa.c ../dfa.c ../dfa.c ../dfa.c >t1.$$ ; \
+	$(CAT) t1.$$ t1.$$ t1.$$ t1.$$ t1.$$ t1.$$ t1.$$ t1.$$ \
+	       t1.$$ t1.$$ >$@ ; \
+	$(RM) t1.$$
+
+cscan1.in: crec1.in
+	$(LN) crec1.in $@
+
+crec2.in: crec1.in
+	$(LN) crec1.in $@
+
+cscan2.in: crec1.in
+	$(LN) crec1.in $@
+
+reject.in:
+	echo "abcd" >t1.$$ ; \
+        for n in 1 2 3 4 5 6 7 8 ; \
+	do \
+	  $(CAT) t1.$$ t1.$$ t1.$$ t1.$$ t1.$$ >t2.$$ ; \
+	  $(MV) t2.$$ t1.$$ ; \
+	done ; \
+	$(MV) t1.$$ $@
+	
+SRC_FILES= \
+  crec1.doc crec1.l \
+  crec2.doc crec2.l \
+  cscan1.doc cscan1.l \
+  cscan2.doc cscan2.l \
+  reject.doc reject.l \
+  cscan.re cscan.l \
+  Makefile.m4 doperf README
+
+NON_SRC_FILES= \
+  Makefile.in linux.log solaris.log sunos.log ultrix.log
+
+DIST_FILES= \
+  $(SRC_FILES) $(NON_SRC_FILES)
+
+clean:	FORCE
+	$(RM) *.in t.* t?.* core *.c $(TESTS)
+	
+distclean: clean FORCE
+	$(RM) Makefile
+
+maintainer-clean: distclean FORCE
+	$(RM) $(NON_SRC_FILES)
+
+FORCE:
+
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+
+Makefile.in:	Makefile.m4 FORCE
+		$(MAKE_MF_IN)

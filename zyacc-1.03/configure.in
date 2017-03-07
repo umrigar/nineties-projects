@@ -1,0 +1,65 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(id914)
+
+dnl Use configuration header file config.h.
+AC_CONFIG_HEADER(config.h)
+
+AC_CONFIG_AUX_DIR(.)
+
+builddir=`pwd` AC_SUBST(builddir)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+
+dnl Check if we are cross-compiling.
+AC_C_CROSS
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(stddef.h)
+AC_CHECK_HEADERS(sys/socket.h)
+dnl AC_CHECK_HEADERS(limits.h) We are doing it below more specifically.
+
+AC_CHECK_FUNCS(strchr memcpy)
+
+dnl Check for existence of networking libraries.  If not found, then the
+dnl networking functions are probably in libc.
+AC_CHECK_LIB(socket, main, XLIBS="$XLIBS -lsocket")
+AC_CHECK_LIB(nsl, main, XLIBS="$XLIBS -lnsl")
+AC_SUBST(XLIBS)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+ZZ_CC_CONST
+ZZ_CC_LIMITS
+ZZ_CC_LONG_DOUBLE
+ZZ_CC_PROTO
+ZZ_CC_SIGNED
+dnl ZZ_CC_SIZE_T
+ZZ_CC_STDARG
+ZZ_CC_STRCAT
+ZZ_CC_STRINGIFY
+ZZ_CC_TOK_CAT
+ZZ_CC_UINT
+ZZ_CC_VOID
+
+dnl Requires previous calls to ZZ_CC_PROTO and ZZ_CC_STRCAT.
+dnl ZZ_CC_ANSI_TO_KNR
+
+dnl Checks for library functions.
+AC_FUNC_VPRINTF
+dnl AC_CHECK_FUNCS(strtol) Not currently checking.
+
+dnl Check whether realloc() and free() handle NULL pointers.
+ZZ_LIB_REALLOC_NULL
+
+dnl Check whether make defines the variable MAKE.
+AC_PROG_MAKE_SET
+
+AC_OUTPUT([Makefile zyacc/doc/Makefile libz/Makefile zyacc/zpl/Makefile 
+	   zyacc/libzyacc/Makefile zyacc/java/Makefile
+	   zyacc/src/Makefile zyacc/src/tests/Makefile zyacc/c2tex/Makefile],
+	  [echo timestamp > stamp-h])
+
+

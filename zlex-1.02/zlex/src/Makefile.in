@@ -1,0 +1,408 @@
+#Makefile.in produced automatically using GNU-m4.
+
+#Name of program.
+PROGRAM=		zlex
+VERSION=		1.02
+
+#DIRECTORIES FOR SOURCES AND BUILD.
+#Source directory controlled by this makefile.
+srcdir=			@srcdir@
+
+#Define VPATH to ensure that source files found even if build directory is
+#different from srcdir.
+VPATH=			@srcdir@
+
+#Top-level source directory for entire package.
+topdir=			@top_srcdir@
+
+#Top-level build directory for package.
+builddir=		@builddir@
+
+#INSTALLATION PATHS.
+#Prefix of path where all architecture-independent files are installed.
+prefix=			@prefix@
+
+#Prefix of path where architecture-dependent files are installed.
+exec_prefix=		@exec_prefix@
+
+#Path where executables are installed.
+bindir=			$(exec_prefix)/bin
+
+#Path where skeleton file and library sources are installed.
+datadir=		$(prefix)/share/$(PROGRAM)
+
+#Path where include files are installed.
+includedir=		$(prefix)/include
+
+#Path where info files are installed.
+infodir=		$(prefix)/info
+
+#Path where libraries are installed.
+libdir=			$(exec_prefix)/lib
+
+#Path where library sources and skeleton are installed.
+libsrcdir=		$(datadir)
+
+#Path where html files are installed.
+docdir=			$(datadir)/doc
+
+SHELL=			/bin/sh
+RM=			rm -f
+AR=			ar
+LN=			ln -f
+MV=			mv
+CAT=			cat
+CMP=			cmp
+SED=			sed
+DEPEND_CMD=		gcc -MM $(CPPFLAGS) $(DFLAGS)
+MAKE_MF_IN=		$(GM4) --include=$(topdir)/mf \
+		        Makefile.m4 >$(srcdir)/Makefile.in
+MAKEINFO=		makeinfo
+TEXI2DVI=		texi2dvi
+TEXI2HTML=		texi2html
+DVI2PS=			dvips
+GM4=			gm4 --prefix-builtins
+RANLIB=			@RANLIB@
+INSTALL=		@INSTALL@
+INSTALL_PROGRAM=	@INSTALL_PROGRAM@
+INSTALL_DATA=		@INSTALL_DATA@
+ZLEX=			zlex
+ZYACC=			zyacc
+ZYACCFLAGS=
+ZLEXFLAGS=
+
+
+#COMPILER CONTROL
+#Make variables which define compiler invocation.
+CC=			@CC@
+
+#Flags to control optimization/debugging.
+CFLAGS=			@CFLAGS@
+
+#Header file search directory and other misc. options for cpp/cc.
+CPPFLAGS=		-I$(srcdir) -I$(LIBZ_SRC) -I$(builddir)
+
+#Extra debugging and optimization options for the C compiler.
+CXXFLAGS=		@CXXFLAGS@
+
+#-D options passed to the C-compiler by configure.
+DEFS=			@DEFS@
+
+#Compose DEFFLAGS as combination of above (plus others if needed).
+#XFLAGS should be project or directory specific flags. DFLAGS are
+#intended to be passed in via the command-line; 
+DEFFLAGS=		$(DEFS) $(XFLAGS) $(DFLAGS)
+
+#Library search used.
+ZLIBS=			-L$(LIBZ_BIN) -lz
+
+LDFLAGS=		@LDFLAGS@
+
+@SET_MAKE@
+
+#Flags to be passed down to recursive compilation makes; 
+#many makes don't do it correctly thru the environment.
+REC_MAKE_FLAGS=	\
+  CFLAGS='$(CFLAGS)' \
+  DFLAGS='$(DFLAGS)' \
+  PROGRAM='$(PROGRAM)' \
+  VERSION='$(VERSION)' \
+  SIGNATURE='Zerksis'
+
+REC_MAKE=	$(MAKE) $(REC_MAKE_FLAGS)
+
+#This ends the configuration section.
+
+#The libz directory is a sibling of the main package directory.
+LIBZ_SRC=		$(topdir)/libz
+LIBZ_BIN=		$(builddir)/libz
+
+
+
+ZLEX_PATH=		./
+ZLEX_SEARCH_PATH=	.
+
+LIBZLEX_SRC=		$(srcdir)/../libzlex
+LIBZLEX_BIN=		../libzlex
+
+XLIBS=			-L$(LIBZLEX_BIN) -lzlex
+
+ZYACCFLAGS=		-d -v
+
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.o .c .y .l
+
+.c.o:
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $<
+
+.c:
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $< $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+
+
+#The following targets use ZYACC_PATH and ZYACC_SKEL_DIR.  If ZYACC_PATH is
+#defined, it must end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+
+ZYACCFLAGS=	-d -v
+
+.y.c:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+
+.y.o:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+	
+.y:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+#The following targets use ZLEX_PATH and ZLEX_SEARCH_PATH.  If ZLEX_PATH is
+#defined, it must end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+.l.c:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+
+.l.o:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.l:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+
+
+
+#Extra -D option passed to the C-compiler.
+XFLAGS=	-DZLEX_SEARCH_PATH='"$$ZLEX_SEARCH_PATH:.:$$HOME:$(libsrcdir)"' \
+	-DVERSION='"$(VERSION)"' 
+
+#Main target to be built in this directory.
+TARGET=		zlex
+SKEL=		zlexskl.c
+
+#FILE DESCRIPTIONS.
+#Human-generated C files.
+C_SRC_FILES= \
+  chrclass.c codescan.c comptab.c datetime.c dfa.c \
+  main.c mkoptinf.c mkopttab.c optcheck.c opttab0.c options.c \
+  outdfa.c outvec.c patterns.c
+
+#Computer-generated C files.
+C_NON_SRC_FILES= \
+  opttab.c parse.c scan.c
+
+#All C files.
+CFILES= \
+  $(C_SRC_FILES) $(C_NON_SRC_FILES)
+
+#Human-generated header files.
+H_SRC_FILES= \
+  chrclass.h codescan.h comptab.h datetime.h dfa.h files.h \
+  main.h options.h outdfa.h outprms.h outvec.h patterns.h port.h \
+  scan.h sklnames.h zparse.h
+
+#Computer-generated header files.
+H_NON_SRC_FILES= \
+  outfns.h parse.h
+
+#All header files.
+HFILES= \
+  $(H_SRC_FILES) $(H_NON_SRC_FILES)
+
+#All human-generated files to be distributed.
+SRC_FILES= \
+  $(C_SRC_FILES) $(H_SRC_FILES) scan.l parse.y \
+  Makefile.m4 $(SKEL)m4 NOTES.txt README SYSDEPS.txt
+
+#All computer-generated files to be distributed.
+NON_SRC_FILES= \
+  $(C_NON_SRC_FILES) $(H_NON_SRC_FILES) \
+  Makefile.in DEPEND $(SKEL) opttab.texi 
+
+#All files to be distributed.
+DIST_FILES= \
+  $(SRC_FILES) $(NON_SRC_FILES)
+
+#Object files.
+OFILES= \
+  chrclass.o codescan.o comptab.o datetime.o dfa.o \
+  main.o options.o outdfa.o outvec.o parse.o patterns.o scan.o
+
+all:		$(TARGET) $(SKEL)
+
+install:	$(TARGET) $(SKEL)
+		$(topdir)/install-chk $(SIGNATURE) $(bindir)/$(TARGET) \
+		&& $(INSTALL_PROGRAM) $(TARGET) $(bindir)/$(TARGET)
+		$(topdir)/install-chk $(SIGNATURE) $(libsrcdir)/$(SKEL) \
+		&& $(INSTALL_DATA) $(srcdir)/$(SKEL) $(libsrcdir)/$(SKEL)
+
+uninstall:
+		$(topdir)/install-chk $(SIGNATURE) $(bindir)/$(TARGET) \
+		&& $(RM) $(bindir)/$(TARGET)
+		$(topdir)/install-chk $(SIGNATURE) $(libsrcdir)/$(SKEL) \
+		&& $(RM) $(libsrcdir)/$(SKEL)
+
+check:		$(TARGET) scan.l
+		@echo -n "Using zlex to build zlex scanner ... " ; \
+		$(ZLEX_PATH)$(TARGET) $(ZLEXFLAGS) scan.l -o t$$$$.c ; \
+		$(SED) -e "s/t$$$$.c/scan.c/g" t$$$$.c >t.c ; \
+		$(RM) t$$$$.* ; \
+		if $(CMP) scan.c t.c >/dev/null 2>&1 ; \
+		then \
+		  echo OK ; $(RM) t.c ; \
+		else \
+		  $(MV) t.c scan.ERR ; \
+		  echo FAILED ; \
+		  echo "Suggest diff'ing error log in scan.ERR with " \
+		       "distributed scan.c" ; \
+		fi
+
+$(TARGET):	$(OFILES) $(SKEL) $(LIBZ_BIN)/libz.a $(LIBZLEX_BIN)/libzlex.a
+		$(CC) $(LDFLAGS) $(OFILES) $(ZLIBS) $(XLIBS)  -o $@ 
+
+$(SKEL) outfns.h: $(SKEL)m4 \
+		  $(LIBZLEX_SRC)/libzlex.h $(LIBZLEX_SRC)/libzlexs.h
+		$(GM4) -I$(srcdir) $(srcdir)/$(SKEL)m4 >$(srcdir)/$(SKEL)
+
+mkopttab:	mkopttab.o
+		$(CC) $(LDFLAGS) mkopttab.o $(ZLIBS) $(XLIBS)  -o $@ 
+
+opttab.c:	mkopttab
+		./mkopttab >$@
+
+mkoptinf:	mkoptinf.o
+		$(CC) $(LDFLAGS) mkoptinf.o $(ZLIBS) $(XLIBS)  -o $@ 
+
+opttab.texi:	mkoptinf
+		./mkoptinf >$@
+
+#CLEANING TARGETS
+
+#Remove any garbage.
+clean:		FORCE
+		$(RM) *.o *~ core t.* t t[0-9]* *.bak lex.yy.c *.tmp tmp.* \
+		      *.output 
+
+#Remove all files not in distribution.
+distclean:	clean FORCE
+		$(RM) $(TARGET) Makefile makefile
+
+
+#Remove all non-source files.  May need special tools to rebuild.
+maintainer-clean: 	distclean FORCE
+		$(RM) $(NON_SRC_FILES)
+
+FORCE:
+
+
+Makefile.in:	Makefile.m4 DEPEND FORCE
+		$(MAKE_MF_IN)
+
+#Dependency generation.
+#Make dependencies to insert into Makefile.in.
+DEPEND:		$(CFILES) $(HFILES)
+		echo "#Automatically generated dependencies." >$(srcdir)/DEPEND
+		$(DEPEND_CMD) $(CFILES) >>$(srcdir)/DEPEND
+
+
+
+dist:		$(SKEL) opttab.texi
+
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+
+#All the object files depend on config.h.  Not put into automatic
+#dependencies as we don't know the directory for config.h till build-time.
+$(OFILES):	$(builddir)/config.h
+
+
+scan.c:		scan.l $(SKEL)
+parse.c:	parse.y
+parse.h:	parse.y
+
+#Force recompilation of datetime.c for each make.
+datetime.o:	.FORCE
+
+.FORCE:
+
+
+#Automatically generated dependencies.
+chrclass.o: chrclass.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h comptab.h files.h options.h \
+ outprms.h outvec.h scan.h ../../libz/area.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/freelist.h ../../libz/ids.h \
+ ../../libz/memalloc.h
+codescan.o: codescan.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h codescan.h dfa.h files.h \
+ options.h patterns.h scan.h sklnames.h ../../libz/area.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/memalloc.h
+comptab.o: comptab.c comptab.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/memalloc.h ../../libz/error.h \
+ ../../libz/errorz.h
+datetime.o: datetime.c datetime.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+dfa.o: dfa.c chrclass.h port.h ../../libz/ccport.h ../../libz/osport.h \
+ ../../libz/iset.h codescan.h dfa.h files.h options.h outdfa.h \
+ outvec.h patterns.h scan.h sklnames.h ../../libz/area.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/memalloc.h
+main.o: main.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h codescan.h datetime.h dfa.h \
+ files.h main.h options.h outdfa.h outfns.h patterns.h scan.h zparse.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/ids.h \
+ ../../libz/memalloc.h ../../libz/zutil.h
+mkoptinf.o: mkoptinf.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c optcheck.c
+mkopttab.o: mkopttab.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c optcheck.c
+optcheck.o: optcheck.c
+opttab0.o: opttab0.c ../../libz/parseopt.h ../../libz/ccport.h \
+ optcheck.c
+options.o: options.c main.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h options.h ../../libz/error.c ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h \
+ ../../libz/parseopt.h ../../libz/zutil.h optcheck.c opttab.c
+outdfa.o: outdfa.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h codescan.h comptab.h dfa.h \
+ files.h options.h outdfa.h outvec.h patterns.h sklnames.h outprms.h \
+ ../../libz/memalloc.h ../../libz/zutil.h
+outvec.o: outvec.c outvec.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+patterns.o: patterns.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h dfa.h files.h main.h options.h \
+ outvec.h patterns.h scan.h sklnames.h ../../libz/area.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/ids.h \
+ ../../libz/memalloc.h
+opttab.o: opttab.c
+parse.o: parse.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h options.h patterns.h scan.h \
+ zparse.h ../../libz/area.h ../../libz/error.h ../../libz/errorz.h
+scan.o: scan.c files.h port.h ../../libz/ccport.h ../../libz/osport.h \
+ scan.h ../../libz/area.h ../../libz/error.h ../../libz/errorz.h \
+ ../../libz/ids.h ../../libz/memalloc.h ../../libz/strspace.h \
+ ../../libz/textid.h ../../libz/zutil.h options.h patterns.h \
+ chrclass.h ../../libz/iset.h parse.h
+
+

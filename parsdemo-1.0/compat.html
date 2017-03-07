@@ -1,0 +1,103 @@
+<HTML><HEAD>
+<TITLE>ParsDemo Applet: Platform Compatibility</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>ParsDemo Applet: Platform Compatibility</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/07/03 01:26:55 umrigar"
+</FONT>
+
+<P> Java still appears to be short of its goal of being <EM>write-once, run
+anywhere</EM>.  This note documents observed incompatibilities for different
+browser/platform combinations:
+<P>
+<CENTER>
+<TABLE ALIGN=CENTER BORDER>
+
+<TR ALIGN=CENTER>
+<TH ALIGN=CENTER>Browser</TH>
+<TH ALIGN=CENTER>Platform</TH>
+<TH ALIGN=CENTER>Behavior</TH>
+</TR>
+
+
+<TR ALIGN=LEFT>
+<TD>netscape 3.0x</TD>
+<TD>linux</TD>
+<TD>ok</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>netscape 3.0x</TD>
+<TD>solaris</TD>
+<TD>ok</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>netscape 3.0x</TD>
+<TD>win95</TD>
+<TD>ok</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>netscape [34].0x</TD>
+<TD>windows NT 4.0</TD>
+<TD>no frame update; no highlighting of rec-descent program; incorrect
+colors</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>explorer 4.0</TD>
+<TD>windows NT 4.0</TD>
+<TD>no frame update; scrollbars broken but usable (as in many Microsoft
+products)</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>hotjava 1.0</TD>
+<TD>any</TD>
+<TD>scrollbars seriously broken</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>java 1.1.1 runtime</TD>
+<TD>linux,<BR> solaris,<BR> windows NT 4.0 </TD>
+<TD>scrollbars seriously broken</TD>
+</TR>
+
+<TR ALIGN=LEFT>
+<TD>any</TD>
+<TD>mac</TD>
+<TD>was told that it wouldn't work</TD>
+</TR>
+
+<CAPTION>
+<B>ParsDemo Incompatibilities</B>
+</CAPTION>
+
+
+</TABLE>
+</CENTER>
+
+<P> My apparent inability to get scrollbars to work under any sort of Java
+1.1 runtime intrigues me.  Interestingly enough, running Sun's HotJava on
+the
+<A
+HREF="http://www.javasoft.com/docs/books/tutorial/ui/components/scrollbar.html">
+Scrollbar example</A> in Sun's Java tutorial results in the same problem.  I
+have attempted to <A HREF="scrollbar_bug.txt">report</A> this problem to
+both the advanced-java list as well as Sun, but have not heard from anyone
+so far.
+
+</CENTER>
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+</BODY>
+
+</HTML>

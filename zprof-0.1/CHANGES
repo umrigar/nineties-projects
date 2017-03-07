@@ -1,0 +1,29 @@
+7/28/97:
+
+version 0.1:
+
+    + Added zprofDebug target to Makefile to make it easy to generate
+      demos for zydebug.
+
+    + Removed multiple-files on command-line.  Added a --output option 
+      to allow the user to name the output C file.
+
+    + 'libz' library changed so that only necessary modules are
+      distributed.
+
+    + New 'hashtab' module added to 'libz'; 'textid' module 
+      changed to use it.
+
+    + Couple of bug fixes to 'libz'.  Both bugs caused by
+      side-effects in function calls being dependent on the order
+      of evaluation of the arguments.  Unfortunately, *there*
+      *may* *be* *others*.
+
+    + 'zprof' code changed to use new 'hashtab' module.  Otherwise,
+      no change to 'zprof' code.
+
+    + This file created and added to distribution.
+
+7/1/97:	
+version 0.0:
+

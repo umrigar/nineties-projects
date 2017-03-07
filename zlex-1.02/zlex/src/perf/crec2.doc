@@ -1,0 +1,2 @@
+crec2:	A C-scanner which simply RECOGNIZES tokens; it uses input()
+	for processing comments.

@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1 (Feb 5, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>An Example</TITLE>
+<META NAME="description" CONTENT="An Example">
+<META NAME="keywords" CONTENT="sigplan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="sigplan.css">
+</HEAD>
+<BODY LANG="EN">
+ <A NAME="tex2html56" HREF="node5.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html54" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html48" HREF="node3.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html57" HREF="node5.html">Analysis of the Method</A>
+<B>Up:</B> <A NAME="tex2html55" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html49" HREF="node3.html">But is it ?</A>
+<BR> <P>
+<H1><A NAME="SECTION00040000000000000000">An Example</A></H1>
+<P>
+<A NAME="SecExample">&#160;</A>
+<P>
+Using G++, it was possible to implement a general dimensional
+analysis package <TT>Dim.h</TT> which incorporates the ideas
+discussed in section&nbsp;<A HREF="node2.html#SecBasic">2</A>.  Some of the capabilities of
+this package are illustrated by the following program which
+uses C++ to simulate a block sliding down a surface.  The
+program is based on similar examples presented in
+[<A HREF="node9.html#cmelik88">CG88</A>] and [<A HREF="node9.html#hilfinger88">Hil88</A>].
+<P>
+<P><A NAME="89">&#160;</A><A NAME="FigDec">&#160;</A> <IMG WIDTH=300 HEIGHT=437 ALIGN=BOTTOM ALT="figure87" SRC="img1.gif"  > <BR>
+<STRONG>Figure 1:</STRONG> Program Declarations<BR>
+<P>
+<P>
+Figure <A HREF="node4.html#FigDec">1</A> shows the declarations in the program.  Lines
+5 and 6 give definitions used by the package: <TT>N_DIM</TT> is the
+number of dimensions, and <TT>DIM_VAL_TYPE</TT> describes the
+default underlying type for dimensioned quantities.  The package
+is included on line 9, and defines several macros which are used
+subsequently. On lines 17-20 we use one of those macros to
+declare units along each dimensional axis with conversion factors
+(to the chosen reference units) and print-names.  From the given
+conversion factors, we can deduce that <TT>Gm</TT> is the chosen
+reference unit along <TT>MASS_DIM</TT>, <TT>Cm</TT> along <TT>LENGTH_DIM</TT>
+and <TT>Sec</TT> along <TT>TIME_DIM</TT>.  Using <TT>UNIT(</TT><EM>
+Name</EM><TT>,</TT>  <IMG WIDTH=18 HEIGHT=2 ALIGN=BOTTOM ALT="tex2html_wrap_inline290" SRC="img2.gif"  >  <TT>)</TT> also creates a scaling object called
+<EM>Name</EM> and a units object called <EM>Name</EM>_.  Specifically,
+the given declarations create scaling objects <TT>Gm</TT>, <TT>Cm</TT>,
+<TT>Feet</TT> and <TT>Sec</TT> and unit objects <TT>Gm_</TT>, <TT>Cm_</TT>,
+<TT>Feet_</TT> and <TT>Sec_</TT>.  The use of these objects will be
+described later.  Finally we <TT>typedef</TT> mnemonic names for
+several dimensioned types.
+<P>
+Figure <A HREF="node4.html#FigCode">2</A> shows the program code.  We first define an
+auxiliary function <TT>height()</TT>.  Note that the multiplication
+of a dimensioned length by the scalar <TT>0.5</TT> is accepted by the
+system.  In the main program which follows, we first declare
+dimensioned constants and variables on lines 6-14.  Note that the
+scaling objects <TT>Gm</TT>, <TT>Cm</TT> and <TT>Sec</TT> created by the
+<TT>UNIT</TT> macro are used to create dimensioned literals in a very
+natural way.  The compiler will signal an error if the dimension
+of the initializing expression conflicts with the dimension of the
+variable being declared.
+<P>
+On lines 16-20 we output prompts and input dimensioned
+quantities.  Scaling objects are used in a manner similar to
+manipulators [<A HREF="node9.html#stroustrup91">Str91</A>] to allow dimensional validation
+of the input statements at compile time.  These input manipulators
+also serve to scale the input values from the specified units to
+their chosen reference units.
+<P>
+<P><A NAME="126">&#160;</A><A NAME="FigCode">&#160;</A> <IMG WIDTH=371 HEIGHT=593 ALIGN=BOTTOM ALT="figure124" SRC="img3.gif"  > <BR>
+<STRONG>Figure 2:</STRONG> Program Code<BR>
+<P>
+<P>
+Lines 22-29 illustrate the very natural expressions possible due
+to operator overloading.  If any of the expressions is
+dimensionally inconsistent, a compile-time error occurs.  Line 25
+uses the unary <TT>+</TT> operator to extract the actual value of a
+(dimensionless) <TT>DIM</TT> expression (as in [<A HREF="node9.html#hilfinger88">Hil88</A>]).
+Lines 30-34 illustrate the use of the unit objects (created by
+the <TT>UNIT</TT> macro) as output manipulators to output the
+print-names of the units for a quantity along with its magnitude.
+The unit objects in the output statements also perform automatic
+scaling of the length dimension from its internal representation
+in <TT>Cm</TT> to its output in <TT>Feet</TT>.  Once again, a
+compile-time error results if the dimension of the constructed
+unit object does not match the dimension of the quantity being
+output.
+<P>
+The implementation and capabilities of the <TT>Dim.h</TT> package
+will be more fully described elsewhere.  For now, we simply list
+some of its capabilities:
+<P>
+<UL><LI> Allows up to 10 dimensions.<LI> Partial support for using arbitrary underlying types for
+dimensioned quantities.<A NAME="tex2html4" HREF="footnode.html#137"><IMG  ALIGN=BOTTOM ALT="gif" SRC="http://localhost/~zdu/icons/foot_motif.gif"></A>  Hence it is possible to have
+dimensioned <TT>struct</TT>s (which may be convenient for
+representing a vector using polar coordinates).<LI> Dimensional checking (and any consequent overhead) can be
+turned off completely by defining a single preprocessor symbol
+(see the comment on line 7 in Figure <A HREF="node4.html#FigDec">1</A>).  With this
+option, most template classes and the entire <TT>DIM</TT> class
+disappear.  Operations on dimensioned quantities operate directly
+on the underlying type.<LI> The use of arbitrary rationals as dimensional exponents.
+Dimensional expressions are allowed to be raised to <B>constant</B>
+rational powers, albeit with a relatively clumsy
+syntax.<A NAME="tex2html5" HREF="footnode.html#171"><IMG  ALIGN=BOTTOM ALT="gif" SRC="http://localhost/~zdu/icons/foot_motif.gif"></A>
+<P>
+</UL><HR><A NAME="tex2html56" HREF="node5.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html54" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html48" HREF="node3.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html57" HREF="node5.html">Analysis of the Method</A>
+<B>Up:</B> <A NAME="tex2html55" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html49" HREF="node3.html">But is it ?</A>
+<P><ADDRESS>
+<I>zerksis umrigar (zdu@acm.org) <BR>
+Fri Aug  8 15:41:40 EDT 1997</I>
+</ADDRESS>
+</BODY>
+</HTML>

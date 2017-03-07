@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1 (Feb 5, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Analysis of the Method</TITLE>
+<META NAME="description" CONTENT="Analysis of the Method">
+<META NAME="keywords" CONTENT="sigplan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="sigplan.css">
+</HEAD>
+<BODY LANG="EN">
+ <A NAME="tex2html66" HREF="node6.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html64" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html58" HREF="node4.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html67" HREF="node6.html">Conclusions</A>
+<B>Up:</B> <A NAME="tex2html65" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html59" HREF="node4.html">An Example</A>
+<BR> <P>
+<H1><A NAME="SECTION00050000000000000000">Analysis of the Method</A></H1>
+<P>
+The advantages of the proposed method are as follows:
+<UL><LI> Full analysis of dimensional correctness <B>before</B> run-time.<LI> No run-time space overhead for dimensional data, unlike the
+method proposed in [<A HREF="node9.html#cmelik88">CG88</A>].  Space is used for storing
+conversion factors and print-names, but similar amounts of space
+would be used by any method which converted between units or
+printed them out.<LI> Once compiler technology for processing inline template
+functions is sufficiently developed, there should not be any
+substantial time or code-space overhead.  This follows from the
+statement on pg. 342 of the ARM that the C++ template mechanism
+``allows close to optimal run-time performance through macro
+expansion of definitions and inlining of function calls.''<LI> The method almost fits into an existing language and is
+accepted by an existing compiler.  This is in contrast to methods
+like those in [<A HREF="node9.html#gehani77">Geh77</A>] or [<A HREF="node9.html#house83">Hou83</A>] which require
+changes to existing languages.<LI> Higher programmer productivity, since programmers need not
+spend their time tracking down dimensional errors at run-time.
+<P>
+</UL>
+<P>
+Some of the disadvantages of the method, along with possible
+solutions are:
+<P>
+<UL><LI> All quantities having a particular dimension use the same
+internal unit. Hence the programmer does not have sufficient
+control over the precision of dimensional quantities, which may
+lead to an accumulation of floating point error.  This may be the
+most serious disadvantage of the method.  It may be possible to
+extend the method to allow multiple reference units along each
+dimension.  In the interim, a possible workaround would be for the
+programmer to assign the same quantity to multiple dimensions
+having internal units of different precision, and manually program
+operations involving these dimensions.<LI> The binary arithmetic operations require that their operands
+be dimensioned quantities with <EM>identical</EM> underlying types.
+This can be inconvenient when dimensioned quantities contain
+multiple underlying types. For example, addition of a dimensioned
+<TT>int</TT> to a dimensioned <TT>double</TT> is not supported.<LI> No direct support for derived units.  However, it is always
+possible for the programmer to include definitions like:
+
+<PRE>#define Newton	(Kg*Meter/(Sec*Sec))
+#define Newton_	(Kg_*Meter_/(Sec_*Sec_))</PRE>
+
+and to provide output functions to handle such derived units.<LI> The set of dimensions required by the program must be known
+at compile-time.<LI> It is not possible to represent relationships between units
+having different origins (like that between the Celsius and
+Fahrenheit temperature scales).  This should not be a problem as
+such situations are relatively uncommon.<LI> An increase in compilation time (by over a factor of 3 for
+the example in section <A HREF="node4.html#SecExample">4</A>).   However, it is still much
+easier for a compiler rather than a human to find errors.<LI> In some C++ environments, a few dimensional errors may not
+be detected until link-time when definitions are generated for
+template functions.  This may be rather inconvenient.<LI> Errors are not reported in terms of dimensional violations,
+but in terms of missing function definitions.  The error messages
+often contain instantiated template arguments and even mangled
+function names.  It may be hard for a programmer to relate an
+error message to a dimensional error.  Tools could be developed
+to convert concrete error messages to more abstract
+dimensional error messages.<LI> Some C++ environments expect help from the programmer in
+determining which template instantiations are required.  The
+package provides the programmer with a macro to declare instances
+of all the (hidden and visible) template classes used by it, but
+the programmer still needs to determine which instances need to be
+declared.<LI> The code produced by the one compiler (G++) known to accept
+the package is currently of poor quality with no inline expansion
+of template functions. Hopefully, this problem should disappear
+over time, for the reasons mentioned above.  In the interim, a
+program should first be compiled with full dimensional checking.
+Once it is free of dimensional errors, it can be recompiled with
+dimensional checking turned off (as discussed in the previous
+section).  However, this recompilation is rather inconvenient and
+some programmers may sometimes choose to omit the first
+compilation step.
+<P>
+</UL><HR><A NAME="tex2html66" HREF="node6.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html64" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html58" HREF="node4.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html67" HREF="node6.html">Conclusions</A>
+<B>Up:</B> <A NAME="tex2html65" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html59" HREF="node4.html">An Example</A>
+<P><ADDRESS>
+<I>zerksis umrigar (zdu@acm.org) <BR>
+Fri Aug  8 15:41:40 EDT 1997</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,5 @@
+#Make dependencies to insert into Makefile.in.
+DEPEND:		$(CFILES) $(HFILES)
+		echo "#Automatically generated dependencies." >$(srcdir)/DEPEND
+		$(DEPEND_CMD) $(CFILES) >>$(srcdir)/DEPEND
+

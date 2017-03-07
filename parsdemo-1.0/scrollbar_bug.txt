@@ -1,0 +1,63 @@
+Scrollbars compiled under 1.02 do not appear to work under a Java
+1.1.1 runtime.  The clearest example of this is to point a 1.1
+browser like HotJava to the ImageScroller example in Sun's Java
+tutorial:
+
+http://java.sun.com:80/docs/books/tutorial/ui/components/scrollbar.html
+
+The displayed image has a large portion of it (bottom right) cut
+off.  If you use a browser with a 1.02 runtime like Netscape 3.0,
+the full image is seen.
+
+I've had similar results using appletviewers 1.1.1 and 1.02.  The
+example given for the Scrollbar class in the Chan & Lee book had
+similar problems (the problems were exacerbated somewhat, as IMHO
+the example is buggy even for 1.02).
+
+Finally, here is a quick test included:
+
+-------------------------- CUT HERE INTO T.java ---------------
+import java.awt.*;
+
+class T extends Frame {
+
+  T() {
+    sb= new Scrollbar(Scrollbar.VERTICAL, 0, 10, 0, 100);
+    add("West", sb);
+  }
+
+  public boolean handleEvent(Event evt) {
+    if (evt.target == sb) {
+      System.out.println(sb.getMinimum() + "/" + sb.getMaximum() 
+			 + ": " + sb.getValue());
+    }
+    return false;
+  }
+
+  private Scrollbar sb;
+
+  public static void main(String args[]) {
+    T t= new T();
+    t.resize(200, 200);
+    t.show();
+    
+  }
+}
+--------------------------- END CUT -----------------------------
+
+As the scrollbar is scrolled, the value increases only up to 90
+under 1.1.1, as opposed to 100 (the getMaximum() value) under
+1.02.
+
+I have had the same results with jdk1.1.1 running under Linux,
+Solaris and Windows NT.
+
+I can modify my program to work under a 1.1.1 runtime, but I 
+can't make the same program work under both a 1.02 runtime and
+a 1.1.1 runtime.
+
+Unless I'm missing something, this appears to be a serious
+undocumented incompatibilty which implies that 1.02 compiled
+programs which use scrollbars will not work correctly under a 1.1
+runtime.
+

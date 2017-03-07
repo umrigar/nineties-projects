@@ -1,0 +1,209 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Table of Contents</TITLE>
+</HEAD>
+<BODY>
+<H1>Zyacc</H1>
+<H2>A Parser-Generator</H2>
+<H2>Edition 1.0, for Zyacc Version 1.</H2>
+<H2>July 1997</H2>
+<H2>Adapted from The Bison Manual</H2>
+<ADDRESS>Zerksis D. Umrigar</ADDRESS>
+<P>
+<UL>
+<LI><A NAME="SEC1" HREF="zyacc_1.html#SEC1">Introduction</A>
+<UL>
+<LI><A NAME="SEC2" HREF="zyacc_1.html#SEC2">Acknowledgements</A>
+<LI><A NAME="SEC3" HREF="zyacc_1.html#SEC3">Zyacc Enhancements</A>
+</UL>
+<LI><A NAME="SEC4" HREF="zyacc_2.html#SEC4">The Concepts of Zyacc</A>
+<UL>
+<LI><A NAME="SEC5" HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>
+<LI><A NAME="SEC6" HREF="zyacc_2.html#SEC6">From Formal Rules to Zyacc Input</A>
+<LI><A NAME="SEC7" HREF="zyacc_2.html#SEC7">Semantic Values</A>
+<LI><A NAME="SEC8" HREF="zyacc_2.html#SEC8">Semantic Actions</A>
+<LI><A NAME="SEC9" HREF="zyacc_2.html#SEC9">Zyacc Output: the Parser File</A>
+<LI><A NAME="SEC10" HREF="zyacc_2.html#SEC10">Stages in Using Zyacc</A>
+<LI><A NAME="SEC11" HREF="zyacc_2.html#SEC11">The Overall Layout of a Zyacc Grammar</A>
+</UL>
+<LI><A NAME="SEC12" HREF="zyacc_3.html#SEC12">Examples</A>
+<UL>
+<LI><A NAME="SEC13" HREF="zyacc_3.html#SEC13">Reverse Polish Notation Calculator</A>
+<UL>
+<LI><A NAME="SEC14" HREF="zyacc_3.html#SEC14">Declarations for <CODE>rpcalc</CODE></A>
+<LI><A NAME="SEC15" HREF="zyacc_3.html#SEC15">Grammar Rules for <CODE>rpcalc</CODE></A>
+<UL>
+<LI><A NAME="SEC16" HREF="zyacc_3.html#SEC16">Explanation of <CODE>input</CODE></A>
+<LI><A NAME="SEC17" HREF="zyacc_3.html#SEC17">Explanation of <CODE>line</CODE></A>
+<LI><A NAME="SEC18" HREF="zyacc_3.html#SEC18">Explanation of <CODE>expr</CODE></A>
+</UL>
+<LI><A NAME="SEC19" HREF="zyacc_3.html#SEC19">The <CODE>rpcalc</CODE> Lexical Analyzer</A>
+<LI><A NAME="SEC20" HREF="zyacc_3.html#SEC20">The Controlling Function</A>
+<LI><A NAME="SEC21" HREF="zyacc_3.html#SEC21">The Error Reporting Routine</A>
+<LI><A NAME="SEC22" HREF="zyacc_3.html#SEC22">Running Zyacc to Make the Parser</A>
+<LI><A NAME="SEC23" HREF="zyacc_3.html#SEC23">Compiling the Parser File</A>
+</UL>
+<LI><A NAME="SEC24" HREF="zyacc_3.html#SEC24">Infix Notation Calculator: <CODE>calc</CODE></A>
+<LI><A NAME="SEC25" HREF="zyacc_3.html#SEC25">Simple Error Recovery</A>
+<LI><A NAME="SEC26" HREF="zyacc_3.html#SEC26">Multi-Function Calculator: <CODE>mfcalc</CODE></A>
+<UL>
+<LI><A NAME="SEC27" HREF="zyacc_3.html#SEC27">Declarations for <CODE>mfcalc</CODE></A>
+<LI><A NAME="SEC28" HREF="zyacc_3.html#SEC28">Grammar Rules for <CODE>mfcalc</CODE></A>
+<LI><A NAME="SEC29" HREF="zyacc_3.html#SEC29">The <CODE>mfcalc</CODE> Symbol Table</A>
+<LI><A NAME="SEC30" HREF="zyacc_3.html#SEC30">The <CODE>mfcalc</CODE> Scanner</A>
+<LI><A NAME="SEC31" HREF="zyacc_3.html#SEC31">The <CODE>mfcalc</CODE> String Space</A>
+<LI><A NAME="SEC32" HREF="zyacc_3.html#SEC32">Why a Separate String Space</A>
+</UL>
+<LI><A NAME="SEC33" HREF="zyacc_3.html#SEC33">The Multi Function Calculator Using a Sugared Syntax</A>
+<LI><A NAME="SEC34" HREF="zyacc_3.html#SEC34">A Multi Function Calculator Which Evaluates Polynomials</A>
+<LI><A NAME="SEC35" HREF="zyacc_3.html#SEC35">A Calculator Which Omits Some Parentheses</A>
+<LI><A NAME="SEC36" HREF="zyacc_3.html#SEC36">Exercises</A>
+</UL>
+<LI><A NAME="SEC37" HREF="zyacc_4.html#SEC37">Zyacc Grammar Files</A>
+<UL>
+<LI><A NAME="SEC38" HREF="zyacc_4.html#SEC38">Outline of a Zyacc Grammar</A>
+<UL>
+<LI><A NAME="SEC39" HREF="zyacc_4.html#SEC39">The C Declarations Section</A>
+<LI><A NAME="SEC40" HREF="zyacc_4.html#SEC40">The Zyacc Declarations Section</A>
+<LI><A NAME="SEC41" HREF="zyacc_4.html#SEC41">The Grammar Rules Section</A>
+<LI><A NAME="SEC42" HREF="zyacc_4.html#SEC42">The Additional C Code Section</A>
+</UL>
+<LI><A NAME="SEC43" HREF="zyacc_4.html#SEC43">Symbols, Terminal and Nonterminal</A>
+<LI><A NAME="SEC44" HREF="zyacc_4.html#SEC44">Syntax of Grammar Rules</A>
+<LI><A NAME="SEC45" HREF="zyacc_4.html#SEC45">Recursive Rules</A>
+<LI><A NAME="SEC46" HREF="zyacc_4.html#SEC46">Defining Language Semantics</A>
+<UL>
+<LI><A NAME="SEC47" HREF="zyacc_4.html#SEC47">Data Types of Semantic Values</A>
+<LI><A NAME="SEC48" HREF="zyacc_4.html#SEC48">More Than One Value Type</A>
+<LI><A NAME="SEC49" HREF="zyacc_4.html#SEC49">Actions</A>
+<LI><A NAME="SEC50" HREF="zyacc_4.html#SEC50">Data Types of Values in Actions</A>
+<LI><A NAME="SEC51" HREF="zyacc_4.html#SEC51">Actions in Mid-Rule</A>
+<LI><A NAME="SEC52" HREF="zyacc_4.html#SEC52">Named Attributes</A>
+<UL>
+<LI><A NAME="SEC53" HREF="zyacc_4.html#SEC53">Named Terminal Attributes</A>
+<LI><A NAME="SEC54" HREF="zyacc_4.html#SEC54">Named Nonterminal Attributes</A>
+</UL>
+<LI><A NAME="SEC55" HREF="zyacc_4.html#SEC55">Inherited Attributes</A>
+<UL>
+<LI><A NAME="SEC56" HREF="zyacc_4.html#SEC56">Inherited Attributes Notation</A>
+<LI><A NAME="SEC57" HREF="zyacc_4.html#SEC57">Attribute Flow Restrictions</A>
+<LI><A NAME="SEC58" HREF="zyacc_4.html#SEC58">Attribute Conflicts</A>
+</UL>
+<LI><A NAME="SEC59" HREF="zyacc_4.html#SEC59">Semantic Tests</A>
+<UL>
+<LI><A NAME="SEC60" HREF="zyacc_4.html#SEC60">A Prototypical Example</A>
+<LI><A NAME="SEC61" HREF="zyacc_4.html#SEC61">Semantic Test Details</A>
+<LI><A NAME="SEC62" HREF="zyacc_4.html#SEC62">Semantic Test Example</A>
+</UL>
+</UL>
+<LI><A NAME="SEC63" HREF="zyacc_4.html#SEC63">Zyacc Declarations</A>
+<UL>
+<LI><A NAME="SEC64" HREF="zyacc_4.html#SEC64">Token Type Names</A>
+<LI><A NAME="SEC65" HREF="zyacc_4.html#SEC65">Operator Precedence</A>
+<LI><A NAME="SEC66" HREF="zyacc_4.html#SEC66">Multi-Character Literal Tokens</A>
+<LI><A NAME="SEC67" HREF="zyacc_4.html#SEC67">The Collection of Value Types</A>
+<LI><A NAME="SEC68" HREF="zyacc_4.html#SEC68">Nonterminal Symbols</A>
+<LI><A NAME="SEC69" HREF="zyacc_4.html#SEC69">Suppressing Conflict Warnings</A>
+<LI><A NAME="SEC70" HREF="zyacc_4.html#SEC70">The Start-Symbol</A>
+<LI><A NAME="SEC71" HREF="zyacc_4.html#SEC71">Multiple Start Symbols</A>
+<LI><A NAME="SEC72" HREF="zyacc_4.html#SEC72">A Pure (Reentrant) Parser</A>
+<LI><A NAME="SEC73" HREF="zyacc_4.html#SEC73">Option Declaration</A>
+<LI><A NAME="SEC74" HREF="zyacc_4.html#SEC74">Specifying the Lookahead</A>
+<LI><A NAME="SEC75" HREF="zyacc_4.html#SEC75">Zyacc Declaration Summary</A>
+</UL>
+<LI><A NAME="SEC76" HREF="zyacc_4.html#SEC76">Multiple Parsers in the Same Program</A>
+</UL>
+<LI><A NAME="SEC77" HREF="zyacc_5.html#SEC77">Parser C-Language Interface</A>
+<UL>
+<LI><A NAME="SEC78" HREF="zyacc_5.html#SEC78">The Parser Function <CODE>yyparse</CODE></A>
+<LI><A NAME="SEC79" HREF="zyacc_5.html#SEC79">The Lexical Analyzer Function <CODE>yylex</CODE></A>
+<UL>
+<LI><A NAME="SEC80" HREF="zyacc_5.html#SEC80">Calling Convention for <CODE>yylex</CODE></A>
+<LI><A NAME="SEC81" HREF="zyacc_5.html#SEC81">Semantic Values of Tokens</A>
+<LI><A NAME="SEC82" HREF="zyacc_5.html#SEC82">Textual Positions of Tokens</A>
+<LI><A NAME="SEC83" HREF="zyacc_5.html#SEC83">Calling Conventions for Pure Parsers</A>
+</UL>
+<LI><A NAME="SEC84" HREF="zyacc_5.html#SEC84">The Error Reporting Function <CODE>yyerror</CODE></A>
+<LI><A NAME="SEC85" HREF="zyacc_5.html#SEC85">Special Features for Use in Actions</A>
+</UL>
+<LI><A NAME="SEC86" HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>
+<UL>
+<LI><A NAME="SEC87" HREF="zyacc_6.html#SEC87">Look-Ahead Tokens</A>
+<LI><A NAME="SEC88" HREF="zyacc_6.html#SEC88">Shift/Reduce Conflicts</A>
+<LI><A NAME="SEC89" HREF="zyacc_6.html#SEC89">Operator Precedence</A>
+<UL>
+<LI><A NAME="SEC90" HREF="zyacc_6.html#SEC90">When Precedence is Needed</A>
+<LI><A NAME="SEC91" HREF="zyacc_6.html#SEC91">Specifying Operator Precedence</A>
+<LI><A NAME="SEC92" HREF="zyacc_6.html#SEC92">Precedence Examples</A>
+<LI><A NAME="SEC93" HREF="zyacc_6.html#SEC93">How Precedence Works</A>
+</UL>
+<LI><A NAME="SEC94" HREF="zyacc_6.html#SEC94">Context-Dependent Precedence</A>
+<LI><A NAME="SEC95" HREF="zyacc_6.html#SEC95">Parser States</A>
+<LI><A NAME="SEC96" HREF="zyacc_6.html#SEC96">Reduce/Reduce Conflicts</A>
+<LI><A NAME="SEC97" HREF="zyacc_6.html#SEC97">Mysterious Reduce/Reduce Conflicts</A>
+<LI><A NAME="SEC98" HREF="zyacc_6.html#SEC98">Stack Overflow, and How to Avoid It</A>
+</UL>
+<LI><A NAME="SEC99" HREF="zyacc_7.html#SEC99">Error Recovery</A>
+<LI><A NAME="SEC100" HREF="zyacc_8.html#SEC100">Handling Context Dependencies</A>
+<UL>
+<LI><A NAME="SEC101" HREF="zyacc_8.html#SEC101">Semantic Info in Token Types</A>
+<LI><A NAME="SEC102" HREF="zyacc_8.html#SEC102">Lexical Tie-ins</A>
+<LI><A NAME="SEC103" HREF="zyacc_8.html#SEC103">Lexical Tie-ins and Error Recovery</A>
+</UL>
+<LI><A NAME="SEC104" HREF="zyacc_9.html#SEC104">Debugging Your Parser</A>
+<UL>
+<LI><A NAME="SEC105" HREF="zyacc_9.html#SEC105">Building Debugging Parsers</A>
+<UL>
+<LI><A NAME="SEC106" HREF="zyacc_9.html#SEC106">Compiling Debugging Parsers</A>
+<LI><A NAME="SEC107" HREF="zyacc_9.html#SEC107">Linking Debugging Parsers</A>
+<LI><A NAME="SEC108" HREF="zyacc_9.html#SEC108">Printing Token Semantics</A>
+</UL>
+<LI><A NAME="SEC109" HREF="zyacc_9.html#SEC109">Environmental Variables</A>
+<LI><A NAME="SEC110" HREF="zyacc_9.html#SEC110">Debugging Parsers Using a Textual Interface</A>
+<UL>
+<LI><A NAME="SEC111" HREF="zyacc_9.html#SEC111">Starting a Single Process Textual Debugger</A>
+<LI><A NAME="SEC112" HREF="zyacc_9.html#SEC112">Starting a Multiple Process Textual Debugger</A>
+<LI><A NAME="SEC113" HREF="zyacc_9.html#SEC113">Textual Debugger Commands</A>
+</UL>
+<LI><A NAME="SEC114" HREF="zyacc_9.html#SEC114">Debugging Parsers Using a Graphical User Interface</A>
+<UL>
+<LI><A NAME="SEC115" HREF="zyacc_9.html#SEC115">Starting a GUI Debugger as a Java Application</A>
+<LI><A NAME="SEC116" HREF="zyacc_9.html#SEC116">Starting a GUI Debugger as a Java Applet</A>
+<LI><A NAME="SEC117" HREF="zyacc_9.html#SEC117">Using the Debugger GUI</A>
+</UL>
+<LI><A NAME="SEC118" HREF="zyacc_9.html#SEC118">Tradeoffs between Debugging Approaches</A>
+</UL>
+<LI><A NAME="SEC119" HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>
+<UL>
+<LI><A NAME="SEC120" HREF="zyacc_10.html#SEC120">Option Conventions</A>
+<LI><A NAME="SEC121" HREF="zyacc_10.html#SEC121">Option Sources</A>
+<LI><A NAME="SEC122" HREF="zyacc_10.html#SEC122">Zyacc Options</A>
+<LI><A NAME="SEC123" HREF="zyacc_10.html#SEC123">Data Search List</A>
+</UL>
+<LI><A NAME="SEC124" HREF="zyacc_11.html#SEC124">Known Incompatibilities with Bison</A>
+<LI><A NAME="SEC125" HREF="zyacc_12.html#SEC125">Bugs and Deficiencies</A>
+<UL>
+<LI><A NAME="SEC126" HREF="zyacc_12.html#SEC126">Suspicions</A>
+<LI><A NAME="SEC127" HREF="zyacc_12.html#SEC127">Bug Reports</A>
+</UL>
+<LI><A NAME="SEC128" HREF="zyacc_13.html#SEC128">Zyacc Symbols</A>
+<LI><A NAME="SEC129" HREF="zyacc_14.html#SEC129">Glossary</A>
+<LI><A NAME="SEC130" HREF="zyacc_15.html#SEC130">Conditions</A>
+<UL>
+<LI><A NAME="SEC131" HREF="zyacc_15.html#SEC131">Conditions for Using Bison</A>
+<LI><A NAME="SEC132" HREF="zyacc_15.html#SEC132">GNU GENERAL PUBLIC LICENSE</A>
+<LI><A NAME="SEC133" HREF="zyacc_15.html#SEC133">Preamble</A>
+<LI><A NAME="SEC134" HREF="zyacc_15.html#SEC134">TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION</A>
+<LI><A NAME="SEC135" HREF="zyacc_15.html#SEC135">How to Apply These Terms to Your New Programs</A>
+</UL>
+<LI><A NAME="SEC136" HREF="zyacc_16.html#SEC136">Index</A>
+</UL>
+<HR>
+This document was generated using the
+<A HREF="http://asis01.cern.ch/infohtml/texi2html.html">texi2html</A>
+translator version 1.31.
+</BODY>
+</HTML>

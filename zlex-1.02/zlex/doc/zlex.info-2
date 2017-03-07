@@ -1,0 +1,1269 @@
+This is Info file zlex.info, produced by Makeinfo-1.64 from the input
+file zlex.texi.
+
+
+File: zlex.info,  Node: Scanner State,  Prev: Scope of Names,  Up: C Interface Conventions
+
+Passing the Scanner State to Zlex Library Routines
+==================================================
+
+   Many of the Zlex library routines need to know the current state of
+private scanner variables to perform their tasks.  This need is met by
+passing the state via an opaque pointer to `void', `typedef''d as a
+`YYDataHandle'.  This pointer can be found in a variable with default
+name `yydataP' having `extern' linkage.  Like all other variable names,
+the name of this variable can be changed to an arbitrary name by
+defining the macro `YY_DATA_P' to the new name.  Alternatively, the
+prefix used for the name can be changed by using the `--prefix' option
+(*note Variable Names::.).
+
+   Since this variable has external linkage, it can be accessed from
+files other than the generated scanner file and passed as a handle to
+Zlex library routines.
+
+
+File: zlex.info,  Node: Patterns,  Next: The Current Lexeme,  Prev: C Interface Conventions,  Up: Top
+
+Patterns
+********
+
+   The pattern language used for expressing the syntax of tokens is
+essentially the language of regular expressions, extended with
+constructs which allow context-dependent matching.
+
+   Note that we distinguish between *patterns* and *regular
+expressions*.  Patterns are regular expressions augmented with
+context-sensitive operators.  All regular expressions are patterns but
+not all patterns are regular expressions.
+
+* Menu:
+
+* Meta-Characters::             Special Zlex patterns characters.
+* Regular Expressions::         Expressions describing lexical syntax.
+* Context Operators::           Making matching sensitive to context.
+* End of File Patterns::        Patterns which match end-of-file.
+* Intra-Token Patterns::        Patterns which can be triggered
+                                *within* a token.
+* Whitespace Within Patterns::  Rules for whitespace within patterns.
+
+
+File: zlex.info,  Node: Meta-Characters,  Next: Regular Expressions,  Prev: Patterns,  Up: Patterns
+
+Meta-Characters
+===============
+
+   In patterns, most characters usually stand for themselves: i.e. the
+occurrence of a particular character in a pattern specifies that that
+particular character should be matched.  However some characters do not
+stand for themselves but are special meta-characters which tell Zlex
+how to combine patterns.  The meta-characters used by Zlex are the
+following:
+
+             \ " ( ) { } < > . ? | + * / ^ $ , -
+
+   If a pattern is required to match any of the above characters, then
+the character can be quoted by preceeding it by a backslash `\'.  If a
+pattern is required to match a backslash, then the backslash itself can
+be quoted by using `\\'.  Any character other than a `\' or `"' can
+also be quoted by simply enclosing it within `"' delimiters.
+
+   There are some contexts within which the above set of
+meta-characters is reduced.  Since it can be difficult to remember
+exactly which characters are special within which contexts, it is
+advisable for the Zlex programmer to quote all non-alphanumeric
+characters which are to be matched literally.
+
+
+File: zlex.info,  Node: Regular Expressions,  Next: Context Operators,  Prev: Meta-Characters,  Up: Patterns
+
+Regular Expressions
+===================
+
+   Regular expressions are a concise notation for specifying the syntax
+of tokens.  Regular expression syntax uses the following constructs and
+operators.
+
+* Menu:
+
+* Single Characters::           Characters which stand for themselves.
+* Escape Sequences::            How to escape Zlex's meta-characters and
+                                specify non-printing characters.
+* Character Classes::           Specify a set of characters.
+* Named Character Classes::     Specify a set of characters in a
+                                portable way.
+* Any Character Except Newline::  A meta-character which matches any
+                                character except a newline.
+* String Quoting::              How to quote characters using `"'.
+* Regular Expression Macros::   Using macros for regular expressions.
+* Optional Regular Expression::  Specifying that a match of a regular
+                                expression is optional.
+* Zero or More Repetitions::    Specifying that a regular expression may
+                                be matched 0 or more times.
+* One or More Repetitions::     Specifying that a regular expression may
+                                be matched 1 or more times.
+* Counted Repetition::          Specifying that a regular expression may
+                                be a certain number of times.
+* Concatenation::               Using juxtaposition to specify the
+                                concatenation of the matches of multiple
+                                regular expressions.
+* Union ::                      An operator which specifies the union of
+                                two regular expressions.
+* Operator Precedence::         The precedence of the different regular
+                                expression operators.
+* Grouping Regular Expression::  Using parentheses to override the
+                                default precedence.
+* Operator Independence::       Some operators can be defined in terms
+                                of others.
+* Regular Expression Examples::  Examples of regular expressions to
+                                describe the syntax of comments in
+                                various programming languages.
+
+
+File: zlex.info,  Node: Single Characters,  Next: Escape Sequences,  Prev: Regular Expressions,  Up: Regular Expressions
+
+Single Characters
+-----------------
+
+   Any character which is not a meta-character is a regular expression
+which matches itself.
+
+Examples
+........
+
+     The regular expression `A' matches the character `A'.
+
+     The regular expression `#' matches the character `#'.  However,
+     since `#' is a non-alphanumeric character it is advisable to quote
+     it by escaping it using a `\' as `\#' or by enclosing it within
+     `"' delimiters as `"#"'.
+
+     `+' is *not* a regular expression since `+' is a meta-character.
+
+
+File: zlex.info,  Node: Escape Sequences,  Next: Character Classes,  Prev: Single Characters,  Up: Regular Expressions
+
+Escape Sequences
+----------------
+
+   The backslash character can be used to quote characters and specify
+character escapes in a manner similar to C.  Specifically:
+
+   * `\a', `\b', `\f', `\n', `\r', `\t', `\v' are regular expressions
+     which match the characters BEL (bell), BS (backspace), FF
+     (form-feed), NL (newline), CR (carriage-return), TAB (tab) and VT
+     (vertical-tab) respectively.
+
+   * `\' followed by upto 3 octal digits is a regular expression which
+     matches the character with character code equal to the octal
+     number.
+
+   * `\x' followed by a hexadecimal number is a regular expression which
+     matches the character with character code equal to the hexadecimal
+     number.
+
+   * `\' followed by any other character (except newline) is a regular
+     expression which matches that character.
+
+Examples
+........
+
+     `\x81' matches the character whose decimal character code is 129.
+
+     `\400' should match the character whose decimal character code is
+     256.  However, this is invalid since Zlex currently only supports
+     character codes in the range 0-255.
+
+
+File: zlex.info,  Node: Character Classes,  Next: Named Character Classes,  Prev: Escape Sequences,  Up: Regular Expressions
+
+Character Classes
+-----------------
+
+   A character class is a regular expression denoting a set of
+characters which will match any single character in the set.  Character
+classes are specified by listing the members of the set enclosed within
+`[' and `]'. It is possible to denote ranges of characters in a
+character class by using `LO-HI', where LO and HI are the first and last
+characters in the range.  A negated character class is a character class
+whose first character is `^' and denotes the complement of the
+character class.  Escape sequences (*note Escape Sequences::.) are
+recognized within a character-class.  The rules for recognizing special
+characters within character-classes are different from those for other
+patterns and are given below:
+
+`\'
+     This is the only character which is special through-out a
+     character class.  It is used to specify escape sequences.  It can
+     be included by quoting it with itself as `\\'.
+
+`^'
+     This is special only at the beginning of a character class
+     (immediately after the `[' signalling the start of the character
+     class).  It signals the start of a negated character class.
+
+`-'
+     This is special and used to denote character ranges when used
+     *within* a character class; it is not special and stands for
+     itself when used at the beginning of the class (immediately after
+     the `[' signalling the start of the character class or immediately
+     after the negated-class operator `^') or at the end (just before
+     the terminating `]').
+
+`]'
+     This is special when used after the beginning of the character
+     class and terminates the character class; it is not special and
+     stands for itself when used right at the beginning of the class
+     (immediately after the `[' signalling the start of the character
+     class or immediately after the negated-class operator `^').
+
+   Any whitespace character (except newline) is significant within a
+character class and specifies a character within the class.  Comments
+are never recognized within a character class.  Hence the character
+class `[/*a */ a]' would contain the four characters ` ', `/', `*' and
+`a'.  Newlines are not allowed directly within a character class and
+must be specified using the escape sequence `\n'.
+
+Examples
+........
+
+     `[lL]' matches any one of the characters `l' or `L'.
+
+     `[0-9a-fA-F]' matches any hexadecimal digit.
+
+     `[^0-9a-zA-Z]' matches any non-alphanumeric character.
+
+     `[-+]' or `[+-]' matches any one of the characters `+' or `-'.
+
+     `[\t \n]' matches a tab, space or newline character.
+
+
+File: zlex.info,  Node: Named Character Classes,  Next: Any Character Except Newline,  Prev: Character Classes,  Up: Regular Expressions
+
+Named Character Classes
+-----------------------
+
+   Specifying lowercase alphabetic characters using a pattern like
+`[a-z]' may not work with character sets other than ASCII as the
+character codes for lower-case letters may not always be contiguous in
+the underlying character set.  To remedy this problem, POSIX introduced
+named character classes of the form `[:NAME:]'.  The class represented
+by `[:NAME:]' is precisely the set of characters C for which the
+standard C-library function `isNAME(C)' returns non-zero.
+
+`[:alnum:]'
+     An upper or lower-case alphabetic character or a decimal digit.
+
+`[:alpha:]'
+     An upper or lower-case alphabetic character.
+
+`[:blank:]'
+     A space ` ' or tab `\t' character.
+
+`[:cntrl:]'
+     A control character.
+
+`[:digit:]'
+     A digit.
+
+`[:graph:]'
+     Any printing character (not a control character) other than a
+     space character.
+
+`[:lower:]'
+     A lower-case letter.
+
+`[:print:]'
+     Any printing character (not a control character), including a
+     space character.
+
+`[:punct:]'
+     A punctuation character which is a printing character but not a
+     space character or alphanumeric character.
+
+`[:space:]'
+     A space ` ', tab `\t', carriage return `\r', newline `\n',
+     vertical tab `\v' or form-feed `\f' character.
+
+`[:upper:]'
+     An upper-case letter.
+
+`[:xdigit:]'
+     A hexadecimal digit.
+
+   These named classes cannot occur directly in a pattern but only as
+members of a character class.  Hence `[:alpha:]' is not a valid pattern
+but `[[:alpha:]]' is.
+
+
+File: zlex.info,  Node: Any Character Except Newline,  Next: String Quoting,  Prev: Named Character Classes,  Up: Regular Expressions
+
+Any Character Except Newline
+----------------------------
+
+   `.' is a regular expression which matches any character except
+newline.
+
+Example
+.......
+
+     `.|\n' is a pattern which matches any character (`|' is a regular
+     expression operator specifying the union of two regular
+     expressions).
+
+
+File: zlex.info,  Node: String Quoting,  Next: Regular Expression Macros,  Prev: Any Character Except Newline,  Up: Regular Expressions
+
+String Quoting
+--------------
+
+   A string of characters enclosed within double-quotes `"' is a regular
+expression which matches that string of characters.  Escape sequences
+are recognized within the string.  The characters which are special
+within the string are `\' (used for escaping characters) and `"' (used
+for terminating the string) and must be escaped with a preceeding `\'
+if they are to be included within the string.  A newline cannot be
+contained directly within a string regular expression, but must be
+specified using a escape sequence as `\n'.
+
+Examples
+........
+
+     `"[]"' matches the string consisting of the two characters `[]'.
+
+     `"\x30\0\"\\\n"' matches the string containing five characters: the
+     first character has the hexadecimal character code `30', the second
+     character has the character code 0, the third and fourth
+     characters are `"' and `\' respectively, and the last character is
+     the newline character.
+
+
+File: zlex.info,  Node: Regular Expression Macros,  Next: Optional Regular Expression,  Prev: String Quoting,  Up: Regular Expressions
+
+Regular Expression Macros
+-------------------------
+
+   A macro can be defined in section 1 of the Zlex file by specifying a
+macro name M followed by a regular expression R.  Any use of `{M}'
+within a regular expression is expanded to `(R)'.  Note that the
+definition is restricted to be a *regular expression*; it cannot be a
+*pattern* containing any context operators (*note Patterns::.).
+
+   A macro name can contain alphanumeric characters or `_' or `-', but
+must start with a alphabetical character or `_'.  When the macro is
+defined in section 1 of the Zlex file, the name must occur at the
+beginning of a line.  This must be followed by whitespace followed by
+the macro definition on the same line.  The regular expression
+comprising the macro definition can contain calls to other macros,
+including those which have not yet been defined.  It is an error for a
+macro to contain a call to itself, either directly or indirectly via
+calls to other macros.  A macro is not expanded until a call to the
+macro is encountered in section 2 of the Zlex file.
+
+   Whitespace is allowed within the defining regular expression (*note
+Whitespace Within Patterns::.).  When a macro name is used within
+braces, no whitespace or comments are allowed within the braces.  This
+makes it easier for Zlex to disambiguate a macro use, from the start of
+a block of C-code.
+
+   Macros can be used to make patterns more readable if the Zlex
+programmer chooses suitable mnemonic macro names.  They do not add
+anything to the expressive power of the pattern language since every
+use of a macro name is fully equivalent to its defining regular
+expression enclosed in parentheses.
+
+Examples
+........
+
+     In old `lex' and `flex' programs one often encounters macros like
+     the following:
+
+          alpha             [a-zA-Z]
+
+     This is not portable across all character set and is no longer
+     necessary since named character classes (*note Named Character
+     Classes::.) can be used instead.
+
+
+File: zlex.info,  Node: Optional Regular Expression,  Next: Zero or More Repetitions,  Prev: Regular Expression Macros,  Up: Regular Expressions
+
+Optional Regular Expression
+---------------------------
+
+   If R is a regular expression which matches R', then `R?' is a
+regular expression which matches zero or one occurrences of R'.
+
+Examples
+........
+
+     `[-+]?' denotes an optional sign.
+
+     `\.?' can be used to denote an optional decimal point.
+
+
+File: zlex.info,  Node: Zero or More Repetitions,  Next: One or More Repetitions,  Prev: Optional Regular Expression,  Up: Regular Expressions
+
+Zero or More Repetitions
+------------------------
+
+   If R is a regular expression which matches R', then `R*' is a
+regular expression which matches zero or more repetitions of R'.  `*'
+is often referred to as the "Kleene-closure" or simply "closure"
+operator.
+
+Examples
+........
+
+     `[[:alnum:]]*' will match a sequence of zero or more alphanumeric
+     characters.
+
+     `[*]*' will match a sequence of 0 or more `*'s.
+
+
+File: zlex.info,  Node: One or More Repetitions,  Next: Counted Repetition,  Prev: Zero or More Repetitions,  Up: Regular Expressions
+
+One or More Repetitions
+-----------------------
+
+   If R is a regular expression which matches R', then `R+' is a
+regular expression which matches one or more repetitions of R'.
+
+Examples
+........
+
+     `[[:xdigit:]]+' will match a sequence of one or more hexadecimal
+     characters.
+
+     `.+' will match the rest of the current line provided it is
+     nonempty (recall that `.'  matches any character except a newline).
+
+
+File: zlex.info,  Node: Counted Repetition,  Next: Concatenation,  Prev: One or More Repetitions,  Up: Regular Expressions
+
+Counted Repetition
+------------------
+
+   If R is a regular expression which matches R', then `R{LO,HI}' where
+LO and HI are positive integers matches LO through HI occurrences of R';
+`R{NUM}' where NUM is a positive integer matches exactly NUM
+occurrences of R'.  `R{LO,}' matches at least LO occurrences of R'.
+
+   No whitespace or comments are ever allowed between the starting `{'
+and the first digit of the repetition count.  This restriction makes it
+easier for Zlex to disambiguate counted repetition from a C-code block.
+
+Examples
+........
+
+     `[[:alpha:]]{1,6}' matches any nonempty string of alphabetic
+     characters upto 6 letters long.
+
+     `[[:digit:]]{3}' matches exactly three digits.
+
+     `[[:alnum:]]{5,}' matches a sequence of at least 5 alpha-numeric
+     characters.
+
+
+File: zlex.info,  Node: Concatenation,  Next: Union,  Prev: Counted Repetition,  Up: Regular Expressions
+
+Concatenation
+-------------
+
+   If R and S are regular expressions which match R' and S'
+respectively, then their juxtaposition `RS' is a regular expression
+which matches the concatenation of R' and S'.
+
+Examples
+........
+
+     The regular expression `[a-zA-Z_][-0-9a-zA-Z_]*' can be used to
+     denote a Zlex macro name.
+
+     The regular expression `0[0-7]*' can be used to denote a octal
+     number in ANSI-C.
+
+
+File: zlex.info,  Node: Union,  Next: Operator Precedence,  Prev: Concatenation,  Up: Regular Expressions
+
+Union
+-----
+
+   If R and S are regular expressions which match R' and S'
+respectively, then `R|S' is a regular expression which matches either
+R' or S'.
+
+Examples
+........
+
+     The regular expression `[0-9]+[lL]?[uU]?|[0-9]+[uU]?[lL]?' denotes
+     a ANSI-C integer which consists of a sequence of digits followed
+     optionally by `l' or `L' (denoting *long*), or by `u' or `U'
+     (denoting *unsigned*) in either order.
+
+     The above can be expressed slightly more succinctly by using
+     parentheses to factor out the `[0-9]+', as `[0-9]+([lL]?[uU]? |
+     [uU]?[lL]?)'.
+
+
+File: zlex.info,  Node: Operator Precedence,  Next: Grouping Regular Expression,  Prev: Union,  Up: Regular Expressions
+
+Operator Precedence
+-------------------
+
+   The precedence of the operators defined above is shown below.
+Operators which are grouped together have the same precedence.  The
+groups are in order of decreasing precedence.
+
+     Postfix operators: Closure operator `*', one or more operator `+',
+     optional operator `?', counted repetition `{LO,HI}'.
+
+     Concatenation by juxtaposition.
+
+     Union operator `|'.
+
+
+File: zlex.info,  Node: Grouping Regular Expression,  Next: Operator Independence,  Prev: Operator Precedence,  Up: Regular Expressions
+
+Grouping Regular Expression
+---------------------------
+
+   If R is a regular expression, then `(R)' is also a regular
+expression equivalent to R.  The parentheses are used for grouping
+regular expressions to override the default precedence of the regular
+expression operators.
+
+Example
+.......
+
+     `(a|b)c' matches either the string `ab' or `ac'.  If the
+     parentheses were omitted and the pattern was written as `a|bc',
+     then the pattern would match the string `a' or the string `bc'.
+
+
+File: zlex.info,  Node: Operator Independence,  Next: Regular Expression Examples,  Prev: Grouping Regular Expression,  Up: Regular Expressions
+
+Operator Independence
+---------------------
+
+   Some of the operators are merely syntactic sugar and can be
+expressed in terms of the other operators.  For example:
+
+     R+ => RR*
+     R{2,4} => RR|RRR|RRRR
+     R{2,} => RRR*
+     [/*-] => "/"|"*"|"-"
+
+
+File: zlex.info,  Node: Regular Expression Examples,  Prev: Operator Independence,  Up: Regular Expressions
+
+Regular Expression Examples
+---------------------------
+
+   The following examples use Zlex regular expressions to specify the
+syntax of comments in various programming languages.
+
+* Menu:
+
+* Ada Comments::                Regular expression for Ada comments.
+* Pascal Comments::             Regular expression for Pascal comments.
+* C Comments::                  Regular expression for C comments.
+
+
+File: zlex.info,  Node: Ada Comments,  Next: Pascal Comments,  Prev: Regular Expression Examples,  Up: Regular Expression Examples
+
+Ada Comments
+............
+
+   An Ada comment starts with the characters `--' and continues to
+end-of-line.  A suitable pattern is
+
+     "--".*
+
+
+File: zlex.info,  Node: Pascal Comments,  Next: C Comments,  Prev: Ada Comments,  Up: Regular Expression Examples
+
+Pascal Comments
+...............
+
+   Pascal has two commenting conventions.  One of them is to enclose
+the body of a possibly multi-line comment within braces `{' and `}'.
+The body of the comment should not contain any `}' characters.  An
+incorrect attempt to write a regular expression for such a comment is:
+
+     "{"(.|\n)*"}"         /* Wrong. */
+
+The problem is that the regular expression does not enforce the
+restriction that the body of the comment should not contain any `}'
+characters.  In fact, with Zlex's rule for preferring the longest
+match, the above regular expression will interpret all the text between
+the first `{' and the last `}' in a Pascal file as a comment!
+
+   A correct regular expression is:
+
+     "{"[^}]*"}"
+
+Though this is correct, it has the disadvantage that it forces Zlex to
+save the text of a long comment.  For more efficient ways of processing
+long comments, see *Note Start States Example::.
+
+
+File: zlex.info,  Node: C Comments,  Prev: Pascal Comments,  Up: Regular Expression Examples
+
+C Comments
+..........
+
+   A comment in C consists of any character sequence not containing the
+subsequence `*/' surrounded by `/*' and `*/'.  The following is an
+incorrect attempt (which was published in a book) at writing a regular
+expression for a C comment (the spaces in the regular expression have
+been added for readability and can be ignored by Zlex):
+
+     ("/*" "/"* ([^*/] | [^*]"/" | "*"[^/])* "*"* "*/") /* Wrong. */
+
+Analyzing the above expression we realize that the expression within the
+inner parentheses corresponds to the body of the comment except for a
+possibly empty prefix containing only `/'s and a possibly empty suffix
+containing only `*'s.  Analyzing the inner expression further, it
+specifies 0 or more repetitions of
+
+   * Any character except a `/' or `*'.
+
+   * Any character except a `*' followed by a `/'.
+
+   * A `*' followed by any character except a `/'.
+
+   Though the above seems correct, it is not.  A counterexample is the
+valid comment `/**1/*/' which does not match the above regular
+expression.  The problem is caused by ignoring the possible overlap
+between the subpatterns `[^*]"/"' and `"*"[^/]' where the negated
+character classes in both patterns may need to match the same character
+(`1' in the counterexample).
+
+   A solution which is claimed to be correct is the following:
+
+     ("/*" [^*]* "*"+ ([^/*][^*]*"*"+)* "/")
+
+The `[^*]*' deals with that prefix of the comment body which does not
+contain any `*'s.  When a `*' occurs, we need to have a sequence of one
+or more of them (`"*"+').  The inner closure `([^/*][^*]*"*"+)*'
+specifies that the sequence of `*'s be followed by 0 or more
+repetitions of text not starting with `/' or `*' and terminating in a
+sequence of `*'s.  So irrespective of the number of iterations of the
+inner closure, the input character at the end of the closure must be a
+`*'. Hence a further `/' in the input terminates the comment.
+
+   Once again, this is not the recommended way to specify C comments in
+Zlex because of the possibly excessive growth of the text saved by
+Zlex.  For the recommended method, see *Note Start States Example::.
+As the preceeding remark makes clear, these complicated regular
+expressions are mainly useful as exercises with which to plague
+students.  What is more interesting is the non-eureka process by which
+these expressions may be constructed, but that is beyond the scope of
+this manual.
+
+
+File: zlex.info,  Node: Context Operators,  Next: End of File Patterns,  Prev: Regular Expressions,  Up: Patterns
+
+Context Operators
+=================
+
+   Sometimes it is necessary to match regular expressions only in
+certain contexts.  This can be achieved by patterns which use
+additional syntax to specify the context in which a regular expression
+should be matched.
+
+* Menu:
+
+* Right Context::               Right-context-sensitive matching.
+* Left Context::                Left-context-sensitive matching.
+
+
+File: zlex.info,  Node: Right Context,  Next: Left Context,  Prev: Context Operators,  Up: Context Operators
+
+Right Context
+-------------
+
+   Right context allows an input sequence to match a regular expression
+only if the input which immediately follows the matching sequence
+satisfies certain restrictions.  Generalized right context allows the
+restrictions to be expressed via an arbitrary regular expression.
+End-of-line right context is a special case of generalized right
+context.
+
+* Menu:
+
+* Generalized Right Context::   Using an arbitrary regular expression to
+                                specify a right context.
+* End of Line::                 Matching only at end-of-line.
+* Right Context Restrictions::  No multiple right context in a pattern.
+
+
+File: zlex.info,  Node: Generalized Right Context,  Next: End of Line,  Prev: Right Context,  Up: Right Context
+
+Generalized Right Context
+.........................
+
+   One can define a real number in Modula-2 by means of the following
+macro definitions:
+
+     digit           [0-9]
+     sign            [-+]
+     exp             E{sign}?{digit}+
+     real            {digit}+\.{digit}*{exp}?
+
+The above definition allows numbers like `22.' with an empty fraction
+and exponent.  Unfortunately, constructs like `1..10' are commonly used
+in Modula-2 to indicate subranges, and should be scanned as three tokens
+`1', `..' and `10'.  However since Zlex always prefers the longest
+match, the effect of the pattern `{real}' on the input `1..10' will be
+to scan the first token as `1.', which is wrong for Modula-2.  One
+solution is to scan a number as a real only if it is not followed by a
+`.'  character.  This can be achieved by suffixing the above pattern
+with a special right-context construct which imposes this restriction:
+
+     `{real}/[^.]'
+
+`/' is the right-context operator.  If R and C are arbitrary regular
+expressions, then `R/C' is a pattern which matches input R' iff R
+matches R' and the input after R' matches C.  Note that the input which
+matched C is available to be rescanned.
+
+   Returning to the Modula-2 example, `{real}/[^.]' will not match the
+input `1..10'.  Instead the `1' can be matched by a pattern for an
+integer, the `..' can be matched by an appropriate pattern, and the
+`10' can be matched by the pattern for an integer.  On the other hand
+if the input is `1.+2', then `{real}/[^.]' will match the `1.', since
+`+' matches `[^.]'.  The `+' will then be rescanned and can be matched
+by a suitable pattern.
+
+   There are no restrictions on the regular expressions on either side
+of the `/'.  Unfortunately, this freedom allows ambiguous patterns like
+`[a-zA-Z0-9]+/[0-9]+"#"', for which there are multiple ways to match an
+input like `aA12b123#'.  Specifically, the prefixes `aA12b', `aA12b1'
+and `aA12b12' all match the specified pattern.  It is necessary for
+Zlex to use a disambiguating rule to resolve the ambiguity: it always
+matches the longest prefix.  For the above example, Zlex would match
+`aA12b12'.  Note that other scanner generators may get confused by
+similar patterns.
+
+
+File: zlex.info,  Node: End of Line,  Next: Right Context Restrictions,  Prev: Generalized Right Context,  Up: Right Context
+
+End of Line Right Context
+.........................
+
+   It is sometimes necessary to match a regular expression R only at the
+end of a line.  This can be achieved by using the pattern `R/\n'.  The
+`$' end-of-line anchor is available to abbreviate this pattern to `R$'.
+The `$' character is special only at the end of a pattern.
+
+
+File: zlex.info,  Node: Right Context Restrictions,  Prev: End of Line,  Up: Right Context
+
+Right Context Restrictions
+..........................
+
+   A single pattern can contain only a single instance of a
+right-context operator.  Hence a pattern like `[A-Za-z0-9]+/[\t ]+$'
+which attempts to recognize an alphanumeric word only when it occurs at
+the end of a line is illegal, since `$' provides an additional
+right-context operator. Instead, the pattern can be written as
+`[A-Za-z0-9]+/[\t ]+\n' which is legal.
+
+
+File: zlex.info,  Node: Left Context,  Prev: Right Context,  Up: Context Operators
+
+Left Context
+------------
+
+   In a Zlex scanner, it is possible to use two methods for allowing
+left-context to influence a match.  The first is useful when the
+interpretation of a token is affected by whether or not it is at the
+start of a line.  The second is more general, and allows encapsulating
+the left-context into a state which selects a subset of the patterns
+which are allowed to match.
+
+* Menu:
+
+* Start of Line::               Matching only at start of a line.
+* Start State Patterns::        Generalized left context matching.
+
+
+File: zlex.info,  Node: Start of Line,  Next: Start State Patterns,  Prev: Left Context,  Up: Left Context
+
+Start of Line Pattern
+.....................
+
+   In a C preprocessor, `#' signals a preprocessor directive only if it
+occurs at the beginning of a line (preceeded optionally by whitespace).
+A pattern which recognizes a `#' only when it signals a preprocessor
+directive is the following:
+
+     ^[\t \v\f]*\#
+
+   The `^' is the "start-of-line" anchor: the following pattern is
+matched only if the previous character was a newline character.
+
+   When a scanner uses one or more patterns containing the
+start-of-line anchor `^', it is possible to query and set the current
+start-of-line condition during scanning.  See *Note Querying Beginning
+of Line:: and *Note Setting Beginning of Line::.
+
+
+File: zlex.info,  Node: Start State Patterns,  Prev: Start of Line,  Up: Left Context
+
+Start State Patterns
+....................
+
+   The generated scanner can be in one of several different states
+before it starts scanning the input for the next token: these states
+are known as "start states".  The Zlex programmer is required to name
+and declare all start states and can control the transitions between
+start states by using special actions. In a particular start state,
+only a subset of the patterns is used to recognize tokens; exactly
+which subset is to be selected is indicated by qualifying each pattern
+with the set of start states in which that pattern should be active.
+More information on start states can be found in *Note Start States::.
+
+
+File: zlex.info,  Node: End of File Patterns,  Next: Intra-Token Patterns,  Prev: Context Operators,  Up: Patterns
+
+End of File Patterns
+====================
+
+   The special pattern `<<EOF>>' (which cannot contain any internal
+whitespace or comments) is used to match the end of the input file.  It
+may be qualified with a set of start conditions using a syntax
+identical to that used for qualifying regular expressions.  The
+end-of-file pattern is useful for doing special processing at
+end-of-file.  The following example shows how it can be used to signal
+that a construct like a comment was not terminated before end-of-file
+was encountered:
+
+     <COMMENT><<EOF>>   fprintf(stderr, "EOF detected within comment.");
+
+It is assumed that the scanner entered a `COMMENT' start state when a
+comment was encountered.
+
+   For special Zlex actions which can be used in `<<EOF>>' patterns,
+see *Note End-of-File and Termination::.
+
+
+File: zlex.info,  Node: Intra-Token Patterns,  Next: Whitespace Within Patterns,  Prev: End of File Patterns,  Up: Patterns
+
+Intra-Token Patterns
+====================
+
+   Intra-token patterns are useful to do pre-lexical processing during
+the scanning process.  More information on intra-token patterns can be
+found in *Note Using Intra-Token Patterns::.
+
+
+File: zlex.info,  Node: Whitespace Within Patterns,  Prev: Intra-Token Patterns,  Up: Patterns
+
+Whitespace Within Patterns
+==========================
+
+   Whitespace is allowed in Zlex patterns when the option
+`--whitespace' is specified (*note Options List::.).  Unfortunately, it
+is not possible to allow totally free-format input in order to retain as
+much backward-compatibility as possible with `flex' and `lex'.  The
+rules for how whitespace within different constructs are as follows:
+
+What is whitespace?
+     Blanks, tabs and comments are regarded as equivalent whitespace.
+     Newlines are treated somewhat differently.
+
+Character classes and strings
+     Whitespace (except newlines) is always significant and is included
+     in the pattern.  Newlines are not allowed directly in strings or
+     character classes, but must be escaped.  The effect of whitespace
+     within these constructs is independent of the `--whitespace'
+     option.  This behavior is identical to the behavior of other
+     common text processing utilities.
+
+End-of-file Pattern
+     Whitespace is never allowed in the end-of-file token `<<EOF>>'
+     which is regarded as an indivisible token.  This behavior is
+     independent of the `--whitespace' option.
+
+Macro Calls
+     Whitespace is never allowed in macro calls of the form `{MACRO}'
+     which are regarded as indivisible tokens.  This behavior is
+     independent of the `--whitespace' option.
+
+Regular Expressions in Macro Definitions
+     Spaces and tabs are always allowed and ignored within the regular
+     expressions used for macro definitions in section 1 of the Zlex
+     file.  When the option `--whitespace' is not specified, the
+     pattern is terminated by the first newline; when the option
+     `--whitespace' is specified, newlines are allowed and ignored
+     *provided they occur within parentheses*.
+
+Patterns in Section 2
+     When the `--whitespace' option is not specified, a pattern in
+     section 2 is terminated by the first non-quoted whitespace which
+     is not within a string or character class. When the `--whitespace'
+     option is specified, whitespace which is not within a character
+     class or string in a section 2 pattern is allowed and ignored; the
+     pattern is terminated by the start of a brace-enclosed action or
+     by the first newline which is not within parentheses.
+
+One consequence of these rules is that when the `--whitespace' option
+is used, it is not possible to include a action for a pattern in
+section 2 of the Zlex file without enclosing the action within braces.
+
+
+File: zlex.info,  Node: The Current Lexeme,  Next: Start States,  Prev: Patterns,  Up: Top
+
+Accessing the Current Lexeme
+****************************
+
+   Two variables with external linkage allow accessing the characters
+constituting the last matched token, as well as its length.
+
+* Menu:
+
+* Lexeme Text::                 Accessing the text of a lexeme.
+* Lexeme Length::               Accessing the length of a lexeme.
+* Catenating Tokens::           Concatenation of successive tokens.
+
+
+File: zlex.info,  Node: Lexeme Text,  Next: Lexeme Length,  Prev: The Current Lexeme,  Up: The Current Lexeme
+
+Current Lexeme Text: `yytext'
+=============================
+
+   This is a variable which enables access to the sequence of characters
+which constitute the lexeme of the current token.  This sequence of
+characters is always terminated by a NUL `\0' character.  Like all
+other variable names, the name of this variable can be changed to an
+arbitrary name by defining the macro `YY_TEXT' to the new name.
+Alternatively, the prefix used for the name can be changed by using the
+`--prefix' option (*note Variable Names::.).  Its default declaration
+depends on whether the option `--pointer' or `--array' is used (*note
+Options List::.).  When `--pointer' is used, its default declaration is
+`char *yytext'; when `--array' is used, its default definition is
+equivalent to
+
+     char *yytext[YYLMAX];
+
+where `YYLMAX' is a macro which gives the size of the array.  `YYLMAX'
+can be defined by the user in section 1 of the Zlex file if a value
+different from the default value (`8192') is desired.
+
+   When `yytext' is declared to be an array and the length of a matched
+lexeme is greater than the value of `YYLMAX', then the `yytext' array
+will silently overflow with unpredictable results.  When `yytext' is
+declared to be a pointer, there is no possibility of overflow as the
+lexeme text is maintained within the scanner's buffer (which is grown
+dynamically as needed).
+
+   A scanner in which `yytext' is declared to be a pointer is usually
+faster than one in which it is declared to be an array.  This fact,
+coupled with the overflow problem mentioned previously, make a `%array'
+declaration fairly useless except for backward compatibility with lex.
+
+   The Zlex programmer should always treat `yytext' as a read-only
+variable.
+
+   The following program fragment shows a pattern-action pair which
+matches the occurrence of an identifier at the beginning of a line and
+saves it in dynamic memory pointed to by the variable `text'.
+
+     %%
+     
+     [[:alpha:]_][[:alnum:]_]*
+       {  text= malloc(yyleng + 1); /* `+1' for terminating `NUL'. */
+          if (!text) { `Call an error routine.' }
+          strcpy(text, yytext);
+       }
+
+
+File: zlex.info,  Node: Lexeme Length,  Next: Catenating Tokens,  Prev: Lexeme Text,  Up: The Current Lexeme
+
+Current Lexeme Length: `yyleng'
+===============================
+
+   This variable with declaration `int yyleng' holds the length of the
+current token.  The "length of a token" is the number of characters in
+the lexeme of the token (not counting any terminating `'\0'').  Like
+all other variable names, the name of this variable can be changed to
+an arbitrary name by defining the macro `YY_LENG' to the new name.
+Alternatively, the prefix used for the name can be changed by using the
+`--prefix' option (*note Variable Names::.).
+
+   The Zlex programmer should always treat `yyleng' as a read-only
+variable.
+
+   The following program produces a histogram of word-lengths, where a
+word is defined to be a maximal sequence of characters not containing a
+space, tab or newline.
+
+     %{
+     enum { MAX_WORD_LEN= 10 };
+     static unsigned freq[MAX_WORD_LEN];
+     %}
+     %%
+     [^\t \n]+       { if (yyleng > MAX_WORD_LEN) {
+                          `Signal error;'
+                       }
+                       else {
+                         freq[yyleng]++;
+                       }
+                     }
+     [\t \n]+        /* No action. */
+     <<EOF>>         { unsigned i;
+                       for (i= 0; i < MAX_WORD_LEN; i++) {
+                         printf("%d: %d\n", i, freq[i]);
+                       }
+                     }
+
+
+File: zlex.info,  Node: Catenating Tokens,  Prev: Lexeme Length,  Up: The Current Lexeme
+
+Concatenating Tokens: `yymore'
+==============================
+
+   If an action contains a call to the `yymore()' macro, then the lexeme
+for that token is prefixed to the lexeme of the next token recognized.
+Effectively, this allows the programmer to recognize subtokens within a
+larger token.  The canonical form `YY_MORE()' can also be used instead.
+The library function `yyMore(YYDataHandle)' can also be used from files
+other than the generated scanner file.
+
+   For example, let us suppose that an application requires printing
+out the input lines in reverse order, and printing the total number of
+words in the input.  Whenever a token within a line is recognized the
+scanner executes a `yymore' action: hence when the `\n' terminating a
+line is finally matched, `yytext' contains the text for the entire
+line.  This is saved in a stack of lines using a function `pushLine()'
+shown below.  Finally at `<<EOF>>' this stack is traversed with the
+lines being printed in reverse order.
+
+     %{
+     #include <stdio.h>
+     #include <stddef.h>
+     
+     typedef struct LineStruct {
+       struct LineStruct *last;
+       char *text;
+     } LineStruct;
+     
+     static LineStruct *pushLine(LineStruct *lines,
+                                 const char *text, int textLen);
+     
+     %}
+     %%
+       /* Declare local variables. */
+       int wc= 0;
+       LineStruct *lines= NULL;
+     [\t ]+          yymore();
+     [^\t \n]+       wc++; yymore();
+     \n              lines= pushLine(lines, yytext, yyleng);
+     <<EOF>>         { LineStruct *p;
+                       for (p= lines; p; p= p->last) fputs(p->text, stdout);
+                       printf("# of words= %d\n", wc);
+                     }
+     %%
+     static LineStruct *
+     pushLine(LineStruct *lines, const char *text, int textLen)
+     {
+       char *const savedText= malloc(textLen + 1);
+       LineStruct *const lineP= malloc(sizeof(LineStruct));
+       if (!savedText || !lineP) {
+         fprintf(stderr, "Out of memory.\n"); exit(1);
+       }
+       strcpy(savedText, text);
+       lineP->text= savedText; lineP->last= lines;
+       return lineP;
+     }
+
+   A log of running the scanner generated from the above follows:
+
+     "Beware the Jabberwock, my son!
+       The jaws that bite, the claws that catch!
+      Beware the Jubjub bird, and shun
+         The frumious Bandersnatch!"
+     ^D
+     =>
+         The frumious Bandersnatch!"
+      Beware the Jubjub bird, and shun
+       The jaws that bite, the claws that catch!
+     "Beware the Jabberwock, my son!
+     # of words= 22
+
+
+File: zlex.info,  Node: Start States,  Next: Scanner Input,  Prev: The Current Lexeme,  Up: Top
+
+Start States
+************
+
+   Start states allow the behavior of the scanner to depend on the left
+context within the input.  Several actions allow the scanner to control
+or access its current start state.
+
+* Menu:
+
+* Start State Types::           Two flavors of start states.
+* Start State Declarations::    How to declare start states.
+* Entering a Start State::      Zlex action to change start state.
+* Current Start State::         Accessing the current start state.
+* Start State Stacks::          Stacking start states.
+* Start States Example::        Start states to process C comments.
+* Using Inclusive Start States::  Tips on where inclusive start states
+                                maybe useful.
+
+
+File: zlex.info,  Node: Start State Types,  Next: Start State Declarations,  Prev: Start States,  Up: Start States
+
+Start State Types
+=================
+
+   Start states are of two types: *exclusive* and *inclusive*. When a
+"exclusive start state" is active, only those patterns whose qualifying
+start states include the name of that start state are selected.  See
+*Note Start States Example:: for an example where start states are used
+to process C-style comments.  When a "inclusive start state" is active,
+patterns which do not have any qualifying start states at all are also
+selected in addition to the patterns whose qualifying start states
+include the name of the active start state.  This implies that a
+pattern with no qualifying start states is equivalent to the same
+pattern qualified by *all* the *inclusive* start states.  Inclusive
+start states are useful to factor out the commonality within different
+start states (*note Using Inclusive Start States::.).
+
+   Start state qualified patterns can occur only in section 2 of the
+Zlex file.  The syntax for qualifying patterns is to prefix the pattern
+with the names of the start states separated by commas `,', and
+enclosed within angle brackets `<' and `>'.  The following patterns are
+examples of start state qualified patterns:
+
+     <INITIAL>"/*"
+     <COMMENT>"*/"
+     <INITIAL,COMMENT>\n
+
+where it is assumed that `INITIAL' and `COMMENT' are suitably declared
+start states.
+
+
+File: zlex.info,  Node: Start State Declarations,  Next: Entering a Start State,  Prev: Start State Types,  Up: Start States
+
+Start State Declarations
+========================
+
+   Before a start state name can be used in section 2 of the Zlex file,
+it must be declared in section 1 of the Zlex file.  An exclusive
+(inclusive) start state is declared in section 1 by a line starting
+with `%x' (`%s') or `%X' (`%S') followed by whitespace followed by the
+name of the start state on the same line.  Multiple start states of the
+same type can be declared by including multiple names on the same line
+separated by space.  The characters allowed within a start state name
+are identical to those allowed in a macro name: a sequence of
+alphanumeric or `_' or `-' characters starting with an alphabetic or
+`_' character.
+
+   The following are examples of start state declarations:
+
+     %x      COMMENT C_CODE          /* Exclusive start states. */
+     %s      RANGE SS_USE            /* Inclusive start states. */
+
+   In the generated scanner, the programmer declared start state names
+are `#define'd to be small integers.  Hence the programmer should not
+use these names in any other context.  All Zlex generated scanners
+predefine an inclusive start state called `INITIAL' which is the
+initial start state for the scanner when it is first called.  `INITIAL'
+is `#define'd to be `0'; The user should not make any assumptions about
+the assignment of integers to other start states, and should always
+refer to them using their symbolic names.
+
+
+File: zlex.info,  Node: Entering a Start State,  Next: Current Start State,  Prev: Start State Declarations,  Up: Start States
+
+Entering a Start State: `BEGIN'
+===============================
+
+   The macro `BEGIN' is used to set the current start state.  To set the
+current start state to one with name SS, `BEGIN(SS)' can be used.  For
+backwards compatibility reasons, `BEGIN SS' without the parentheses can
+also be used.
+
+   The canonical name `YY_BEGIN' can be used instead; unlike `BEGIN',
+the parentheses are always required.  To begin start-state SS the form
+`YY_BEGIN(SS)' is used.
+
+   Since the `INITIAL' start state (*note Start State Declarations::.)
+is `#define'd to be `0', `BEGIN 0' is synonymous with `BEGIN INITIAL'.
+
+   The following example shows how inclusive start states can be used to
+recognize numbers in different bases depending on a specific directive.
+The base is set by a `%bin', `%oct' or `%hex' directive which must
+occur at the start of a line.
+
+     %s BIN OCT HEX
+     %%
+     ^"%bin"                 BEGIN BIN;
+     ^"%oct"                 BEGIN OCT;
+     ^"%hex"                 BEGIN HEX;
+     <BIN>[01]+              `Action for a binary number.'
+     <OCT>[0-7]+             `Action for a octal number.'
+     <HEX>[a-fA-F0-9]+       `Action for a hexadecimal number.'
+     `Other non-qualified patterns.'
+
+
+File: zlex.info,  Node: Current Start State,  Next: Start State Stacks,  Prev: Entering a Start State,  Up: Start States
+
+Accessing the Current Start State: `YY_START'
+=============================================
+
+   The macro `YY_START' returns the current start state (an unsigned
+integer).  `YYSTATE' is synonymous with `YY_START'.
+
+   Accessing the current start state using `YY_START' allows the Zlex
+programmer to use start-state subroutines.  For example, in the scanner
+for Zlex, C-style comments are allowed within several constructs.  These
+comments are processed using an exclusive start state `COMMENT' (*note
+Start States Example::.).  When we are in a construct and see the start
+of a comment, we do a `BEGIN COMMENT' *after* saving the current start
+state in a global variable, say `commentRet'.  Then when in the
+`COMMENT' state we see the end of the comment we do a `BEGIN
+commentRet', which puts us back in the start state in which we
+originally saw the comment.
+
+   In the above situation, we could predict exactly how many start
+states we need to save at any time (exactly one).  That may not be
+possible in general.  Start state stacks may be used in such situations
+(*note Start State Stacks::.).
+
+
+File: zlex.info,  Node: Start State Stacks,  Next: Start States Example,  Prev: Current Start State,  Up: Start States
+
+Start State Stacks
+==================
+
+   In a Zlex scanner, start state stacks can be created and manipulated
+using three routines.
+
+* Menu:
+
+* Pushing a Start State::
+* Popping the Start State Stack::
+* Top of the Start State Stack::
+
+
+File: zlex.info,  Node: Pushing a Start State,  Next: Popping the Start State Stack,  Prev: Start State Stacks,  Up: Start State Stacks
+
+Pushing a Start State: `yy_push_state'
+--------------------------------------
+
+   The macro `yy_push_state(SS)' pushes the current start-state on top
+of the start state stack and does a `BEGIN SS' action.  The canonical
+name `YY_PUSH_STATE' may be used synonymously.  From files other than
+the generated scanner, the programmer can call the Zlex library
+function `yyPushState' with prototype:
+
+     void
+     yyPushState(YYDataHandle d, YYState ss);
+
+to push the current start state on the start state stack of the scanner
+specified by `d' and enter start state `ss'.
+

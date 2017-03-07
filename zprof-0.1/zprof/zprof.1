@@ -1,0 +1,305 @@
+.TH ZPROF 1 "27 June 1997" "Version 0.0"
+.SH NAME
+zprof, zcounts \- transform ANSI-C programs to enable basic block profiling.
+.\"
+.\"File:	 zprof.1
+.\"Purpose: Man page for zprof.
+.\"
+.\"Last Update Time-stamp: <97/07/03 18:15:58 zdu>
+.\"
+.\"Copyright (C) 1995, 1997 Zerksis D. Umrigar
+.\"
+.\"See the file LICENSE for copying and distribution conditions.
+.\"THERE IS ABSOLUTELY NO WARRANTY FOR THIS PROGRAM.
+.\"
+
+.\"I've used bold where I really need something for fixed font.  At least
+.\" man(7) on linux doesn't say anything about how to get something like \tt.
+	
+.SH SYNOPSIS
+.B zprof 
+.in +4
+.nf
+[\fB\-\-cond\fP|\fB\-c\fP] 
+[\fB\-\-help\fP|\fB\-h\fP] 
+[\fB\-\-prefix\fP=\fIPREFIX\fP|\fB\-p\fP\fIPREFIX\fP] 
+[\fB\-\-preprocess\fP|\fB\-P\fP] 
+[\fB\-\-silent\fP|\fB\-s\fP] 
+[\fB\-\-version\fP|\fB\-v\fP]
+[\fB\-\-typedef\fP=\fIID\fP|\fB\-t\fP\fIID\fP] 
+.in -4
+.fi
+[\fIfile\fP.c...]
+.br
+
+\fBzcounts\fP
+
+
+.SH DESCRIPTION
+
+\fBzprof\fP is a preprocessor which transforms a ANSI-C program to
+enable basic block profiling.  When the transformed program is
+compiled and executed, it records the number of times each of its
+basic blocks is executed.
+
+.LP
+
+Each source file \fIfile\fP\fB.c\fP is transformed to \fIfile\fP\fB_BB.c\fP
+(to change the output name, see the \fB\-\-prefix\fP option).  The
+transformed program needs to be linked with the \fBzprof\fP library
+\fBlibzprof.a\fP.  When the transformed program is executed, it appends the
+execution counts of its basic blocks to the file \fBzprof.out\fP.  The
+\fBzcounts\fP script uses the generated \fBzprof.out\fP file to produce an
+annotated version of the original files (with names of the form
+\fIfile\fP\fB.c.bb\fP) with each line preceeded by its execution count.
+The \fBzprof.out\fP file can also be analyzed using standard utilities (see
+the \fBEXAMPLES\fP section).
+
+.LP
+If no source files are specified, \fBzprof\fP simply prints a summary of its
+options and exits.
+
+.SH OPTIONS
+
+\fBZprof\fP supports both traditional single-letter options and mnemonic
+long option names.  Long option names are indicated using \-\- instead of \-.
+Abbreviations for long option names are allowed as long as they are unique.
+When a long option like \fB\-\-prefix\fP takes an argument, connect the
+option name and the argument with = or put the argument in the next word.
+Similarly, when a short option like \fB\-p\fP takes an argument, put the
+argument value immediately after the option in the same word, or put the
+argument in the next word.  Boolean argument values may be specified as
+\fB0\fP or \fB1\fP, \fByes\fP or \fBno\fP, \fBon\fP or \fBoff\fP.
+
+.TP
+.BI \-\-cond 
+.br
+.ns
+.TP
+.BI \-c
+Profile subexpressions of all ?: conditional expressions (default: \fBoff\fP).
+.TP
+.BI \-\-help 
+.br
+.ns
+.TP
+.BI \-h
+Print summary of options and exit.
+.TP
+\fB\-\-prefix\fP=\fIPREFIX\fP
+.br
+.ns
+.TP
+.BI \-p PREFIX 
+
+Use \fIPREFIX\fP as prefix of all generated names in instrumented file
+and for forming the name of the output files (default: \fB_BB\fP).
+
+.TP
+.BI \-\-preprocess 
+.br
+.ns
+.TP
+.BI \-P
+Run the preprocessor (given by environmental var \fBCPP\fP) on the input file 
+before \fBzprof\fP sees it (default: \fBon\fP).
+.TP
+.BI \-\-silent 
+.br
+.ns
+.TP
+.BI \-s
+Do not generate error messages (default: \fBoff\fP).
+.TP
+.BI \-\-version 
+.br
+.ns
+.TP
+.BI \-v
+Print version information and exit.
+.TP
+\fB\-\-typedef\fP=\fIID\fP
+.br
+\
+.ns
+.TP
+.BI -t ID
+Declare identifier \fIID\fP to be a typedef in the global scope.
+
+.SH ENVIRONMENT
+
+If preprocessing is not turned off using \fB--preprocess\fP=\fBno\fP, then
+the command used to run the C-preprocessor is taken from the environmental
+variable \fBCPP\fP.  If \fBCPP\fP is not defined, then the name of a C
+compiler is sought in environmental variable \fBCC\fP, and each source file
+\fIfile\fP\fB.c\fP is preprocessed using the command:
+
+.in +4
+	\fB$CC\fP -E \fIfile\fP\fB.c\fP
+.in -4
+
+If \fBCC\fP is also not defined, then the C-preprocessor is run using
+
+.in +4
+	cc -E \fIfile\fP\fB.c\fP
+.in -4
+
+.SH EXAMPLES
+
+Consider the simple prime number program from file \fBprimes.c\fP shown
+below:
+
+.in +4
+.nf
+static int
+prime(int n) 
+{
+  int i;
+  for (i= 2; i < n; i++) {
+    if (n % i == 0) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int 
+main()
+{
+  const int n= 1000;
+  int i;
+  for (i= 2; i <= n; i++) {
+    if (prime(i)) {
+      printf("%d\n", i);
+    }
+  }
+  return 0;
+}
+.nf
+.in -4
+
+This can be profiled as follows:
+.in +4
+.nf
+.\"Really need fixed font here.  Bold-facing this would look bad.
+$ zprof primes.c
+$ cc primes_BB.c -lzprof -o primes_bb
+$ rm -f zprof.out
+$ ./primes_bb >/dev/null
+$ zcounts
+.fi
+.in -4
+
+The first line transforms \fBprimes.c\fP into \fBprimes_BB.c\fP which has
+additional code for accumulating profile counts.  The second line compiles
+the transformed file and links the object file with the \fBzprof\fP library
+to get an executable \fBprimes_bb\fP.  The third line ensures that there is
+no \fBzprof.out\fP file present in the current directory, as the execution
+counts from the next step are appended to it.  The fourth line runs
+\fBprimes_bb\fP, producing a \fBzprof.out\fP file containing the execution
+statistics.  The final line uses the statistics to produce an annotated
+version \fBprimes.c.bb\fP shown below:
+
+.in +4
+.nf
+.\"Really need fixed font here.  Bold-facing this would look bad.
+         static int
+         prime(int n) 
+         {
+           int i;
+999        for (i= 2; i < n; i++) {
+78022        if (n % i == 0) {
+831            return 0;
+             }
+           }
+168        return 1;
+         }
+         
+         int 
+         main()
+         {
+           const int n= 1000;
+           int i;
+1          for (i= 2; i <= n; i++) {
+999          if (prime(i)) {
+168            printf("%d\n", i);
+             }
+           }
+1          return 0;
+         }
+.fi
+.in -4
+
+.LP
+In order to correctly parse C, it is necessary to recognize \fBtypedef\fPs.
+Since \fBtypedef\fPs are often defined in header files, it is necessary to
+parse all included header files --- this is typically done by running the
+C-preprocessor first.  Unfortunately, on some systems like Linux, the system
+header files use non-ANSI extensions, which causes problems for \fBzprof\fP
+which expects ANSI-C.  It is still possible to use \fBzprof\fP on such
+systems by using the C-preprocessor to remove the non-ANSI extensions.  For
+example, the following works for profiling some programs under Linux.
+
+.in +4
+.nf
+$ CPP="gcc -E -D'__attribute(n)__=' -D__const=const" \\
+  \fBzprof\fP ...
+.fi
+.in -4
+
+The options \fB--preprocess=0\fP, \fB--silent\fP and \fB--typedef\fP may also
+be useful in such situations where a header which cannot otherwise be parsed
+defines only a few \fBtypedef\fPs.
+
+
+.SH FILES
+
+The format of the generated \fBzprof.out\fP file consists of lines of the
+form:
+
+.in +4
+.nf
+	\fIfilename\fP:\fIlinenum\fP: \fIcount\fP
+.fi
+.in -4
+
+specifying that line number \fIlinenum\fP in file \fIfilename\fP was executed
+\fIcount\fP times.  If there are multiple basic blocks associated with a
+particular source line, then multiple lines will be produced for the
+same \fIfilename\fP and \fIlinenum\fP.
+
+.LP
+The above format is amenable to easy processing by several tools:
+
+.IP +
+The file can easily be sorted in descending order of counts:
+
+.in +4
+sort -t: -nr -2 zprof.out
+.in -4
+
+.IP +
+Emacs compilation-mode can be used to interactively browse this file.
+\fBM-x compile\fP can be used to start compilation and the compilation
+command can be specified simply as \fBcat zprof.out\fP.  Then the
+\fBM-`\fP command can be used repeatedly to position the cursor at each
+source line with its execution count shown in the compilation buffer.
+
+
+.SH AUTHOR
+       Copyright (C) 1997  Zerksis D. Umrigar
+
+.LP 
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version.
+
+
+.SH SEE ALSO
+.BR prof (1)
+.BR monitor (3) 
+.br
+
+
+

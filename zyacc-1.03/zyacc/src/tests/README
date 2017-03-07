@@ -1,0 +1,14 @@
+This directory contains regression tests for zyacc.
+
+Best to run with GNU-make.  Ultrix make has problems.  If your make has
+problems, go to the Makefile and search for the line which contains the
+string @@@, and try commenting out the following dependency.
+
+Requires a cc which understands function prototypes.
+
+attrfrnt test puts make output into a file which is compared with log (a sed
+filter tries to get rid of this, but is not always successful).  Since
+different makes produce different kinds of output, this can lead to trivial
+errors.
+
+

@@ -1,0 +1,50 @@
+#Automatically generated dependencies.
+attribs.o: attribs.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gcolor.h gram.h lalr.h scan.h ../../libz/area.h \
+ ../../libz/iset.h ../../libz/error.h ../../libz/errorz.h \
+ ../../libz/ids.h ../../libz/memalloc.h
+buildrec.o: buildrec.c buildrec.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+comptab.o: comptab.c comptab.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/memalloc.h ../../libz/error.h \
+ ../../libz/errorz.h
+gcolor.o: gcolor.c gcolor.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/memalloc.h ../../libz/error.h \
+ ../../libz/errorz.h
+gram.o: gram.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gram.h options.h scan.h zparse.h \
+ ../../libz/area.h ../../libz/iset.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h
+lalr.o: lalr.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h comptab.h ../../libz/error.h ../../libz/errorz.h \
+ gram.h lalr.h options.h outvec.h scan.h xset.h ../../libz/area.h \
+ ../../libz/autobuf.h ../../libz/memalloc.h ../../libz/iset.h \
+ ../../libz/zutil.h
+main.o: main.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h buildrec.h gram.h lalr.h main.h options.h \
+ outfns.h ../../libz/parseopt.h scan.h zparse.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h \
+ ../../libz/zutil.h
+mkoptinf.o: mkoptinf.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c
+mkopttab.o: mkopttab.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c
+opttab0.o: opttab0.c ../../libz/parseopt.h ../../libz/ccport.h
+options.o: options.c main.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h options.h ../../libz/error.c ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h \
+ ../../libz/parseopt.h ../../libz/zutil.h opttab.c
+outvec.o: outvec.c outvec.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+xset.o: xset.c xset.h port.h ../../libz/ccport.h ../../libz/osport.h \
+ ../../libz/area.h ../../libz/error.h ../../libz/errorz.h
+zydebug.o: zydebug.c port.h ../../libz/ccport.h ../../libz/osport.h
+opttab.o: opttab.c
+parse.o: parse.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gram.h lalr.h options.h scan.h zparse.h \
+ ../../libz/error.h ../../libz/errorz.h
+scan.o: scan.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gram.h options.h scan.h zparse.h \
+ ../../libz/area.h ../../libz/error.h ../../libz/errorz.h \
+ ../../libz/ids.h ../../libz/zutil.h parse.h
+scanlib.o: scanlib.c

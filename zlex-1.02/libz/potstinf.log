@@ -1,0 +1,57 @@
+@item --intFlag0
+@itemx -0
+Set integer flag 0 to 0 (default: @code{1}).
+@xref{intFlag0}.
+
+@item --intFlag1
+@itemx -1
+Set integer flag 1 to 1 (default: @code{0}).
+@xref{intFlag1}.
+
+@item --intVal @var{value}
+@itemx -V @var{value}
+Set integer value to VALUE. (default: @code{0}).
+@xref{intVal}.
+
+@item --charAltFlag
+@itemx -C
+@itemx --charFlag
+@itemx -c
+Reset char flag. (default: @code{1}).
+@xref{charFlag}.
+
+@item --charVal[=@var{char}]
+@itemx -v[@var{char}]
+Set charVal to Char.  Continuing on with this description... This
+character option has a very long description. It continues for more
+than one line.  It goes on and on and on and on and on and on and on... 
+(default: @code{A}).
+@xref{charVal}.
+
+@item --stringFlag[=@var{value}]
+Set string flag to @var{value} (default: @code{ }).
+@xref{stringFlag}.
+
+@item --stringAltVal @var{string}
+@itemx -S @var{string}
+@itemx --stringVal @var{string}
+@itemx -s @var{string}
+Set string value to @var{string} (default).
+@xref{stringVal}.
+
+@item --rangeVal @var{int}
+@itemx -r @var{int}
+Range option between @code{-2} and @code{5} (default: @code{3}).
+@xref{rangeVal}.
+
+@item --primeVal @var{int}
+@itemx -p @var{int}
+Prime # @code{2}, @code{3}, @code{5}, @code{7} or @code{11} 
+(default: @code{7}).
+@xref{primeVal}.
+
+@item --names @var{name}
+Name must be one of @code{mary}, @code{marge} or @code{marty} 
+(default: @code{mary}).
+@xref{names}.
+

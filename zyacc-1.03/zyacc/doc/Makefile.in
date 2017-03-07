@@ -1,0 +1,286 @@
+#Makefile.in produced automatically using GNU-m4.
+#We assume that any make variables defined on the make command-line are
+#passed into a recursive make.
+
+#DIRECTORIES FOR SOURCES AND BUILD.
+#Source directory controlled by this makefile.
+srcdir=			@srcdir@
+
+#Define VPATH to ensure that source files found even if build directory is
+#different from srcdir.
+VPATH=			@srcdir@
+
+#Top-level source directory for entire package.
+topdir=			@top_srcdir@
+
+#Top-level build directory for package.
+builddir=		@builddir@
+
+#INSTALLATION PATHS.
+#Prefix of path where all architecture-independent files are installed.
+prefix=			@prefix@
+
+#Prefix of path where architecture-dependent files are installed.
+exec_prefix=		@exec_prefix@
+
+#Path where executables are installed.
+bindir=			$(exec_prefix)/bin
+
+#Path where skeleton file and library sources are installed.
+datadir=		$(prefix)/share/$(PROGRAM)
+
+#Path where include files are installed.
+includedir=		$(prefix)/include
+
+#Path where info files are installed.
+infodir=		$(prefix)/info
+
+#Path where libraries are installed.
+libdir=			$(exec_prefix)/lib
+
+#Path where java classes are installed.
+classdir=		$(prefix)/share/classes
+
+#Path where manuals are installed (section $N in $(mandir)/man$N).
+mandir=			$(prefix)/man
+
+#Path where library sources and skeleton are installed.
+libsrcdir=		$(datadir)
+
+#Path where html files are installed.
+htmldir=		$(prefix)/doc/html
+
+SHELL=			/bin/sh
+RM=			rm -f
+AR=			ar
+LN=			ln -f
+MV=			mv
+CAT=			cat
+CMP=			cmp
+SED=			sed
+GZIP=			gzip -f
+DEPEND_CMD=		gcc -MM $(CPPFLAGS) $(DFLAGS)
+MAKE_MF_IN=		$(GM4) --include=$(topdir)/mf \
+		        Makefile.m4 >$(srcdir)/Makefile.in
+MAKEINFO=		makeinfo
+TEXI2DVI=		texi2dvi
+TEXI2HTML=		texi2html
+DVI2PS=			dvips
+GM4=			gm4 --prefix-builtins
+RANLIB=			@RANLIB@
+INSTALL=		@INSTALL@
+INSTALL_PROGRAM=	@INSTALL_PROGRAM@
+INSTALL_DATA=		@INSTALL_DATA@
+ZLEX=			zlex
+ZYACC=			zyacc
+ZYACCFLAGS=
+ZLEXFLAGS=
+
+
+#COMPILER CONTROL
+#Make variables which define compiler invocation.
+CC=			@CC@
+
+#Flags to control optimization/debugging.
+CFLAGS=			@CFLAGS@
+
+#Header file search directory and other misc. options for cpp/cc.
+CPPFLAGS=		-I$(srcdir) -I$(LIBZ_SRC) -I$(builddir)
+
+#Extra debugging and optimization options for the C compiler.
+CXXFLAGS=		@CXXFLAGS@
+
+#-D options passed to the C-compiler by configure.
+DEFS=			@DEFS@
+
+#Compose DEFFLAGS as combination of above (plus others if needed).
+#XFLAGS should be project or directory specific flags. DFLAGS are
+#intended to be passed in via the command-line; 
+DEFFLAGS=		$(DEFS) $(XFLAGS) $(DFLAGS)
+
+#Library search used.
+ZLIBS=			-L$(LIBZ_BIN) -lz
+
+XLIBS=			@XLIBS@
+
+LDFLAGS=		@LDFLAGS@
+
+@SET_MAKE@
+
+#Flags to be passed down to recursive compilation makes; 
+#many makes don't do it correctly thru the environment.
+REC_MAKE_FLAGS=	\
+  CFLAGS='$(CFLAGS)' \
+  DFLAGS='$(DFLAGS)' \
+  PROGRAM='$(PROGRAM)' \
+  VERSION='$(VERSION)' \
+  SIGNATURE='Zerksis'
+
+REC_MAKE=	$(MAKE) $(REC_MAKE_FLAGS)
+
+#This ends the configuration section.
+
+#The libz directory is a sibling of the main package directory.
+LIBZ_SRC=		$(topdir)/libz
+LIBZ_BIN=		$(builddir)/libz
+
+
+
+#SUFFIX RULES
+.SUFFIXES:
+
+.SUFFIXES:	.ps .html .info .texi .tm4
+
+.tm4.texi:
+		$(GM4) $< >$@
+
+.texi.ps:
+		$(TEXI2DVI) $<
+		$(DVI2PS) $*.dvi -o $@
+		$(RM) $*.dvi
+
+.texi.info:
+		$(MAKEINFO) $<
+
+#Examples
+EXAMPLEDIR=	examples/
+
+#c2tex
+C2TEX=		c2tex
+C2TEX_DIR=	../c2tex
+
+INCLUDES= \
+  $(EXAMPLEDIR)rpcalc.y \
+  $(EXAMPLEDIR)calc.y \
+  $(EXAMPLEDIR)mfcalc.y \
+  $(EXAMPLEDIR)nmcalc.y \
+  $(EXAMPLEDIR)polycalc.y \
+  $(EXAMPLEDIR)lazycalc.y \
+  $(EXAMPLEDIR)semtest.y \
+  evalpoly.c \
+  union.c
+
+#Human-generated files.
+SRC_FILES= \
+  $(PROGRAM).tm4 \
+  $(INCLUDES) \
+  macros.m4 Makefile.m4 xoptnode.sed $(EXAMPLEDIR)Makefile README
+
+HTML_FILES= \
+  $(PROGRAM)_toc.html $(PROGRAM)_1.html $(PROGRAM)_2.html $(PROGRAM)_3.html \
+  $(PROGRAM)_4.html $(PROGRAM)_5.html $(PROGRAM)_6.html $(PROGRAM)_7.html \
+  $(PROGRAM)_8.html $(PROGRAM)_9.html $(PROGRAM)_10.html $(PROGRAM)_11.html \
+  $(PROGRAM)_12.html $(PROGRAM)_13.html $(PROGRAM)_14.html 
+
+
+#Computer-generated files.
+NON_SRC_FILES= \
+  $(PROGRAM).texi \
+  $(PROGRAM).info \
+  $(PROGRAM).info-1 $(PROGRAM).info-2 $(PROGRAM).info-3 $(PROGRAM).info-4 \
+  $(PROGRAM).info-5 $(PROGRAM).info-6 \
+  $(HTML_FILES) \
+  $(PROGRAM).ps \
+  Makefile.in
+
+DIST_FILES= \
+  $(SRC_FILES) $(NON_SRC_FILES)
+
+
+all:		$(PROGRAM).info $(PROGRAM)_toc.html $(PROGRAM).ps
+
+$(HTML_FILES):	$(PROGRAM).texi
+		$(TEXI2HTML) -split_chapter $? 
+
+install:
+		@if test -f ./$(PROGRAM)_toc.html || \
+		    test -f $(srcdir)/$(PROGRAM)_toc.html ; \
+		then \
+		  echo "installing documentation" ; \
+		else \
+		  echo "*** no doc made; Must make doc first"; exit 1 ; \
+		fi
+		@-if test -f $(PROGRAM)_toc.html ; \
+		then d=. ; \
+		else d=$(srcdir) ; \
+		fi ; \
+		for h in $(HTML_FILES) ; \
+		do \
+		  $(topdir)/install-chk $(SIGNATURE) $(htmldir)/$$h \
+		    && $(INSTALL_DATA) $$d/$$h $(htmldir)/$$h ; \
+		done 
+		@-if test -f $(PROGRAM).info ; \
+		then d=. ; \
+		else d=$(srcdir) ; \
+		fi ; \
+		if $(topdir)/install-chk $(SIGNATURE) \
+			$(infodir)/$(PROGRAM).info* ; \
+		then \
+		  for i in $$d/$(PROGRAM).info* ; \
+		  do \
+		    $(INSTALL_DATA) $$i $(infodir)/`basename $$i` ; \
+		  done ; \
+		fi
+
+dist-min-doc:	$(NON_SRC_FILES)
+		@for f in $(SRC_FILES) Makefile.in ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+uninstall:
+		$(topdir)/install-chk $(SIGNATURE) \
+		      $(htmldir)/$(PROGRAM)_toc.html \
+		&& $(RM) $(htmldir)/$(PROGRAM)*.html 
+		if $(topdir)/install-chk $(SIGNATURE) \
+			$(infodir)/$(PROGRAM).info* ; \
+		then \
+		  $(RM) $(infodir)/$(PROGRAM).info* ; \
+		fi
+
+optnodes.sed:	$(PROGRAM).texi
+		$(SED) -n -f xoptnode.sed <$(PROGRAM).texi >$@
+
+options.texi:	optnodes.sed ../src/opttab.texi
+		$(SED) -f optnodes.sed <../src/opttab.texi >$@
+
+$(PROGRAM).texi: $(PROGRAM).tm4 c2tex
+
+c2tex:
+		cd $(C2TEX_DIR); $(MAKE)
+
+#CLEANING TARGETS
+clean:		FORCE
+		$(RM) *.log *.dvi *~ *.bak wc wcRevLns debug 
+		$(RM) *.tmp t.* t?.*
+		$(RM) *.aux *.cp *.cps *.fn *.fns *.ky *.pg *.tp *.vr
+
+distclean:	clean FORCE
+		$(RM) Makefile
+
+maintainer-clean: distclean FORCE
+		$(RM) $(PROGRAM).info* $(PROGRAM).html $(PROGRAM).ps \
+		Makefile.in
+
+FORCE:
+
+#Assume Makefile.in target only when building within srcdir.
+Makefile.in:	Makefile.m4 FORCE
+		$(MAKE_MF_IN)
+
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+
+$(PROGRAM).info:	$(PROGRAM).tm4 $(INCLUDES)
+
+$(PROGRAM).html:	$(PROGRAM).tm4 $(INCLUDES)
+
+$(PROGRAM).ps:		$(PROGRAM).tm4 $(INCLUDES)
+

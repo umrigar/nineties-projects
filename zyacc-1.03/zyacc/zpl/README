@@ -1,0 +1,5 @@
+This directory contains a parser for full DEC-10 Prolog with
+dynamically-defined operators, subject to the constraint that there cannot
+be infix and suffix operators having the same name.
+
+See NOTES.txt for a brief technical overview.

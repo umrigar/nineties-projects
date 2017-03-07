@@ -1,0 +1,4 @@
+This directory contains the source file for zyacc.
+
+The skeleton file is zlexskl.c, generated automatically by m4 from
+zyaccskl.cm4. 

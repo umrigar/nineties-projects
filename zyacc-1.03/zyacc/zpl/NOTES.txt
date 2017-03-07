@@ -1,0 +1,69 @@
+SCANNER
+
+The only unusual aspect of the scanner is that the syntax of string, quoted
+atom and character tokens depends on the Prolog flag character_escapes.  In
+an attempt to handle this in lex rather than C, the introductor characters
+("\"" for strings, "\'" for quoted atoms and "0\'" for characters chooses a
+exclusive start-state which depends on the aforementioned Prolog flag.  This
+results in 6 start-states (3 constructs x 2 states of the Prolog flag).  In
+addition there is a exclusive start-state for COMMENTs.  Also there is a
+initial pattern for characters which only recognizes 0', it was necessary to
+add a start-state for based integers.  If this was not done and we had two
+rules like:
+
+0\'			{ BEGIN ((G.doEsc) ? NUM_ESC_ON : NUM_ESC_OFF); }
+{natNum}\'{alphaNum}+	{ V.NAT_S= basedInt(yytext); }
+
+(where basedInt() extracts the based integer from yytext), then a pattern
+like 0'0 would match the second pattern (via the longest-match rule) which
+is not what is desired.
+
+Characters within strings are returned as STR_CHAR_TOKs.  It is the
+parser's responsibility to recognize a sequence of these STR_CHAR_TOKs as a
+Prolog list.
+
+Negative numbers are not recognized in the scanner.  Instead, a minus which
+immediately (without any intervening whitespace) precedes a digit is
+returned as NUM_MINUS_TOK.  This distinguishing by the scanner, allows the
+parser to treat the - in the term -1+a as a number sign, while treating the
+- in a-1 as a binary operator.  Note that in - 1+a, the - will be treated as
+a unary operator.
+
+PARSER
+
+The grammar is essentially a straight-forward transcription of the DEC-10
+Quintus grammar.  The major difference is the replacement of the subTerm(M)
+non-terminal with an inherited attribute for Term which constrains the
+maximum precedence of the Term.
+
+Reduction decisions are made using the %test REDUCE_TEST(n) which looks at
+the current lookahead.  It returns FALSE iff the lookahead is not a infix or
+suffix operator with precedence < n. 
+
+Operators are recognized using the respective productions at the end of the
+grammar.  These use a test which OP(id, type, max) which succeeds if id is
+an operator of type and precedence <= max.  It is this test which allows
+operator definitions to be changed dynamically.
+
+The non-terminal Term999 is introduced to avoid an attribute-conflict which
+would result if it was not used.  The XFX_OP, XFY_OP, etc, non-terminals
+were needed for the same reason.
+
+Since comma is overused in the Prolog syntax it needs some special handling.
+It is allowed as punctuation to separate structure arguments as well as list
+arguments.  It use as an operator is allowed by an alternative for
+InfixTerm.  Note that the test REDUCE_TEST() checks for the comma being a
+lookahead and if so, treats it like any other infix or suffix operator.
+
+Another slightly problematic feature is the '-' sign.  As indicated above,
+the scanner returns a different token NUM_MINUS_TOK if a '-' occurs in the
+context where it is immediately followed by a digit.  If when the parser can
+accept a unary operator it sees such a NUM_MINUS_TOK followed by a number,
+then it absorbs the NUM_MINUS token into the value of the number producing a
+negative number.  In other contexts, where the parser is expecting a infix
+or suffix operator, a NUM_MINUS_TOK is treated like any other operator
+governed by the current declarations.
+
+
+
+

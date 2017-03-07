@@ -1,0 +1,170 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Glossary</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_13.html">previous</A>, <A HREF="zyacc_15.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<A NAME="IDX207"></A>
+<H1><A NAME="SEC129" HREF="zyacc_toc.html#SEC129">Glossary</A></H1>
+<P>
+<DL COMPACT>
+<DT>Backus-Naur Form (BNF)
+<DD>Formal method of specifying context-free grammars.  BNF was first used
+in the <CITE>ALGOL-60</CITE> report, 1963.  See section <A HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>.
+
+<DT>Context-free grammars
+<DD>Grammars specified as rules that can be applied regardless of context.
+Thus, if there is a rule which says that an integer can be used as an
+expression, integers are allowed <EM>anywhere</EM> an expression is
+permitted.  See section <A HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>.
+
+<DT>Dynamic allocation
+<DD>Allocation of memory that occurs during execution, rather than at
+compile time or on entry to a function.
+
+<DT>Empty string
+<DD>Analogous to the empty set in set theory, the empty string is a
+character string of length zero.
+
+<DT>Finite-state stack machine
+<DD>A "machine" that has discrete states in which it is said to exist at
+each instant in time.  As input to the machine is processed, the
+machine moves from state to state as specified by the logic of the
+machine.  In the case of the parser, the input is the language being
+parsed, and the states correspond to various stages in the grammar
+rules.  See section <A HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>.
+
+<DT>Grouping
+<DD>A language construct that is (in general) grammatically divisible;
+for example, `expression' or `declaration' in C.  
+See section <A HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>.
+
+<DT>Infix operator
+<DD>An arithmetic operator that is placed between the operands on which it
+performs some operation.
+
+<DT>Input stream
+<DD>A continuous flow of data between devices or programs.
+
+<DT>Language construct
+<DD>One of the typical usage schemas of the language.  For example, one of
+the constructs of the C language is the <CODE>if</CODE> statement.
+See section <A HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>.
+
+<DT>Left associativity
+<DD>Operators having left associativity are analyzed from left to right:
+<SAMP>`a+b+c'</SAMP> first computes <SAMP>`a+b'</SAMP> and then combines with
+<SAMP>`c'</SAMP>.  See section <A HREF="zyacc_6.html#SEC89">Operator Precedence</A>.
+
+<DT>Left recursion
+<DD>A rule whose result symbol is also its first component symbol;
+for example, <SAMP>`expseq1 : expseq1 ',' exp;'</SAMP>.  See section <A HREF="zyacc_4.html#SEC45">Recursive Rules</A>.
+
+<DT>Left-to-right parsing
+<DD>Parsing a sentence of a language by analyzing it token by token from
+left to right.  See section <A HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>.
+
+<DT>Lexical analyzer (scanner)
+<DD>A function that reads an input stream and returns tokens one by one.
+See section <A HREF="zyacc_5.html#SEC79">The Lexical Analyzer Function <CODE>yylex</CODE></A>.
+
+<DT>Lexical tie-in
+<DD>A flag, set by actions in the grammar rules, which alters the way
+tokens are parsed.  See section <A HREF="zyacc_8.html#SEC102">Lexical Tie-ins</A>.
+
+<DT>Look-ahead token
+<DD>A token already read but not yet shifted.  See section <A HREF="zyacc_6.html#SEC87">Look-Ahead Tokens</A>.
+
+<DT>LALR(1)
+<DD>The class of context-free grammars that Zyacc (like most other parser
+generators) can handle; a subset of LR(1).  See section <A HREF="zyacc_6.html#SEC97">Mysterious Reduce/Reduce Conflicts</A>.
+
+<DT>LR(1)
+<DD>The class of context-free grammars in which at most one token of
+look-ahead is needed to disambiguate the parsing of any piece of input.
+
+<DT>Nonterminal symbol
+<DD>A grammar symbol standing for a grammatical construct that can
+be expressed through rules in terms of smaller constructs; in other
+words, a construct that is not a token.  See section <A HREF="zyacc_4.html#SEC43">Symbols, Terminal and Nonterminal</A>.
+
+<DT>Parse error
+<DD>An error encountered during parsing of an input stream due to invalid
+syntax.  See section <A HREF="zyacc_7.html#SEC99">Error Recovery</A>.
+
+<DT>Parser
+<DD>A function that recognizes valid sentences of a language by analyzing
+the syntax structure of a set of tokens passed to it from a lexical
+analyzer.
+
+<DT>Postfix operator
+<DD>An arithmetic operator that is placed after the operands upon which it
+performs some operation.
+
+<DT>Reduction
+<DD>Replacing a string of nonterminals and/or terminals with a single
+nonterminal, according to a grammar rule.  See section <A HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>.
+
+<DT>Reentrant
+<DD>A reentrant subprogram is a subprogram which can be in invoked any
+number of times in parallel, without interference between the various
+invocations.  See section <A HREF="zyacc_4.html#SEC72">A Pure (Reentrant) Parser</A>.
+
+<DT>Reverse polish notation
+<DD>A language in which all operators are postfix operators.
+
+<DT>Right recursion
+<DD>A rule whose result symbol is also its last component symbol;
+for example, <SAMP>`expseq1: exp ',' expseq1;'</SAMP>.  See section <A HREF="zyacc_4.html#SEC45">Recursive Rules</A>.
+
+<DT>Semantics
+<DD>In computer languages, the semantics are specified by the actions
+taken for each instance of the language, i.e., the meaning of
+each statement.  See section <A HREF="zyacc_4.html#SEC46">Defining Language Semantics</A>.
+
+<DT>Shift
+<DD>A parser is said to shift when it makes the choice of analyzing
+further input from the stream rather than reducing immediately some
+already-recognized rule.  See section <A HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>.
+
+<DT>Single-character literal
+<DD>A single character that is recognized and interpreted as is.
+See section <A HREF="zyacc_2.html#SEC6">From Formal Rules to Zyacc Input</A>.
+
+<DT>Start symbol
+<DD>The nonterminal symbol that stands for a complete valid utterance in
+the language being parsed.  The start symbol is usually listed as the
+first nonterminal symbol in a language specification.  
+See section <A HREF="zyacc_4.html#SEC70">The Start-Symbol</A>.
+
+<DT>Symbol table
+<DD>A data structure where symbol names and associated data are stored
+during parsing to allow for recognition and use of existing
+information in repeated uses of a symbol.  See section <A HREF="zyacc_3.html#SEC26">Multi-Function Calculator: <CODE>mfcalc</CODE></A>.
+
+<DT>Token
+<DD>A basic, grammatically indivisible unit of a language.  The symbol
+that describes a token in the grammar is a terminal symbol.
+The input of the Zyacc parser is a stream of tokens which comes from
+the lexical analyzer.  See section <A HREF="zyacc_4.html#SEC43">Symbols, Terminal and Nonterminal</A>.
+
+<DT>Terminal symbol
+<DD>A grammar symbol that has no rules in the grammar and therefore
+is grammatically indivisible.  The piece of text it represents
+is a token.  See section <A HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>.
+</DL>
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_13.html">previous</A>, <A HREF="zyacc_15.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

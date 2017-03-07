@@ -1,0 +1,356 @@
+#Makefile.in produced automatically using GNU-m4.
+
+#DIRECTORIES FOR SOURCES AND BUILD.
+#Source directory controlled by this makefile.
+srcdir=			@srcdir@
+
+#Define VPATH to ensure that source files found even if build directory is
+#different from srcdir.
+VPATH=			@srcdir@
+
+#Top-level source directory for entire package.
+topdir=			@top_srcdir@
+
+#Top-level build directory for package.
+builddir=		@builddir@
+
+#INSTALLATION PATHS.
+#Prefix of path where all architecture-independent files are installed.
+prefix=			@prefix@
+
+#Prefix of path where architecture-dependent files are installed.
+exec_prefix=		@exec_prefix@
+
+#Path where executables are installed.
+bindir=			$(exec_prefix)/bin
+
+#Path where skeleton file and library sources are installed.
+datadir=		$(prefix)/share/$(PROGRAM)
+
+#Path where include files are installed.
+includedir=		$(prefix)/include
+
+#Path where info files are installed.
+infodir=		$(prefix)/info
+
+#Path where libraries are installed.
+libdir=			$(exec_prefix)/lib
+
+#Path where java classes are installed.
+classdir=		$(prefix)/share/classes
+
+#Path where manuals are installed (section $N in $(mandir)/man$N).
+mandir=			$(prefix)/man
+
+#Path where library sources and skeleton are installed.
+libsrcdir=		$(datadir)
+
+#Path where html files are installed.
+htmldir=		$(prefix)/doc/html
+
+SHELL=			/bin/sh
+RM=			rm -f
+AR=			ar
+LN=			ln -f
+MV=			mv
+CAT=			cat
+CMP=			cmp
+SED=			sed
+GZIP=			gzip -f
+DEPEND_CMD=		gcc -MM $(CPPFLAGS) $(DFLAGS)
+MAKE_MF_IN=		$(GM4) --include=$(topdir)/mf \
+		        Makefile.m4 >$(srcdir)/Makefile.in
+MAKEINFO=		makeinfo
+TEXI2DVI=		texi2dvi
+TEXI2HTML=		texi2html
+DVI2PS=			dvips
+GM4=			gm4 --prefix-builtins
+RANLIB=			@RANLIB@
+INSTALL=		@INSTALL@
+INSTALL_PROGRAM=	@INSTALL_PROGRAM@
+INSTALL_DATA=		@INSTALL_DATA@
+ZLEX=			zlex
+ZYACC=			zyacc
+ZYACCFLAGS=
+ZLEXFLAGS=
+
+
+#COMPILER CONTROL
+#Make variables which define compiler invocation.
+CC=			@CC@
+
+#Flags to control optimization/debugging.
+CFLAGS=			@CFLAGS@
+
+#Header file search directory and other misc. options for cpp/cc.
+CPPFLAGS=		-I$(srcdir) -I$(LIBZ_SRC) -I$(builddir)
+
+#Extra debugging and optimization options for the C compiler.
+CXXFLAGS=		@CXXFLAGS@
+
+#-D options passed to the C-compiler by configure.
+DEFS=			@DEFS@
+
+#Compose DEFFLAGS as combination of above (plus others if needed).
+#XFLAGS should be project or directory specific flags. DFLAGS are
+#intended to be passed in via the command-line; 
+DEFFLAGS=		$(DEFS) $(XFLAGS) $(DFLAGS)
+
+#Library search used.
+ZLIBS=			-L$(LIBZ_BIN) -lz
+
+XLIBS=			@XLIBS@
+
+LDFLAGS=		@LDFLAGS@
+
+@SET_MAKE@
+
+#Flags to be passed down to recursive compilation makes; 
+#many makes don't do it correctly thru the environment.
+REC_MAKE_FLAGS=	\
+  CFLAGS='$(CFLAGS)' \
+  DFLAGS='$(DFLAGS)' \
+  PROGRAM='$(PROGRAM)' \
+  VERSION='$(VERSION)' \
+  SIGNATURE='Zerksis'
+
+REC_MAKE=	$(MAKE) $(REC_MAKE_FLAGS)
+
+#This ends the configuration section.
+
+#The libz directory is a sibling of the main package directory.
+LIBZ_SRC=		$(topdir)/libz
+LIBZ_BIN=		$(builddir)/libz
+
+
+
+ZYACC_PATH=		..
+ZYACC_SEARCH_PATH=	..
+
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.o .c .y .l
+
+.c.o:
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $<
+
+.c:
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $< $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+
+
+#The following targets use ZYACC_PATH and ZYACC_SEARCH_PATH.  If ZYACC_PATH is
+#defined, it should not end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+
+ZYACCFLAGS=	-d -v
+
+.y.c:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+
+.y.o:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.y:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+#The following targets use ZLEX_PATH and ZLEX_SEARCH_PATH.  If ZLEX_PATH is
+#defined, it should not end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+.l.c:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+
+.l.o:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.l:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+
+
+
+ZLIBS=			-L$(builddir)/zyacc/libzyacc -lzyacc
+
+#FILE DESCRIPTIONS.
+#All human-generated files to be distributed.
+SRC_FILES= \
+  arithexp.y attrfrnt.y decuse.y lalr.y loc.y look.y multi.y \
+  assocprc.y binnum.y inattrib.y semtest.y conflicts.y debug.y zprof.y \
+  arithexp.in assocprc.in binnum.in decuse.in \
+  inattrib.in loc.in multi.in semtest.in debug.in debug.in1 \
+  Makefile.m4 README
+
+#All computer-generated files to be distributed.
+NON_SRC_FILES= \
+  arithexp.log attrfrnt.log decuse.log lalr.log loc.log look.log multi.log \
+  assocprc.log binnum.log inattrib.log semtest.log conflicts.log debug.log \
+  zprof.log Makefile.in 
+
+#All files to be distributed.
+DIST_FILES= \
+  $(SRC_FILES) $(NON_SRC_FILES)
+
+
+#Run parser generator, compile and then execute these tests.
+EXEC_TESTS= \
+	 arithexp \
+	 assocprc \
+	 binnum \
+	 decuse \
+	 inattrib \
+	 loc \
+	 multi \
+	 semtest 
+
+#Only run parser generator and look at output file.
+OUT_TESTS= \
+	 conflicts \
+	 lalr 
+
+#Only run parser generator and look at diagnostic errors.
+ERR_TESTS= \
+	 attrfrnt \
+	 look
+
+DEBUG_TESTS= \
+	 debug 
+
+C_TESTS= \
+	zprof
+
+check:		EXEC_TESTS OUT_TESTS ERR_TESTS DEBUG_TESTS C_TESTS
+		@echo Tests completed.
+
+EXEC_TESTS:
+		@for t in $(EXEC_TESTS) ; \
+		do \
+		  $(MAKE) $$t TARGET=$$t && \
+		  ./$$t <$$t.in >tmp.$$$$ && \
+		  $(MAKE) FILE_CMP TEST=$$t \
+		    GOOD_LOG=$$t.log TEST_LOG=tmp.$$$$ ; \
+		done
+
+ERR_TESTS:	
+		@for t in $(ERR_TESTS) ; \
+		do \
+		  $(RM) $$t.c ; \
+		  $(MAKE) $$t.c TARGET=$$t.c 2>tmp.$$$$ || true; \
+		  $(MAKE) FILE_CMP TEST=$$t \
+		    GOOD_LOG=$$t.log TEST_LOG=tmp.$$$$ ; \
+		done
+
+OUT_TESTS:
+		@for t in $(OUT_TESTS) ; \
+		do \
+		  $(RM) $$t.c ; \
+		  $(MAKE) $$t.c TARGET=$$t.c && \
+		  tail +2 $$t.output >$$t.$$$$ && \
+		  $(MAKE) FILE_CMP TEST=$$t \
+		    GOOD_LOG=$$t.log TEST_LOG=$$t.$$$$ ; \
+		done
+
+DEBUG_TESTS:
+		@for t in $(DEBUG_TESTS) ; \
+		do \
+		  $(MAKE) CFLAGS="-g -DYYDEBUG" $$t TARGET=$$t && \
+		  ./$$t $$t.in1 <$$t.in >tmp.$$$$ && \
+		  $(MAKE) FILE_CMP TEST=$$t \
+		    GOOD_LOG=$$t.log TEST_LOG=tmp.$$$$ ; \
+		done
+
+C_TESTS:
+		@for t in $(C_TESTS) ; \
+		do \
+		  $(RM) $$t.c ; \
+		  $(MAKE) $$t.c TARGET=$$t.c && \
+		  tail +5 $$t.c >$$t.$$$$ && \
+		  $(MAKE) FILE_CMP TEST=$$t \
+		    GOOD_LOG=$$t.log TEST_LOG=$$t.$$$$ ; \
+		done
+
+
+#Ensure that every target depends on zyacc executable & library being tested.
+#@@@ If your make has problems, try commenting out the following 2 lines.
+$(EXEC_TESTS) $(OUT_TESTS) $(ERR_TESTS) $(DEBUG_TESTS):	\
+  $(ZYACC_PATH)/$(ZYACC) $(builddir)/zyacc/libzyacc/libzyacc.a
+
+#The following rule acts as a subroutine invoked via a recursive make to
+#compare $(GOOD_LOG) with $(TEST_LOG) for test $(TEST).
+FILE_CMP:	
+		@echo -n "Testing $(TEST) ... " ; \
+		$(SED) -e '/make/d' $(TEST_LOG) >tmp.$$$$ ; \
+		$(MV) tmp.$$$$ $(TEST_LOG) ; \
+		if cmp $(GOOD_LOG) $(TEST_LOG) >/dev/null 2>/dev/null ; \
+		then \
+		  echo OK. ; \
+		  $(RM) $(TEST_LOG) ; \
+		else \
+		  mv $(TEST_LOG) $(TEST).ERR ; \
+		  echo FAILED. ; \
+		  echo Diff test log in $(TEST).ERR \
+		       with good log in $(GOOD_LOG) ; \
+		fi ;
+
+install:	
+		@echo "No files to be installed from this directory."
+
+uninstall:
+		@echo "No files to be uninstalled from this directory."
+
+#CLEANING TARGETS
+#Remove any garbage.
+clean:		FORCE
+		$(RM) *.o *~ core t.* t t[0-9]* lex.yy.c *.tmp tmp.* \
+		      *.output 
+
+#Remove all files not in distribution.
+distclean:	clean FORCE
+		$(RM) $(TARGET) Makefile makefile
+
+
+#Remove all non-source files.  May need special tools to rebuild.
+maintainer-clean: 	distclean FORCE
+		$(RM) $(NON_SRC_FILES) *.bak
+
+FORCE:
+
+
+
+Makefile.in:	Makefile.m4 FORCE
+		$(MAKE_MF_IN)
+
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+
+
+

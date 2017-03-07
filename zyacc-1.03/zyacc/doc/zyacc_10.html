@@ -1,0 +1,309 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Invoking Zyacc</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_9.html">previous</A>, <A HREF="zyacc_11.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<A NAME="IDX202"></A>
+<A NAME="IDX203"></A>
+<A NAME="IDX204"></A>
+<H1><A NAME="SEC119" HREF="zyacc_toc.html#SEC119">Invoking Zyacc</A></H1>
+<P>
+The command line needed to invoke Zyacc has the format:
+<P>
+<PRE>
+zyacc [<VAR>Options List</VAR>] <VAR>yacc-file</VAR> [<VAR>yacc-file</VAR>...]
+</PRE>
+<P>
+Here <VAR>yacc-file</VAR> specifies the name(s) of the grammar file, usually
+ending in <SAMP>`.y'</SAMP>.  Unless the <CODE>--output</CODE> or <CODE>--yacc</CODE> options
+are specified, the name of the generated parser file is created by replacing
+the <SAMP>`.y'</SAMP> with <SAMP>`.tab.c'</SAMP>.  Thus, the <SAMP>`zyacc foo.y'</SAMP> filename
+yields <TT>`foo.tab.c'</TT>, and the <SAMP>`zyacc hack/foo.y'</SAMP> filename yields
+<TT>`hack/foo.tab.c'</TT>.<P>
+<P>
+<UL>
+
+<LI>
+If no <VAR>yacc-file</VAR>s are specified on
+the command line, then a
+help message is printed on the standard output.  
+
+<LI>
+If multiple <VAR>yacc-files</VAR>s are specified, then their concatenation is
+treated as a single logical file.
+
+<LI>
+A <VAR>yacc-file</VAR> specified by the single character <SAMP>`-'</SAMP> stands for the
+standard input.
+
+</UL>
+<P>
+<H2><A NAME="SEC120" HREF="zyacc_toc.html#SEC120">Option Conventions</A></H2>
+<P>
+A word which constitutes a command-line argument has two possible types: it
+is a <DFN>option word</DFN> if it begin with a <SAMP>`-'</SAMP> or <SAMP>`--'</SAMP> (with
+certain exceptions noted below), or if it follows an option word which
+requires an argument.  Otherwise it is a <DFN>non-option word</DFN>.  An option
+word specifies the value of a Zyacc option; a non-option word specifies a
+file name.
+<P>
+<UL>
+<LI>
+Options with short single character names must begin with a single <SAMP>`-'</SAMP>.
+
+<LI>
+Options with long multiple-character names must begin with <SAMP>`--'</SAMP>.  The
+name can consists of any alphanumeric characters along with <SAMP>`-'</SAMP> and
+<SAMP>`_'</SAMP> characters.
+
+<LI>
+When a option is specified using a long name, it is sufficient to specify an
+unambiguous prefix of its name.
+
+<LI>
+If an option has a value which must be one of several prespecified values,
+then it is sufficient to specify an unambiguous prefix of the value, in a
+manner similar to long option names.
+
+<LI>
+It is possible to specify an option value in the same word as the option
+name.  For short option names, there should not be any intervening
+characters between the short name and the value.  For long option names, the
+long name should be separated from the value using a single <SAMP>`='</SAMP>
+character. 
+
+<LI>
+If an option has an <EM>optional</EM> value, then the value must be provided
+in the same word as the option name, as outlined above.
+
+<LI>
+If an option has a <EM>required</EM> value, then the value may be provided in
+the same word as the option name as outlined above, or it may be
+provided in the next word.  In the latter case, the entire next word is
+taken to be the value (even if it looks like an option starting with
+<SAMP>`-'</SAMP> or <SAMP>`--'</SAMP>).
+
+<LI>Short names for multiple options which are not allowed to have any
+values may be combined into a single word.  For example, if Zyacc had
+options <SAMP>`-l'</SAMP> and <SAMP>`-7'</SAMP> which were not allowed to have any values
+(it does not), then instead of specifying them using two words as <SAMP>`-l
+-7'</SAMP>, they can be specified using a single word <SAMP>`-l7'</SAMP>.
+
+<LI>
+If an option is given two incompatible values, then the option which is
+specified later dominates.
+
+<LI>
+If the option consisting simply of the two characters <SAMP>`--'</SAMP> is
+specified, then all the remaining words on the command line will not be
+treated as options irrespective of whether they start with <SAMP>`-'</SAMP> or
+<SAMP>`--'</SAMP>.  This makes it possible to specify file names starting with a
+<SAMP>`-'</SAMP>.
+
+<LI>
+Option words and non-option words may be arbitrarily interspersed.
+
+<LI>
+Command-line options always override the options specified elsewhere
+(see section <A HREF="zyacc_10.html#SEC121">Option Sources</A>).
+
+</UL>
+<P>
+<H2><A NAME="SEC121" HREF="zyacc_toc.html#SEC121">Option Sources</A></H2>
+<P>
+Besides the command-line, Zyacc can read its options from several different
+sources.  In order of increasing priority these sources are the following:
+<P>
+<UL>
+
+<LI>
+The file <TT>`zyacc.opt'</TT>.  The file should contain only option names and
+values separated by whitespace (newline counts as whitespace).  In addition
+it may contain comments enclosed within <SAMP>`/*'</SAMP> and <SAMP>`*/'</SAMP>.  The file
+is searched for using Zyacc's search list (see section <A HREF="zyacc_10.html#SEC123">Data Search List</A>).
+
+The use of this file for setting defaults, makes it possible for a site to
+setup default options for Zyacc different from its builtin defaults.  It also
+makes it easy to drop Zyacc into a GUI toolset where options are set using a
+graphical user interface.
+
+<LI>
+The environment variable <CODE>ZYACC_OPTIONS</CODE>.  If this variable is set, then
+its value should contain only options and option values separated by
+whitespace as on the command-line.  The procedure for setting environment
+variables depends on the system you are using: under the UNIX shell
+<CODE>csh</CODE> the <CODE>setenv</CODE> command can be used, under the MS-DOS
+command-interpreter the <CODE>set</CODE> command can be used; under the UNIX shell
+<CODE>sh</CODE> or <CODE>ksh</CODE> the <CODE>export</CODE> command can be used.
+
+<LI>
+It is also possible to specify options directly within the Zyacc
+source file using the <CODE>%option</CODE> directives (see section <A HREF="zyacc_4.html#SEC40">The Zyacc Declarations Section</A>).
+
+</UL>
+<P>
+Options specified by the environment variable <CODE>ZYACC_OPTIONS</CODE> overrides
+the options specified in the <TT>`zyacc.opt'</TT> file.  Options specified in the
+Zyacc source file override options specified in the <TT>`zyacc.opt'</TT> file or
+<CODE>ZLEX_OPTIONS</CODE> environment variable.  Finally, command-line options
+always override options specified by all other sources.
+<P>
+<H2><A NAME="SEC122" HREF="zyacc_toc.html#SEC122">Zyacc Options</A></H2>
+<P>
+A list of the available options follows:
+<P>
+<DL COMPACT>
+<DT><CODE>--build-display</CODE>
+<DD>Display the parameters used to build zyacc and exit.
+<DT><CODE>--debug[=1|0]</CODE>
+<DD><DT><CODE>-t[1|0]</CODE>
+<DD>Output a definition of the macro <CODE>YYDEBUG</CODE> into the parser file,
+so that the debugging facilities are compiled.  See section <A HREF="zyacc_9.html#SEC104">Debugging Your Parser</A>.
+<DT><CODE>--defines[=1|0]</CODE>
+<DD><DT><CODE>-d[1|0]</CODE>
+<DD>Output a .h definitions file containing the semantic value type
+<CODE>YYSTYPE</CODE> and C preprocessor macro definitions for all the token
+type names defined in the grammar (default: <CODE>0</CODE>).
+
+If the parser output file is named <TT>`<VAR>name</VAR>.c'</TT> then this file
+is named <TT>`<VAR>name</VAR>.h'</TT>.
+This output file is essential if you wish to put the definition of
+<CODE>yylex</CODE> in a separate source file, because <CODE>yylex</CODE> needs to
+be able to refer to token type codes and the variable
+<CODE>yylval</CODE>.  See section <A HREF="zyacc_5.html#SEC81">Semantic Values of Tokens</A>.
+<DT><CODE>--file-prefix <VAR>prefix</VAR></CODE>
+<DD><DT><CODE>-b <VAR>prefix</VAR></CODE>
+<DD>Specify a <VAR>prefix</VAR> to use for all Zyacc output file names.  The names are
+chosen as if the input file were named <TT>`<VAR>prefix</VAR>.c'</TT>.
+<DT><CODE>--grammar[=1|0]</CODE>
+<DD><DT><CODE>-g[1|0]</CODE>
+<DD>Output a reference grammar file to &#60;stdout&#62; and exit (default: <CODE>0</CODE>).
+<DT><CODE>--help</CODE>
+<DD><DT><CODE>-h</CODE>
+<DD>Print summary of options and exit.
+<DT><CODE>--HTML[=1|0]</CODE>
+<DD><DT><CODE>-H[1|0]</CODE>
+<DD>Write a HTML parser description in .html file.  This is similar to the
+<CODE>--verbose</CODE> option, but you can use any WWW browser like Netscape
+or Lynx to browse the parser description file and follow hot links
+within the file (default: <CODE>0</CODE>).
+<DT><CODE>--lines</CODE>
+<DD>Output #line directives in generated parser file (default: <CODE>1</CODE>).  If
+Zyacc puts these directives in the parser file then the C compiler and
+debuggers can associate errors with your source file, the grammar file.  If
+this option is specified as <CODE>0</CODE>, then errors will be associated with
+the parser file, treating it an independent source file in its own right.
+<DT><CODE>--longer-rule-prefer[=1|0]</CODE>
+<DD>When resolving a reduce-reduce conflict prefer the longer rule (default:
+<CODE>0</CODE>). If this option is specified as <CODE>0</CODE>, then the reduce-reduce
+conflicts are resolved in favor of the rule which occurs <EM>earlier</EM> in
+the source file.
+<DT><CODE>--output-file <VAR>outFile</VAR></CODE>
+<DD><DT><CODE>-o <VAR>outFile</VAR></CODE>
+<DD>Specify the name outFile for the parser file.
+The other output files' names are constructed from <VAR>outfile</VAR>
+as described under the <CODE>--defines</CODE> and <CODE>--verbose</CODE> switches.
+<DT><CODE>--name-prefix <VAR>prefix</VAR></CODE>
+<DD><DT><CODE>-p <VAR>prefix</VAR></CODE>
+<DD>Specify <VAR>prefix</VAR> to be used for all external symbols.
+Rename the external symbols used in the parser so that they start with
+<VAR>prefix</VAR> instead of <SAMP>`yy'</SAMP>.  The precise list of symbols renamed
+is <CODE>yychar</CODE>, <CODE>yydebug</CODE>, <CODE>yyerror</CODE>, <CODE>yylex</CODE>,
+<CODE>yynerrs</CODE>, <CODE>yylval</CODE> and <CODE>yyparse</CODE>.
+
+
+For example, if you use <SAMP>`-p c'</SAMP>, the names become <CODE>cchar</CODE>,
+<CODE>cdebug</CODE>, and so on.
+
+See section <A HREF="zyacc_4.html#SEC76">Multiple Parsers in the Same Program</A>.
+
+
+<DT><CODE>--term-prefix <VAR>suffix</VAR></CODE>
+<DD>Specify suffix string to be appended to all external terminal names 
+(default <CODE>""</CODE>).  For example, if you specify <CODE>--term-prefix _TOK</CODE>,
+then the string <CODE>_TOK</CODE> will be appended to all terminal names
+exported from the grammar; if you use <CODE>ID</CODE> as a terminal name within
+your grammar, its external name will be <CODE>ID_TOK</CODE>.
+
+<DT><CODE>--verbose[=1|0]</CODE>
+<DD><DT><CODE>-v[1|0]</CODE>
+<DD>Write verbose parser description in .output file (default: <CODE>0</CODE>).  The
+extra output file contains descriptions of the parser states and what is
+done for each type of look-ahead token in that state.
+
+This file also describes all the conflicts, both those resolved by
+operator precedence and the unresolved ones.
+
+The file's name is made by removing <SAMP>`.tab.c'</SAMP> or <SAMP>`.c'</SAMP> from
+the parser output file name, and adding <SAMP>`.output'</SAMP> instead.
+Therefore, if the input file is <TT>`foo.y'</TT>, then the parser file is
+called <TT>`foo.tab.c'</TT> by default.  As a consequence, the verbose
+output file is called <TT>`foo.output'</TT>.
+<DT><CODE>--version</CODE>
+<DD><DT><CODE>-V</CODE>
+<DD>Print version number and exit.
+<DT><CODE>--yacc[=1|0]</CODE>
+<DD><DT><CODE>-y[1|0]</CODE>
+<DD>Name output files like YACC (default: <CODE>0</CODE>)
+Equivalent to <SAMP>`-o y.tab.c'</SAMP>; the parser output file is called
+<TT>`y.tab.c'</TT>, and the other outputs are called <TT>`y.output'</TT> and
+<TT>`y.tab.h'</TT>.  The purpose of this switch is to imitate Yacc's output
+file name conventions.  Thus, the following shell script can substitute
+for Yacc:
+<PRE>
+zyacc -y $*
+</PRE>
+</DL>
+<P>
+<H2><A NAME="SEC123" HREF="zyacc_toc.html#SEC123">Data Search List</A></H2>
+<P>
+When Zyacc is run, it looks for certain data files (a skeleton file
+<TT>`zyaccskl.c'</TT> and an options file <TT>`zyacc.opt'</TT> (see section <A HREF="zyacc_10.html#SEC121">Option Sources</A>)) in certain standard directories (the skeleton file <EM>must</EM>
+exist, but the option file need not exist).  The search list specifying
+these standard directories is fixed when Zyacc is installed; it can be
+printed out using Zyacc's  <SAMP>`--help'</SAMP> option (see section <A HREF="zyacc_10.html#SEC122">Zyacc Options</A>).
+<P>
+The search list consists of a list of colon-separated directory names (the
+directory names may or may not have terminating slashes) or environment
+variables (starting with a <SAMP>`$'</SAMP>).  If a directory name starts with a
+<SAMP>`$'</SAMP>, then the first (only the first) <SAMP>`$'</SAMP> must be repeated.  An
+empty component in the search list specifies the current directory.
+Typically the search list contains the current directory.  
+Also typically, the environment variable <CODE>ZYACC_SEARCH_PATH</CODE> is present
+in the search list -- this causes Zyacc to check if the variable is set in
+the environment.  If it is, then Zyacc expects it to specify a search list
+which it recursively searches.
+<P>
+Typically, the search list compiled into Zyacc looks something like the
+following:
+<P>
+<PRE>
+$ZYACC_SEARCH_PATH:.:$HOME:/usr/local/share/zyacc
+</PRE>
+<P>
+Since the search list will typically contain an environment variable like
+<CODE>ZYACC_SEARCH_PATH</CODE> it is possible to change the set of standard
+directories searched by Zyacc even after installation by specifying a 
+value for the variable.  For example, if with the above search list,
+<CODE>ZYACC_SEARCH_PATH</CODE> is set to <CODE>/usr/lib:/usr/opt/lib</CODE>, then 
+the effective search list becomes:
+<P>
+<PRE>
+/usr/lib:/usr/opt/lib:.:$HOME:/usr/local/share/zyacc
+</PRE>
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_9.html">previous</A>, <A HREF="zyacc_11.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

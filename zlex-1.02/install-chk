@@ -1,0 +1,43 @@
+#! /bin/sh
+
+Usage="Usage: install-chk Signature File [File...]"
+
+#This script returns non-zero if all of the specified Files which exist 
+#do so without the specified Signature.
+#We first try grep which should work if file is ASCII.  Then we try 
+#strings which should work if file is binary.  Hopefully neither one
+#blows up on the wrong kind of file.  Also hopefully strings is portable.
+
+if test $# -lt 2
+then
+  echo $Usage 1>&2
+  exit 1
+fi
+
+sig=$1; shift
+for f 
+do
+  if test -f $f 
+  then
+    exists="$exists $f"
+    if grep $sig $f >/dev/null 2>&1 \
+       || strings $f | grep $sig >/dev/null 2>&1
+    then exit 0
+    else true
+    fi 
+  else
+    continue
+  fi
+done
+
+if test -n "$exists"
+then
+    echo "*** Found previous files $exists which do not appear to be part "\
+	 "of this package."
+    echo "*** Did not make any changes.  Retry after deleting or renaming "\
+	 "files."
+else
+  exit 0
+fi
+
+

@@ -1,0 +1,37 @@
+All measurements below made using SWI-Prolog (Version 1.5.0, October 1990),
+running on a DECstation 5000/25 with a MIPS R-3000 processor & 8MB memory.
+
+========================================
+PROGRAM		       SIZE#	RATIO
+========================================
+TMPrg			 6	
+Target			10	1.67
+----------------------------------------
+TMInt			33
+comp			60	1.81
+----------------------------------------
+mix			65
+cogen		       120	1.84
+========================================
+
+#All sizes are in # of lines of unsugared fc program.
+
+============================================================	
+		RUN	 	       TIME	   RATIO
+============================================================
+output= TMInt[tmPrg, tmInput]		***
+output= Target[tmInput]			***	    ---
+------------------------------------------------------------
+Target= mix[tmInt, tmPrg]		6.07
+Target= comp[tmPrg]			***	    ---
+------------------------------------------------------------
+comp= mix[mix, tmInt]		       51.33
+comp= cogen[tmInt]		        9.99	    5.13
+------------------------------------------------------------
+cogen= mix[mix, mix]		      109.17
+cogen= cogen[mix]		       21.94	    4.97
+============================================================
+
+*** Anomalous times observed, some negative, large variation. 
+Probably too small to measure.
+

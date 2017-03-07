@@ -1,0 +1,1210 @@
+This is Info file zyacc.info, produced by Makeinfo-1.64 from the input
+file zyacc.texi.
+
+
+File: zyacc.info,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
+
+Zyacc
+*****
+
+   This file documents Zyacc, a parser-generator which is
+largely-compatible with both `yacc' and `bison'.
+
+   Large portions of this file have been adapted from the Bison manual
+(*note Bison Manual: (bison.info)top.).
+
+   Copyright (C) 1996, 1997 Zerksis D. Umrigar
+
+   This is the first edition of the Zyacc documentation.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the sections entitled "GNU General Public License" and "Conditions
+for Using Zyacc are included exactly as in the original, and provided
+that the entire resulting derived work is distributed under the terms
+of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions.
+
+* Menu:
+
+* Introduction::                Introduction to Zyacc's capabilities.
+* Concepts::                    Basic concepts for understanding Zyacc.
+* Examples::                    Six simple explained examples of using Zyacc.
+
+Reference sections:
+* Grammar File::                Writing Zyacc declarations and rules.
+* Interface::                   C-language interface to the generated parser.
+* Algorithm::                   How the Zyacc parser works at run-time.
+* Error Recovery::              Writing rules for error recovery.
+* Context Dependency::          How to handle a messy language syntax.
+* Debugging::                   Debugging Zyacc parsers that parse wrong.
+* Invocation::                  Invoking Zyacc from the command-line.
+* Known Incompatibilities with Bison::
+* Bugs and Deficiencies::
+* Table of Symbols::            Listing of Zyacc keywords.
+* Glossary::                    Listing of basic concepts.
+* Conditions::
+* Index::                       Cross-references to the text.
+
+ -- The Detailed Node Listing --
+
+Introduction
+
+* Acknowledgements::
+* Zyacc Enhancements::
+
+The Concepts of Zyacc
+
+* Language and Grammar::        Languages and context-free grammars,
+                                as mathematical ideas.
+* Grammar in Zyacc::            How we represent grammars for Zyacc's sake.
+* Semantic Values::             Each token or syntactic grouping can have
+                                a semantic value (the value of an integer,
+                                the name of an identifier, etc.).
+* Semantic Actions::            Each rule can have an action containing C code.
+* Zyacc Parser::                What are Zyacc's input and output,
+                                how is the output used?
+* Stages::                      Stages in writing and running Zyacc grammars.
+* Grammar Layout::              Overall structure of a Zyacc grammar file.
+
+Examples
+
+* RPN Calc::                    Reverse polish notation calculator;
+                                a first example with no operator precedence.
+* Infix Calc::                  Infix (algebraic) notation calculator.
+                                Operator precedence is introduced.
+* Simple Error Recovery::       Continuing after syntax errors.
+* Multi-function Calc::         Calculator with memory and trig functions.
+                                It uses multiple data-types for semantic
+                                values.
+* MfCalc with Sugared Syntax::
+* Polynomial Calc::
+* Lazy Calc::
+* Exercises::                   Ideas for improving the multi-function calculator.
+
+Reverse Polish Notation Calculator
+
+* Decls: Rpcalc Decls.          Zyacc and C declarations for rpcalc.
+* Rules: Rpcalc Rules.          Grammar Rules for rpcalc, with explanation.
+* Lexer: Rpcalc Lexer.          The lexical analyzer.
+* Main: Rpcalc Main.            The controlling function.
+* Error: Rpcalc Error.          The error reporting function.
+* Gen: Rpcalc Gen.              Running Zyacc on the grammar file.
+* Comp: Rpcalc Compile.         Run the C compiler on the output code.
+
+Grammar Rules for `rpcalc'
+
+* Rpcalc Input::
+* Rpcalc Line::
+* Rpcalc Expr::
+
+Multi-Function Calculator: `mfcalc'
+
+* Decl: Mfcalc Decl.            Zyacc declarations for multi-function calculator.
+* Rules: Mfcalc Rules.          Grammar rules for the calculator.
+* Symtab: Mfcalc Symtab.        Symbol table management subroutines.
+* Mfcalc Scanner::              Scanner for multi-function calculator.
+* Mfcalc StrSpace::             String-space for multi-function calculator.
+* Why a StrSpace::              Justification for a separate string-space.
+
+Zyacc Grammar Files
+
+* Grammar Outline::             Overall layout of the grammar file.
+* Symbols::                     Terminal and nonterminal symbols.
+* Rules::                       How to write grammar rules.
+* Recursion::                   Writing recursive rules.
+* Semantics::                   Semantic values and actions.
+* Declarations::                All kinds of Zyacc declarations are described here.
+* Multiple Parsers::            Putting more than one Zyacc parser in one program.
+
+Outline of a Zyacc Grammar
+
+* C Declarations::              Syntax and usage of the C declarations section.
+* Zyacc Declarations::          Syntax and usage of the Zyacc declarations section.
+* Grammar Rules::               Syntax and usage of the grammar rules section.
+* C Code::                      Syntax and usage of the additional C code section.
+
+Defining Language Semantics
+
+* Value Type::                  Specifying one data type for all semantic values.
+* Multiple Types::              Specifying several alternative data types.
+* Actions::                     An action is the semantic definition of a grammar rule.
+* Action Types::                Specifying data types for actions to operate on.
+* Mid-Rule Actions::            Most actions go at the end of a rule.
+                      This says when, why and how to use the exceptional
+                        action in the middle of a rule.
+* Named Attributes::            Attributes can be named.
+* Inherited Attributes::        Attributes allow context information.
+* Semantic Tests::              Parsing decisions can depend on semantics.
+
+Named Attributes
+
+* Named Terminal Attributes::   How to declare named attributes for terminals.
+* Named Nonterminal Attributes::  How to declare named attributes for
+                        nonterminals.
+
+Inherited Attributes
+
+* Inherited Attributes Notation::  Declaring inherited attributes.
+* Attribute Flow Restrictions::  Restrictions on information flow due to
+                                left-to-right parsing.
+* Attribute Conflicts::         When an inherited attribute gets multiple definitions.
+
+Semantic Tests
+
+* A Prototypical Example::      A typical example where semantic tests are useful.
+* Semantic Test Details::       How semantic tests work.
+* Semantic Test Example::       Implementing dynamic operators.
+
+Zyacc Declarations
+
+* Token Decl::                  Declaring terminal symbols.
+* Precedence Decl::             Declaring terminals with precedence and associativity.
+* Multi-Character Lits::        Allowing multiple-character literal tokens.
+* Union Decl::                  Declaring the set of all semantic value types.
+* Type Decl::                   Declaring the choice of type for a nonterminal symbol.
+* Expect Decl::                 Suppressing warnings about shift/reduce conflicts.
+* Start Decl::                  Specifying the start symbol.
+* Multiple Start Symbols::
+* Pure Decl::                   Requesting a reentrant parser.
+* Option Decl::                 Specifying command-line options within the parser.
+* Specifying the Lookahead::
+* Decl Summary::                Table of all Zyacc declarations.
+
+Parser C-Language Interface
+
+* Parser Function::             How to call `yyparse' and what it returns.
+* Lexical::                     You must supply a function `yylex'
+                                which reads tokens.
+* Error Reporting::             You must supply a function `yyerror'.
+* Action Features::             Special features for use in actions.
+
+The Lexical Analyzer Function `yylex'
+
+* Calling Convention::          How `yyparse' calls `yylex'.
+* Token Values::                How `yylex' must return the semantic value
+                                of the token it has read.
+* Token Positions::             How `yylex' must return the text position
+                                (line number, etc.) of the token, if the
+                                actions want that.
+* Pure Calling::                How the calling convention differs
+                                in a pure parser (*note A Pure (Reentrant) Parser: Pure Decl.).
+
+The Zyacc Parser Algorithm
+
+* Look-Ahead::                  Parser looks one token ahead when deciding
+                                what to do.
+* Shift/Reduce::                Conflicts: when either shifting or
+                                reduction is valid.
+* Precedence::                  Operator precedence works by resolving
+                                conflicts.
+* Contextual Precedence::       When an operator's precedence depends on
+                                context.
+* Parser States::               The parser is a finite-state-machine with
+                                stack.
+* Reduce/Reduce::               When two rules are applicable in the
+                                same situation.
+* Mystery Conflicts::           Reduce/reduce conflicts that look unjustified.
+* Stack Overflow::              What happens when stack gets full.
+                                How to avoid it.
+
+Operator Precedence
+
+* Why Precedence::              An example showing why precedence is needed.
+* Using Precedence::            How to specify precedence in Zyacc grammars.
+* Precedence Examples::         How these features are used in the
+                                previous example.
+* How Precedence::              How they work.
+
+Handling Context Dependencies
+
+* Semantic Tokens::             Token parsing can depend on the semantic context.
+* Lexical Tie-ins::             Token parsing can depend on the syntactic context.
+* Tie-in Recovery::             Lexical tie-ins have implications for how
+                                error recovery rules must be written.
+
+Debugging Your Parser
+
+* Building Debugging Parsers::
+* Environmental Variables::
+* Debugging Parsers Using a Textual Interface::
+* Debugging Parsers Using a Graphical User Interface::
+* Tradeoffs between Debugging Approaches::
+
+Building Debugging Parsers
+
+* Compiling Debugging Parsers::
+* Linking Debugging Parsers::
+* Printing Token Semantics::
+
+Debugging Parsers Using a Textual Interface
+
+* Starting a Single Process Textual Debugger::
+* Starting a Multiple Process Textual Debugger::
+* Textual Debugger Commands::
+
+Debugging Parsers Using a Graphical User Interface
+
+* Starting a GUI Debugger as a Java Application::
+* Starting a GUI Debugger as a Java Applet::
+* Using the Debugger GUI::
+
+Invoking Zyacc
+
+* Option Conventions::
+* Option Sources::
+* Zyacc Options::
+* Data Search List::
+
+Bugs and Deficiencies
+
+* Suspicions::                  Possible problem areas in Zyacc.
+* Bug Reports::                 How to report bugs.
+
+Conditions
+
+* Conditions for Using Bison::
+* GPL::
+
+
+File: zyacc.info,  Node: Introduction,  Next: Concepts,  Prev: Top,  Up: Top
+
+Introduction
+************
+
+   "Zyacc" is a general-purpose parser generator that converts a
+grammar description for an LALR(1) context-free grammar into a C
+program to parse that grammar.  Once you are proficient with Zyacc, you
+may use it to develop a wide range of language parsers, from those used
+in simple desk calculators to complex programming languages.
+
+   Zyacc is largely upward compatible with Yacc and Bison: all
+properly-written Yacc and Bison grammars ought to work with Zyacc with
+minimal change.  Anyone familiar with Yacc or Bison should be able to
+use Zyacc with little trouble.  This manual uses the spellings Zyacc,
+Bison and Yacc to refer to the specific programs, while using the
+spelling yacc to refer to any one of the above programs.  You need to
+be fluent in C programming in order to use Zyacc or to understand this
+manual.
+
+   We begin with tutorial chapters that explain the basic concepts of
+using Zyacc and show six explained examples, each building on the last.
+If you don't know yacc or Zyacc, start by reading these chapters.
+Reference chapters follow which describe specific aspects of Zyacc in
+detail.
+
+* Menu:
+
+* Acknowledgements::
+* Zyacc Enhancements::
+
+
+File: zyacc.info,  Node: Acknowledgements,  Next: Zyacc Enhancements,  Prev: Introduction,  Up: Introduction
+
+Acknowledgements
+================
+
+   The bulk of this manual is derived from the well-written Bison
+manual (*note Bison Manual: (bison.info)top.).  The changes made by the
+present author include reformatting the examples and adding sections
+specific to Zyacc.
+
+   Many of the algorithms used within Zyacc is based on work by others.
+See the `zyacc/refs.bib' file included with the distribution for some
+of the references.
+
+
+File: zyacc.info,  Node: Zyacc Enhancements,  Prev: Acknowledgements,  Up: Introduction
+
+Zyacc Enhancements
+==================
+
+   Zyacc provides the following enhancements:
+
+   * Supports inherited attributes which can be uniquely evaluated in a
+     left-to-right parse (*note Inherited Attributes::.).
+
+   * Supports semantic tests which allow the outcome of runtime semantic
+     tests to affect parsing decisions (*note Semantic Tests::.).
+
+   * Permits remote interactive debugging of generated parsers either
+     by using a textual interface or by using a java-based GUI (*note
+     Debugging::.).  The debugger allows the setting of breakpoints on
+     any grammar symbol and selective display of the current parser
+     state.
+
+   * Allows named attribute variables which make maintaining grammars
+     easier (*note Named Attributes::.).
+
+   * Can generate its parser description files in HTML which can then be
+     viewed using any Web browser (*note Zyacc Options::.).
+
+   * Provides a `%look' directive to check (at parser construction time)
+     whether a reduction requires lookahead (*note Specifying the
+     Lookahead::.).
+
+   * Allows multiple start nonterminals and allows a call to the
+     parsing function to be made for a particular start nonterminal
+     (*note Start Decl::.).
+
+   * It is possible to avoid having types which are only used in
+     describing nonterminal semantics written into the generated `.h'
+     file (*note Value Type::.).
+
+   * Allows multiple-character quoted literal tokens (*note
+     Multi-Character Lits::.).
+
+   * Allows command-line options to be specified from within the parser
+     file (*note Option Decl::.).
+
+
+File: zyacc.info,  Node: Concepts,  Next: Examples,  Prev: Introduction,  Up: Top
+
+The Concepts of Zyacc
+*********************
+
+   This chapter introduces many of the basic concepts without which the
+details of Zyacc will not make sense.  If you do not already know how to
+use Zyacc, we suggest you start by reading this chapter carefully.
+
+* Menu:
+
+* Language and Grammar::        Languages and context-free grammars,
+                            as mathematical ideas.
+* Grammar in Zyacc::            How we represent grammars for Zyacc's sake.
+* Semantic Values::             Each token or syntactic grouping can have
+                        a semantic value (the value of an integer,
+                        the name of an identifier, etc.).
+* Semantic Actions::            Each rule can have an action containing C code.
+* Zyacc Parser::                What are Zyacc's input and output,
+                        how is the output used?
+* Stages::                      Stages in writing and running Zyacc grammars.
+* Grammar Layout::              Overall structure of a Zyacc grammar file.
+
+
+File: zyacc.info,  Node: Language and Grammar,  Next: Grammar in Zyacc,  Prev: Concepts,  Up: Concepts
+
+Languages and Context-Free Grammars
+===================================
+
+   In order for Zyacc to parse a language, it must be described by a
+"context-free grammar".  This means that you specify one or more
+"syntactic groupings" and give rules for constructing them from their
+parts.  For example, in the C language, one kind of grouping is called
+an `expression'.  One rule for making an expression might be, "An
+expression can be made of a minus sign and another expression".
+Another would be, "An expression can be an integer".  As you can see,
+rules are often recursive, but there must be at least one rule which
+leads out of the recursion.
+
+   The most common formal system for presenting such rules for humans
+to read is "Backus-Naur Form" or "BNF", which was developed in order to
+specify the language Algol 60.  Any grammar expressed in BNF is a
+context-free grammar.  The input to Zyacc is essentially
+machine-readable BNF.
+
+   Not all context-free languages can be handled by Zyacc, only those
+that are LALR(1).  In brief, this means that it must be possible to
+tell how to parse any portion of an input string with just a single
+token of look-ahead.  Strictly speaking, that is a description of an
+LR(1) grammar, and LALR(1) involves additional restrictions that are
+hard to explain simply; but it is rare in actual practice to find an
+LR(1) grammar that fails to be LALR(1).  *Note Mysterious Reduce/Reduce
+Conflicts: Mystery Conflicts, for more information on this.
+
+   In the formal grammatical rules for a language, each kind of
+syntactic unit or grouping is named by a "symbol".  Those which are
+built by grouping smaller constructs according to grammatical rules are
+called "nonterminal symbols"; those which can't be subdivided are called
+"terminal symbols" or "token types".  We call a piece of input
+corresponding to a single terminal symbol a "token", and a piece
+corresponding to a single nonterminal symbol a "grouping".
+
+   We can use the C language as an example of what symbols, terminal and
+nonterminal, mean.  The tokens of C are identifiers, constants (numeric
+and string), and the various keywords, arithmetic operators and
+punctuation marks.  So the terminal symbols of a grammar for C include
+`identifier', `number', `string', plus one symbol for each keyword,
+operator or punctuation mark: `if', `return', `const', `static', `int',
+`char', `plus-sign', `open-brace', `close-brace', `comma' and many
+more.  (These tokens can be subdivided into characters, but that is a
+matter of lexicography, not grammar.)
+
+   Here is a simple C function subdivided into tokens:
+
+     int             /* keyword `int' */
+     square (x)      /* identifier, open-paren, */
+                     /* identifier, close-paren */
+          int x;     /* keyword `int', identifier, semicolon */
+     {               /* open-brace */
+       return x * x; /* keyword `return', identifier, */
+                     /* asterisk, identifier, semicolon */
+     }               /* close-brace */
+
+   The syntactic groupings of C include the expression, the statement,
+the declaration, and the function definition.  These are represented in
+the grammar of C by nonterminal symbols `expression', `statement',
+`declaration' and `function definition'.  The full grammar uses dozens
+of additional language constructs, each with its own nonterminal
+symbol, in order to express the meanings of these four.  The example
+above is a function definition; it contains one declaration, and one
+statement.  In the statement, each `x' is an expression and so is `x *
+x'.
+
+   Each nonterminal symbol must have grammatical rules showing how it
+is made out of simpler constructs.  For example, one kind of C
+statement is the `return' statement; this would be described with a
+grammar rule which reads informally as follows:
+
+     A `statement' can be made of a `return' keyword, an `expression'
+     and a `semicolon'.
+
+There would be many other rules for `statement', one for each kind of
+statement in C.
+
+   One nonterminal symbol must be distinguished as the special one which
+defines a complete utterance in the language.  It is called the "start
+symbol".  In a compiler, this means a complete input program.  In the C
+language, the nonterminal symbol `sequence of definitions and
+declarations' plays this role.
+
+   For example, `1 + 2' is a valid C expression--a valid part of a C
+program--but it is not valid as an *entire* C program.  In the
+context-free grammar of C, this follows from the fact that `expression'
+is not the start symbol.
+
+   The Zyacc parser reads a sequence of tokens as its input, and groups
+the tokens using the grammar rules.  If the input is valid, the end
+result is that the entire token sequence reduces to a single grouping
+whose symbol is the grammar's start symbol.  If we use a grammar for C,
+the entire input must be a `sequence of definitions and declarations'.
+If not, the parser reports a syntax error.
+
+
+File: zyacc.info,  Node: Grammar in Zyacc,  Next: Semantic Values,  Prev: Language and Grammar,  Up: Concepts
+
+From Formal Rules to Zyacc Input
+================================
+
+   A formal grammar is a mathematical construct.  To define the language
+for Zyacc, you must write a file expressing the grammar in Zyacc syntax:
+a "Zyacc grammar" file.  *Note Zyacc Grammar Files: Grammar File.
+
+   A nonterminal symbol in the formal grammar is represented in Zyacc
+input as an identifier, like an identifier in C.  By convention, it
+should be in lower case, such as `expr', `stmt' or `declaration'.
+
+   The Zyacc representation for a terminal symbol is also called a
+"token type".  Token types as well can be represented as C-like
+identifiers.  By convention, these identifiers should be upper case to
+distinguish them from nonterminals: for example, `INTEGER',
+`IDENTIFIER', `IF' or `RETURN'.  A terminal symbol that stands for a
+particular keyword in the language should be named after that keyword
+converted to upper case.  The terminal symbol `error' is reserved for
+error recovery.  *Note Symbols::.
+
+   A terminal symbol can also be represented as a character literal,
+just like a C character constant.  You should do this whenever a token
+is just a single character (parenthesis, plus-sign, etc.): use that
+same character in a literal as the terminal symbol for that token.
+Zyacc also permits literal token names consisting of multiple
+characters -- in that case, it is necessary to define an alias used for
+referring to that token external to the parser.
+
+   Given this notation, it is easy to express grammar rules in Zyacc
+syntax.  For example, here is the Zyacc rule for a C `return'
+statement.  The semicolon in quotes is a literal character token,
+representing part of the C syntax for the statement; the naked
+semicolon, and the colon, are Zyacc punctuation used in every rule.
+
+     stmt
+       : RETURN expr ';'
+       ;
+
+*Note Syntax of Grammar Rules: Rules.
+
+
+File: zyacc.info,  Node: Semantic Values,  Next: Semantic Actions,  Prev: Grammar in Zyacc,  Up: Concepts
+
+Semantic Values
+===============
+
+   A formal grammar selects tokens only by their classifications: for
+example, if a rule mentions the terminal symbol `integer constant', it
+means that *any* integer constant is grammatically valid in that
+position.  The precise value of the constant is irrelevant to how to
+parse the input: if `x+4' is grammatical then `x+1' or `x+3989' is
+equally grammatical.
+
+   But the precise value is very important for what the input means
+once it is parsed.  A compiler is useless if it fails to distinguish
+between 4, 1 and 3989 as constants in the program!  Therefore, each
+token in a Zyacc grammar has both a token type and a "semantic value".
+*Note Defining Language Semantics: Semantics, for details.
+
+   The token type is a terminal symbol defined in the grammar, such as
+`INTEGER', `IDENTIFIER' or `',''.  It tells everything you need to know
+to decide where the token may validly appear and how to group it with
+other tokens.  The grammar rules know nothing about tokens except their
+types.
+
+   The semantic value has all the rest of the information about the
+meaning of the token, such as the value of an integer, or the name of an
+identifier.  (A token such as `','' which is just punctuation doesn't
+need to have any semantic value.)
+
+   For example, an input token might be classified as token type
+`INTEGER' and have the semantic value 4.  Another input token might
+have the same token type `INTEGER' but value 3989.  When a grammar rule
+says that `INTEGER' is allowed, either of these tokens is acceptable
+because each is an `INTEGER'.  When the parser accepts the token, it
+keeps track of the token's semantic value.
+
+   Each grouping can also have a semantic value as well as its
+nonterminal symbol.  For example, in a calculator, an expression
+typically has a semantic value that is a number.  In a compiler for a
+programming language, an expression typically has a semantic value that
+is a tree structure describing the meaning of the expression.
+
+
+File: zyacc.info,  Node: Semantic Actions,  Next: Zyacc Parser,  Prev: Semantic Values,  Up: Concepts
+
+Semantic Actions
+================
+
+   In order to be useful, a program must do more than parse input; it
+must also produce some output based on the input.  In a Zyacc grammar,
+a grammar rule can have an "action" made up of C statements.  Each time
+the parser recognizes a match for that rule, the action is executed.
+*Note Actions::.
+
+   Most of the time, the purpose of an action is to compute the
+semantic value of the whole construct from the semantic values of its
+parts.  For example, suppose we have a rule which says an expression
+can be the sum of two expressions.  When the parser recognizes such a
+sum, each of the subexpressions has a semantic value which describes
+how it was built up.  The action for this rule should create a similar
+sort of value for the newly recognized larger expression.
+
+   For example, here is a rule that says an expression can be the sum of
+two subexpressions:
+
+     expr
+       : expr '+' expr   { $$ = $1 + $3; }
+       ;
+
+The action says how to produce the semantic value of the sum expression
+from the values of the two subexpressions.
+
+
+File: zyacc.info,  Node: Zyacc Parser,  Next: Stages,  Prev: Semantic Actions,  Up: Concepts
+
+Zyacc Output: the Parser File
+=============================
+
+   When you run Zyacc, you give it a Zyacc grammar file as input.  The
+output is a C source file that parses the language described by the
+grammar.  This file is called a "Zyacc parser".  Keep in mind that the
+Zyacc utility and the Zyacc parser are two distinct programs: the Zyacc
+utility is a program whose output is the Zyacc parser that becomes part
+of your program.
+
+   The job of the Zyacc parser is to group tokens into groupings
+according to the grammar rules--for example, to build identifiers and
+operators into expressions.  As it does this, it runs the actions for
+the grammar rules it uses.
+
+   The tokens come from a function called the "lexical analyzer" that
+you must supply in some fashion (such as by writing it in C).  The
+Zyacc parser calls the lexical analyzer each time it wants a new token.
+It doesn't know what is "inside" the tokens (though their semantic
+values may reflect this).  Typically the lexical analyzer makes the
+tokens by parsing characters of text, but Zyacc does not depend on
+this.  *Note The Lexical Analyzer Function `yylex': Lexical.
+
+   The Zyacc parser file is C code which defines a function named
+`yyparse' which implements that grammar.  This function does not make a
+complete C program: you must supply some additional functions.  One is
+the lexical analyzer.  Another is an error-reporting function which the
+parser calls to report an error.  In addition, a complete C program must
+start with a function called `main'; you have to provide this, and
+arrange for it to call `yyparse' or the parser will never run.  *Note
+Parser C-Language Interface: Interface.
+
+   Aside from the token type names and the symbols in the actions you
+write, all variable and function names used in the Zyacc parser file
+begin with `yy' or `YY'.  This includes interface functions such as the
+lexical analyzer function `yylex', the error reporting function
+`yyerror' and the parser function `yyparse' itself.  This also includes
+numerous identifiers used for internal purposes.  Therefore, you should
+avoid using C identifiers starting with `yy' or `YY' in the Zyacc
+grammar file except for the ones defined in this manual.
+
+
+File: zyacc.info,  Node: Stages,  Next: Grammar Layout,  Prev: Zyacc Parser,  Up: Concepts
+
+Stages in Using Zyacc
+=====================
+
+   The actual language-design process using Zyacc, from grammar
+specification to a working compiler or interpreter, has these parts:
+
+  1. Formally specify the grammar in a form recognized by Zyacc (*note
+     Zyacc Grammar Files: Grammar File.).  For each grammatical rule in
+     the language, describe the action that is to be taken when an
+     instance of that rule is recognized.  The action is described by a
+     sequence of C statements.
+
+  2. Write a lexical analyzer to process input and pass tokens to the
+     parser.  The lexical analyzer may be written by hand in C (*note
+     The Lexical Analyzer Function `yylex': Lexical.).  It could also
+     be produced using Lex, but the use of Lex is not discussed in this
+     manual.
+
+  3. Write a controlling function that calls the Zyacc-produced parser.
+
+  4. Write error-reporting routines.
+
+   To turn this source code as written into a runnable program, you
+must follow these steps:
+
+  1. Run Zyacc on the grammar to produce the parser.
+
+  2. Compile the code output by Zyacc, as well as any other source
+     files.
+
+  3. Link the object files to produce the finished product.
+
+
+File: zyacc.info,  Node: Grammar Layout,  Prev: Stages,  Up: Concepts
+
+The Overall Layout of a Zyacc Grammar
+=====================================
+
+   The input file for the Zyacc utility is a "Zyacc grammar file".  The
+general form of a Zyacc grammar file is as follows:
+
+     %{
+     C DECLARATIONS
+     %}
+     
+     ZYACC DECLARATIONS
+     
+     %%
+     GRAMMAR RULES
+     %%
+     ADDITIONAL C CODE
+
+The `%%', `%{' and `%}' are punctuation that appears in every Zyacc
+grammar file to separate the sections.
+
+   The C declarations may define types and variables used in the
+actions.  You can also use preprocessor commands to define macros used
+there, and use `#include' to include header files that do any of these
+things.
+
+   The Zyacc declarations declare the names of the terminal and
+nonterminal symbols, and may also describe operator precedence and the
+data types of semantic values of various symbols.
+
+   The grammar rules define how to construct each nonterminal symbol
+from its parts.
+
+   The additional C code can contain any C code you want to use.  Often
+the definition of the lexical analyzer `yylex' goes here, plus
+subroutines called by the actions in the grammar rules.  In a simple
+program, all the rest of the program can go here.
+
+
+File: zyacc.info,  Node: Examples,  Next: Grammar File,  Prev: Concepts,  Up: Top
+
+Examples
+********
+
+   Now we show and explain six sample programs written using Zyacc. The
+first three examples illustrate features of Zyacc which are also present
+in yacc. These are a reverse polish notation calculator, an algebraic
+(infix) notation calculator, and a multi-function calculator.  The last
+three illustrate features which are unique in Zyacc: these include a
+differently sugared implementation of the multi-function calculator, a
+calculator which evaluates polynomials and a lazy person's calculator
+which allows omitting some sets of parentheses.
+
+   The code shown in this manual has been extracted automatically from
+code which has been tested. These examples are simple, but Zyacc
+grammars for real programming languages are written the same way.
+
+   If you have access to the Zyacc distribution, you will find these
+examples under the `doc' directory.  Otherwise, you can copy these
+examples out of the Info file and into a source file to try them.
+
+* Menu:
+
+* RPN Calc::                    Reverse polish notation calculator;
+                        a first example with no operator precedence.
+* Infix Calc::                  Infix (algebraic) notation calculator.
+                        Operator precedence is introduced.
+* Simple Error Recovery::       Continuing after syntax errors.
+* Multi-function Calc::         Calculator with memory and trig functions.
+                           It uses multiple data-types for semantic values.
+* MfCalc with Sugared Syntax::
+* Polynomial Calc::
+* Lazy Calc::
+* Exercises::                   Ideas for improving the multi-function calculator.
+
+
+File: zyacc.info,  Node: RPN Calc,  Next: Infix Calc,  Prev: Examples,  Up: Examples
+
+Reverse Polish Notation Calculator
+==================================
+
+   The first example is that of a simple double-precision "reverse
+polish notation" calculator (a calculator using postfix operators).
+This example provides a good starting point, since operator precedence
+is not an issue.  The second example will illustrate how operator
+precedence is handled.
+
+   The source code for this calculator is named `rpcalc.y'.  The `.y'
+extension is a convention used for Zyacc input files.
+
+* Menu:
+
+* Decls: Rpcalc Decls.          Zyacc and C declarations for rpcalc.
+* Rules: Rpcalc Rules.          Grammar Rules for rpcalc, with explanation.
+* Lexer: Rpcalc Lexer.          The lexical analyzer.
+* Main: Rpcalc Main.            The controlling function.
+* Error: Rpcalc Error.          The error reporting function.
+* Gen: Rpcalc Gen.              Running Zyacc on the grammar file.
+* Comp: Rpcalc Compile.         Run the C compiler on the output code.
+
+
+File: zyacc.info,  Node: Rpcalc Decls,  Next: Rpcalc Rules,  Prev: RPN Calc,  Up: RPN Calc
+
+Declarations for `rpcalc'
+-------------------------
+
+   Here are the C and Zyacc declarations for the reverse polish notation
+calculator.  As in C, comments are placed between `/*...*/'.
+
+     /* Reverse polish notation calculator. */
+     
+     %{
+     #include <math.h>
+     #include <stdio.h>
+     
+     #define YYSTYPE double
+     
+     int yylex(void);
+     void yyerror(const char *errMsg);
+     
+     %}
+     
+     %token NUM_TOK
+     
+     %% /* Grammar rules and actions follow */
+
+   The C declarations section (*note The C Declarations Section: C
+Declarations.) contains two preprocessor directives.
+
+   The `#define' directive defines the macro `YYSTYPE', thus specifying
+the C data type for semantic values of both tokens and groupings (*note
+Data Types of Semantic Values: Value Type.).  The Zyacc parser will use
+whatever type `YYSTYPE' is defined as; if you don't define it, `int' is
+the default.  Because we specify `double', each token and each
+expression has an associated value, which is a floating point number.
+
+   The `#include' directive is used to declare the exponentiation
+function `pow'.
+
+   The second section, Zyacc declarations, provides information to Zyacc
+about the token types (*note The Zyacc Declarations Section: Zyacc
+Declarations.).  Each terminal symbol that is not a single-character
+literal must be declared here.  (Single-character literals normally
+don't need to be declared.)  In this example, all the arithmetic
+operators are designated by single-character literals, so the only
+terminal symbol that needs to be declared is `NUM_TOK', the token type
+for numeric constants (since Zyacc will `#define' `NUM_TOK' adding the
+`_TOK' suffix prevents it from clashing with identifiers used for other
+purposes).
+
+
+File: zyacc.info,  Node: Rpcalc Rules,  Next: Rpcalc Lexer,  Prev: Rpcalc Decls,  Up: RPN Calc
+
+Grammar Rules for `rpcalc'
+--------------------------
+
+   Here are the grammar rules for the reverse polish notation
+calculator.
+
+     input
+       : /* empty */
+       | input line
+       ;
+     
+     line
+       : '\n'
+       | exp '\n'    { printf ("\t%.10g\n", $1); }
+       ;
+     
+     exp
+       : NUM_TOK
+       | exp exp '+' { $$= $1 + $2; }
+       | exp exp '-' { $$= $1 - $2; }
+       | exp exp '*' { $$= $1 * $2; }
+       | exp exp '/' { $$= $1 / $2; }
+         /* Exponentiation */
+       | exp exp '^' { $$= pow ($1, $2); }
+         /* Unary minus    */
+       | exp 'n'     { $$= -$1; }
+       ;
+     %%
+
+   The groupings of the rpcalc "language" defined here are the
+expression (given the name `exp'), the line of input (`line'), and the
+complete input transcript (`input').  Each of these nonterminal symbols
+has several alternate rules, joined by the `|' punctuator which is read
+as "or".  The following sections explain what these rules mean.
+
+   The semantics of the language is determined by the actions taken
+when a grouping is recognized.  The actions are the C code that appears
+inside braces.  *Note Actions::.
+
+   You must specify these actions in C, but Zyacc provides the means for
+passing semantic values between the rules.  In each action, the
+pseudo-variable `$$' stands for the semantic value for the grouping
+that the rule is going to construct.  Assigning a value to `$$' is the
+main job of most actions.  The semantic values of the components of the
+rule are referred to as `$1', `$2', and so on.
+
+* Menu:
+
+* Rpcalc Input::
+* Rpcalc Line::
+* Rpcalc Expr::
+
+
+File: zyacc.info,  Node: Rpcalc Input,  Next: Rpcalc Line,  Prev: Rpcalc Rules,  Up: Rpcalc Rules
+
+Explanation of `input'
+......................
+
+   Consider the definition of `input':
+
+     input
+       : /* empty */
+       | input line
+       ;
+
+   This definition reads as follows: "A complete input is either an
+empty string, or a complete input followed by an input line".  Notice
+that "complete input" is defined in terms of itself.  This definition
+is said to be "left recursive" since `input' appears always as the
+leftmost symbol in the sequence.  *Note Recursive Rules: Recursion.
+
+   The first alternative is empty because there are no symbols between
+the colon and the first `|'; this means that `input' can match an empty
+string of input (no tokens).  We write the rules this way because it is
+legitimate to type `Ctrl-d' right after you start the calculator.  It's
+conventional to put an empty alternative first and write the comment
+`/* empty */' in it.
+
+   The second alternate rule (`input line') handles all nontrivial
+input.  It means, "After reading any number of lines, read one more
+line if possible."  The left recursion makes this rule into a loop.
+Since the first alternative matches empty input, the loop can be
+executed zero or more times.
+
+   The parser function `yyparse' continues to process input until a
+grammatical error is seen or the lexical analyzer says there are no more
+input tokens; we will arrange for the latter to happen at end of file.
+
+
+File: zyacc.info,  Node: Rpcalc Line,  Next: Rpcalc Expr,  Prev: Rpcalc Input,  Up: Rpcalc Rules
+
+Explanation of `line'
+.....................
+
+   Now consider the definition of `line':
+
+     line
+       : '\n'
+       | exp '\n'  { printf ("\t%.10g\n", $1); }
+       ;
+
+   The first alternative is a token which is a newline character; this
+means that rpcalc accepts a blank line (and ignores it, since there is
+no action).  The second alternative is an expression followed by a
+newline.  This is the alternative that makes rpcalc useful.  The
+semantic value of the `exp' grouping is the value of `$1' because the
+`exp' in question is the first symbol in the alternative.  The action
+prints this value, which is the result of the computation the user
+asked for.
+
+   This action is unusual because it does not assign a value to `$$'.
+As a consequence, the semantic value associated with the `line' is
+uninitialized (its value will be unpredictable).  This would be a bug if
+that value were ever used, but we don't use it: once rpcalc has printed
+the value of the user's input line, that value is no longer needed.
+
+
+File: zyacc.info,  Node: Rpcalc Expr,  Prev: Rpcalc Line,  Up: Rpcalc Rules
+
+Explanation of `expr'
+.....................
+
+   The `exp' grouping has several rules, one for each kind of
+expression.  The first rule handles the simplest expressions: those
+that are just numbers.  The second handles an addition-expression,
+which looks like two expressions followed by a plus-sign.  The third
+handles subtraction, and so on.
+
+     exp
+       : NUM_TOK
+       | exp exp '+'     { $$ = $1 + $2;    }
+       | exp exp '-'     { $$ = $1 - $2;    }
+       ...
+       ;
+
+   Note that there is no semantic action specified in the case when a
+`exp' is a `NUM_TOK'.  That is because if a rule has no associated
+semantic action, then Zyacc automatically generates the implicit action
+`{ $$= $1; }', which is exactly what we need in this case.
+
+   We have used `|' to join all the rules for `exp', but we could
+equally well have written them separately:
+
+     exp
+       : NUM_TOK
+       ;
+     exp
+       : exp exp '+'     { $$ = $1 + $2;    }
+       ;
+     exp
+       : exp exp '-'     { $$ = $1 - $2;    }
+       ;
+       ...
+
+   Most of the rules have actions that compute the value of the
+expression in terms of the value of its parts.  For example, in the
+rule for addition, `$1' refers to the first component `exp' and `$2'
+refers to the second one.  The third component, `'+'', has no meaningful
+associated semantic value, but if it had one you could refer to it as
+`$3'.  When `yyparse' recognizes a sum expression using this rule, the
+sum of the two subexpressions' values is produced as the value of the
+entire expression.  *Note Actions::.
+
+   You don't have to give an action for every rule.  When a rule has no
+action, Zyacc by default copies the value of `$1' into `$$'.  This is
+what happens in the first rule (the one that uses `NUM_TOK').
+
+   The formatting shown here is the recommended convention, but Zyacc
+does not require it.  You can add or change whitespace as much as you
+wish.  For example, this:
+
+     exp   : NUM_TOK | exp exp '+' {$$ = $1 + $2; } | ... ;
+
+means the same thing as this:
+
+     exp
+       : NUM_TOK
+       | exp exp '+'    { $$ = $1 + $2; }
+       ...
+       ;
+
+The latter, however, is much more readable.
+
+
+File: zyacc.info,  Node: Rpcalc Lexer,  Next: Rpcalc Main,  Prev: Rpcalc Rules,  Up: RPN Calc
+
+The `rpcalc' Lexical Analyzer
+-----------------------------
+
+   The lexical analyzer's job is low-level parsing: converting
+characters or sequences of characters into tokens.  The Zyacc parser
+gets its tokens by calling the lexical analyzer.  *Note The Lexical
+Analyzer Function `yylex': Lexical.
+
+   Only a simple lexical analyzer is needed for the RPN calculator.
+This lexical analyzer skips blanks and tabs, then reads in numbers as
+`double' and returns them as `NUM_TOK' tokens.  Any other character
+that isn't part of a number is a separate token.  Note that the
+token-code for such a single-character token is the character itself.
+
+   The return value of the lexical analyzer function is a numeric code
+which represents a token type.  The same text used in Zyacc rules to
+stand for this token type is also a C expression for the numeric code
+for the type.  This works in two ways.  If the token type is a
+character literal, then its numeric code is the ASCII code for that
+character; you can use the same character literal in the lexical
+analyzer to express the number.  If the token type is an identifier,
+that identifier is defined by Zyacc as a C macro whose definition is
+the appropriate number.  In this example, therefore, `NUM_TOK' becomes
+a macro for `yylex' to use.
+
+   The semantic value of the token (if it has one) is stored into the
+global variable `yylval', which is where the Zyacc parser will look for
+it.  (The C data type of `yylval' is `YYSTYPE', which was defined at
+the beginning of the grammar; *note Declarations for `rpcalc': Rpcalc
+Decls..)
+
+   A token type code of zero is returned if the end-of-file is
+encountered.  (Zyacc recognizes any nonpositive value as indicating the
+end of the input.)
+
+   Here is the code for the lexical analyzer:
+
+     /* Lexical analyzer returns a double floating point
+      * number in yylval and the token NUM_TOK, or the ASCII
+      * character read if not a number.  Skips all blanks
+      * and tabs, returns 0 for EOF.
+      */
+     
+     #include <ctype.h>
+     
+     int
+     yylex(void)
+     {
+       int c;
+     
+       /* skip white space  */
+       while ((c = getchar ()) == ' ' || c == '\t')
+         ;
+       /* process numbers   */
+       if (c == '.' || isdigit (c)) {
+          ungetc(c, stdin);
+          scanf("%lf", &yylval);
+          return NUM_TOK;
+       }
+       /* return end-of-file  */
+       if (c == EOF)
+         return 0;
+       /* return single chars */
+       return c;
+     }
+
+
+File: zyacc.info,  Node: Rpcalc Main,  Next: Rpcalc Error,  Prev: Rpcalc Lexer,  Up: RPN Calc
+
+The Controlling Function
+------------------------
+
+   In keeping with the spirit of this example, the controlling function
+is kept to the bare minimum.  The only requirement is that it call
+`yyparse' to start the process of parsing.
+
+     int
+     main()
+     {
+       return yyparse();
+     }
+
+
+File: zyacc.info,  Node: Rpcalc Error,  Next: Rpcalc Gen,  Prev: Rpcalc Main,  Up: RPN Calc
+
+The Error Reporting Routine
+---------------------------
+
+   When `yyparse' detects a syntax error, it calls the error reporting
+function `yyerror' to print an error message (usually but not always
+`"parse error"').  It is up to the programmer to supply `yyerror'
+(*note Parser C-Language Interface: Interface.), so here is the
+definition we will use:
+
+
+     /* Called by yyparse on error */
+     void
+     yyerror(const char *s)
+     {
+       printf("%s\n", s);
+     }
+
+   After `yyerror' returns, the Zyacc parser may recover from the error
+and continue parsing if the grammar contains a suitable error rule
+(*note Error Recovery::.).  Otherwise, `yyparse' returns nonzero.  We
+have not written any error rules in this example, so any invalid input
+will cause the calculator program to exit.  This is not clean behavior
+for a real calculator, but it is adequate in the first example.
+
+
+File: zyacc.info,  Node: Rpcalc Gen,  Next: Rpcalc Compile,  Prev: Rpcalc Error,  Up: RPN Calc
+
+Running Zyacc to Make the Parser
+--------------------------------
+
+   Before running Zyacc to produce a parser, we need to decide how to
+arrange all the source code in one or more source files.  For such a
+simple example, the easiest thing is to put everything in one file.
+The definitions of `yylex', `yyerror' and `main' go at the end, in the
+"additional C code" section of the file (*note The Overall Layout of a
+Zyacc Grammar: Grammar Layout.).
+
+   For a large project, you would probably have several source files,
+and use `make' to arrange to recompile them.
+
+   With all the source in a single file, you use the following command
+to convert it into a parser file:
+
+     zyacc FILE_NAME.y
+
+In this example the file was called `rpcalc.y' (for "Reverse Polish
+CALCulator").  Zyacc produces a file named `FILE_NAME.tab.c', removing
+the `.y' from the original file name. The file output by Zyacc contains
+the source code for `yyparse'.  The additional functions in the input
+file (`yylex', `yyerror' and `main') are copied verbatim to the output.
+
+
+File: zyacc.info,  Node: Rpcalc Compile,  Prev: Rpcalc Gen,  Up: RPN Calc
+
+Compiling the Parser File
+-------------------------
+
+   Here is how to compile and run the parser file:
+
+     # List files in current directory.
+     % ls
+     rpcalc.tab.c  rpcalc.y
+     
+     # Compile the Zyacc parser.
+     # `-lm' tells compiler to search math library for `pow'.
+     % cc rpcalc.tab.c -lm -o rpcalc
+     
+     # List files again.
+     % ls
+     rpcalc  rpcalc.tab.c  rpcalc.y
+
+   The file `rpcalc' now contains the executable code.  Here is an
+example session using `rpcalc'.
+
+     $ rpcalc
+     4 9 +
+             13
+     3 7 + 3 4 5 *+-
+             -13
+     3 7 + 3 4 5 * + - n              Note the unary minus, `n'
+             13
+     5 6 / 4 n +
+             -3.166666667
+     3 4 ^                           Exponentiation
+             81
+     ^D                               End-of-file indicator
+     $
+
+   On an error, `rpcalc' simply gives up after printing an error
+message as shown below:
+     $ rpcalc
+     1 2 + +
+     parse error
+     $ echo $?
+     1
+     $
+   The `echo $?' makes the shell (the Bourne shell or Korn shell) print
+the exit code of the last command (`rpcalc') in this case.  The value 1
+is the value returned by the `return yyparse()' statement in `main()'.
+

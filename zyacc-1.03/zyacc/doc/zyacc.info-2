@@ -1,0 +1,1234 @@
+This is Info file zyacc.info, produced by Makeinfo-1.64 from the input
+file zyacc.texi.
+
+
+File: zyacc.info,  Node: Infix Calc,  Next: Simple Error Recovery,  Prev: RPN Calc,  Up: Examples
+
+Infix Notation Calculator: `calc'
+=================================
+
+   We now modify rpcalc to handle infix operators instead of postfix.
+Infix notation involves the concept of operator precedence and the need
+for parentheses nested to arbitrary depth.  Here is the Zyacc code for
+`calc.y', an infix desk-top calculator.
+
+     /* Infix notation calculator--calc */
+     
+     %{
+     #include <math.h>
+     #include <stdio.h>
+     
+     #define YYSTYPE double
+     
+     int yylex(void);
+     void yyerror(const char *errMsg);
+     %}
+     
+     /* zyacc declarations */
+     %token NUM_TOK
+     %left '-' '+'
+     %left '*' '/'
+     %left NEG       /* negation--unary minus */
+     %right '^'      /* exponentiation   */
+     
+     /* Grammar follows */
+     %%
+     input
+       : /* empty */
+       | input line
+       ;
+     
+     line
+       : '\n'
+       | exp '\n'            { printf ("\t%.10g\n", $1); }
+       ;
+     
+     exp
+       : NUM_TOK
+       | exp '+' exp         { $$= $1 + $3; }
+       | exp '-' exp         { $$= $1 - $3; }
+       | exp '*' exp         { $$= $1 * $3; }
+       | exp '/' exp         { $$= $1 / $3; }
+       | '-' exp  %prec NEG  { $$= -$2; }
+       | exp '^' exp         { $$= pow ($1, $3); }
+       | '(' exp ')'         { $$= $2; }
+       ;
+     %%
+
+The functions `yylex', `yyerror' and `main' can be the same as before.
+
+   There are two important new features shown in this code.
+
+   In the second section (Zyacc declarations), `%left' declares token
+types and says they are left-associative operators.  The declarations
+`%left' and `%right' (right associativity) take the place of `%token'
+which is used to declare a token type name without associativity.
+(These tokens are single-character literals, which ordinarily don't
+need to be declared.  We declare them here to specify the
+associativity.)
+
+   Operator precedence is determined by the line ordering of the
+declarations; the higher the line number of the declaration (lower on
+the page or screen), the higher the precedence.  Hence, exponentiation
+has the highest precedence, unary minus (`NEG') is next, followed by
+`*' and `/', and so on.  *Note Operator Precedence: Precedence.
+
+   The other important new feature is the `%prec' in the grammar section
+for the unary minus operator.  The `%prec' simply instructs Zyacc that
+the rule `| '-' exp' has the same precedence as `NEG'--in this case the
+next-to-highest.  *Note Context-Dependent Precedence: Contextual
+Precedence.
+
+   Here is a sample run of `calc.y':
+
+     $ calc
+     4 + 4.5 - (34/(8*3+-3))
+             6.880952381
+     -56 + 2
+             -54
+     3 ^ 2
+             9
+
+
+File: zyacc.info,  Node: Simple Error Recovery,  Next: Multi-function Calc,  Prev: Infix Calc,  Up: Examples
+
+Simple Error Recovery
+=====================
+
+   Up to this point, this manual has not addressed the issue of "error
+recovery"--how to continue parsing after the parser detects a syntax
+error.  All we have handled is error reporting with `yyerror'.  Recall
+that by default `yyparse' returns after calling `yyerror'.  This means
+that an erroneous input line causes the calculator program to exit.
+Now we show how to rectify this deficiency.
+
+   The Zyacc language itself includes the reserved word `error', which
+may be included in the grammar rules.  In the example below it has been
+added to one of the alternatives for `line':
+
+     line
+       : '\n'
+       | exp '\n'    { printf ("\t%.10g\n", $1); }
+       | error '\n'  { yyerrok; }
+       ;
+
+   This addition to the grammar allows for simple error recovery in the
+event of a parse error.  If an expression that cannot be evaluated is
+read, the error will be recognized by the third rule for `line', and
+parsing will continue.  (The `yyerror' function is still called upon to
+print its message as well.)  The action executes the statement
+`yyerrok', a macro defined automatically by Zyacc; its meaning is that
+error recovery is complete (*note Error Recovery::.).  Note the
+difference between `yyerrok' and `yyerror'; neither one is a misprint.
+
+   This form of error recovery deals with syntax errors.  There are
+other kinds of errors; for example, division by zero, which raises an
+exception signal that is normally fatal.  A real calculator program
+must handle this signal and use `longjmp' to return to `main' and
+resume parsing input lines; it would also have to discard the rest of
+the current line of input.  We won't discuss this issue further because
+it is not specific to Zyacc programs.
+
+
+File: zyacc.info,  Node: Multi-function Calc,  Next: MfCalc with Sugared Syntax,  Prev: Simple Error Recovery,  Up: Examples
+
+Multi-Function Calculator: `mfcalc'
+===================================
+
+   Now that the basics of Zyacc have been discussed, it is time to move
+on to a more advanced problem.  The above calculators provided only five
+functions, `+', `-', `*', `/' and `^'.  It would be nice to have a
+calculator that provides other mathematical functions such as `sin',
+`cos', etc.
+
+   It is easy to add new operators to the infix calculator as long as
+they are only single-character literals.  The lexical analyzer `yylex'
+passes back all non-number characters as tokens, so new grammar rules
+suffice for adding a new operator.  But we want something more
+flexible: built-in functions whose syntax has this form:
+
+     FUNCTION_NAME (ARGUMENT)
+
+At the same time, we will add memory to the calculator, by allowing you
+to create named variables, store values in them, and use them later.
+Here is a sample session with the multi-function calculator:
+
+     $ mfcalc
+     pi = 3.141592653589
+             3.141592654
+     sin(pi)
+             7.932657935e-13
+     alpha = beta1 = 2.3
+             2.3
+     alpha
+             2.3
+     ln(alpha)
+             0.8329091229
+     exp(ln(beta1))
+             2.3
+     $
+
+   Note that multiple assignment and nested function calls are
+permitted.
+
+   The implementation given below has the scanner first *intern*
+identifiers into a separate *string-space* so that identifiers with the
+same spelling share the same string-space entry.  The scanner returns
+the intern'd representation of the identifier to the parser.  The
+parser uses the intern'd representation to access a symbol table which
+keeps track of the properties of the identifier (whether it is a
+variable or function, the value associated with the identifier).
+
+* Menu:
+
+* Decl: Mfcalc Decl.            Zyacc declarations for multi-function calculator.
+* Rules: Mfcalc Rules.          Grammar rules for the calculator.
+* Symtab: Mfcalc Symtab.        Symbol table management subroutines.
+* Mfcalc Scanner::              Scanner for multi-function calculator.
+* Mfcalc StrSpace::             String-space for multi-function calculator.
+* Why a StrSpace::              Justification for a separate string-space.
+
+
+File: zyacc.info,  Node: Mfcalc Decl,  Next: Mfcalc Rules,  Prev: Multi-function Calc,  Up: Multi-function Calc
+
+Declarations for `mfcalc'
+-------------------------
+
+   The previous grammars had only a single semantic type: the `double'
+value associated with `NUM_TOK's and `exp's.  However, now we will have
+identifiers used for variables and functions: they will need a semantic
+type different from `double'.  The C and Zyacc declarations given below
+for the multi-function calculator use a couple of new Zyacc features to
+allow multiple semantic types (*note More Than One Value Type: Multiple
+Types.).
+
+     %{
+     #include <ctype.h>
+     #include <math.h>
+     #include <stdio.h>
+     
+     int yylex(void);
+     void yyerror(const char *errMsg);
+     
+     /* Typedef typical unary <math.h> function. */
+     typedef double (*MathFnP)(double input);
+     
+     /* Interface to symbol table. */
+     static double getIDVal(const char *name);
+     static MathFnP getIDFn(const char *name);
+     static void setIDVal(const char *name, double val);
+     static void setIDFn(const char *name, MathFnP fnP);
+     
+     %}
+     %union {
+       double val;           /* For returning numbers. */
+       const char *id;       /* For returning identifiers. */
+     }
+     
+     %token <val>  NUM_TOK   /* Double precision number */
+     %token <id>   ID_TOK    /* Identifiers. */
+     %type  <val>  exp
+     
+     %right '='
+     %left '-' '+'
+     %left '*' '/'
+     %left NEG               /* Negation--unary minus */
+     %right '^'              /* Exponentiation */
+     
+     /* Grammar follows */
+     %%
+
+   The `%union' declaration specifies the entire list of possible
+types; this is instead of defining `YYSTYPE'.  The allowable types are
+now double-floats (for `exp' and `NUM_TOK') and `char *' pointers for
+the names of variables and functions. *Note The Collection of Value
+Types: Union Decl.
+
+   Since values can now have various types, it is necessary to
+associate a type with each grammar symbol whose semantic value is used.
+These symbols are `NUM_TOK', `ID_TOK', and `exp'.  Their declarations
+are augmented with information about their data type (placed between
+angle brackets).
+
+   The Zyacc construct `%type' is used for declaring nonterminal
+symbols, just as `%token' is used for declaring token types.  We have
+not used `%type' before because nonterminal symbols are normally
+declared implicitly by the rules that define them.  But `exp' must be
+declared explicitly so we can specify its value type.  *Note
+Nonterminal Symbols: Type Decl.
+
+   The C declarations section above also declares the functions used to
+interface to the symbol table.  The symbol table is a mapping from
+identifiers to either `double' values (for identifiers which are
+variables) or function pointers (for identifiers whicha re functions).
+The `get' functions are used to get the value associated with an
+identifier; the `set' functions are used to change the value.
+
+
+File: zyacc.info,  Node: Mfcalc Rules,  Next: Mfcalc Symtab,  Prev: Mfcalc Decl,  Up: Multi-function Calc
+
+Grammar Rules for `mfcalc'
+--------------------------
+
+   The grammar rules for the multi-function calculator are identical to
+those for `calc' except for three additional rules for `exp' shown
+below:
+
+     exp
+       : ID_TOK              { $$= getIDVal($1); }
+       | ID_TOK '=' exp      { setIDVal($1, $3); $$= $3; }
+       | ID_TOK '(' exp ')'  { $$= (*(getIDFn($1)))($3); }
+
+   The above additional rules correspond to the cases when an
+expression is an identifier, an assignment or a function application
+respectively.
+   * If an expression is an identifier, we merely lookup its value in
+     the symbol table using `getIDVal()'.
+
+   * If an expression is an assignment statement, we use the symbol
+     table interface to set the value of the left-hand side identifier
+     to the value of the right-hand side expression using `setIDVal()'.
+
+   * If an expression is a function application, we lookup the function
+     pointer associated with the identifier in the symbol table using
+     `getIDFn' and apply the corresponding function to the value of the
+     expression.
+
+
+File: zyacc.info,  Node: Mfcalc Symtab,  Next: Mfcalc Scanner,  Prev: Mfcalc Rules,  Up: Multi-function Calc
+
+The `mfcalc' Symbol Table
+-------------------------
+
+   The multi-function calculator requires a symbol table to keep track
+of the names and meanings of variables and functions.  This doesn't
+affect the grammar rules (except for the actions) or the Zyacc
+declarations, but it requires some additional C functions for support.
+
+   The symbol table itself consists of a linked list of records.  It
+provides for either functions or variables to be placed in the table.
+Its definition is as follows:
+
+     /* Symbol table ADT. */
+     
+     /* Possible types for symbols. */
+     typedef enum { VAR_SYM, FN_SYM } SymType;
+     
+     typedef struct Sym {
+       const char *name;     /* Name of symbol. */
+       SymType type;         /* Type of symbol. */
+       union {
+         double var;         /* Value of a VAR_SYM. */
+         MathFnP fn;         /* Value of a FN_SYM. */
+       } value;
+       struct Sym *succ;     /* Link field. */
+     } Sym;
+     
+     /* The symbol table: a chain of Sym's.*/
+     static Sym *symTab;
+
+   The `Sym' type contains the `name' of the identifier and a `type'
+field which classifies the symbol as either a variable (`type ==
+VAR_SYM') or function (`type == FN_SYM').  Depending on this `type'
+field, the symbol's `value' is in the `union' field `var' for a
+variable or in `fn' for a function.  The `succ' field is used to chain
+all symbols together in a LIFO chain.
+
+   The heart of the symbol table module is the `getSym()' routine shown
+below:
+     /* Search symTab for name.  If doCreate, then create an entry for
+      * it if it is not there.  Return pointer to Sym entry.
+      */
+     static Sym *
+     getSym(const char *name, unsigned doCreate)
+     {
+       Sym *p;
+       for (p= symTab; p != NULL && p->name != name; p= p->succ) ;
+       if (p == NULL && doCreate) {
+         p= malloc(sizeof(Sym));
+         p->name= name; p->succ= symTab; symTab= p;
+       }
+       return p;
+     }
+
+   `getSym()' searches the linear chain of `Sym's rooted in `symTab'
+for an identifier with a specified `name'.  If it finds one, it returns
+a pointer to the corresponding `Sym'; otherwise if `doCreate' is zero
+it simply returns `NULL'; if `doCreate' is non-zero it creates a new
+entry for `name' and links it in at the head of the `symTab' chain.
+
+   To get the value or function associated with an identifier, the
+symbol table interface routines `getIDVal()' and `getIDFn()' shown
+below can be used:
+     /* Get value associated with name; signal error if not ok. */
+     static double
+     getIDVal(const char *name)
+     {
+       const Sym *p= getSym(name, 0);
+       double val= 1.0; /* A default value. */
+       if (!p) fprintf(stderr, "No value for %s.\n", name);
+       else if (p->type != VAR_SYM)
+         fprintf(stderr, "%s is not a variable.\n", name);
+       else val= p->value.var;
+       return val;
+     }
+     
+     /* Get function associated with name; signal error if not ok. */
+     static MathFnP
+     getIDFn(const char *name)
+     {
+       const Sym *p= getSym(name, 0);
+       MathFnP fn= sin; /* A default value. */
+       if (!p) fprintf(stderr, "No value for %s.\n", name);
+       else if (p->type != FN_SYM)
+         fprintf(stderr, "%s is not a function.\n", name);
+       else fn= p->value.fn;
+       return fn;
+     }
+
+   The routines take care of printing out a error message if the `name'
+is not found or is of an inappropriate type.
+
+   Changing the values of a symbol is done in a straight-forward manner
+as shown below:
+     /* Unconditionally set name to a VAR_SYM with value val. */
+     static void
+     setIDVal(const char *name, double val)
+     {
+       Sym *p= getSym(name, 1);
+       p->type= VAR_SYM; p->value.var= val;
+     }
+     
+     /* Unconditionally set name to a FN_SYM with fn ptr fnP. */
+     static void
+     setIDFn(const char *name, MathFnP fnP)
+     {
+       Sym *p= getSym(name, 1);
+       p->type= FN_SYM; p->value.fn= fnP;
+     }
+
+   It is necessary to preload the symbol table with the functions which
+will be provided by `mfcalc'.  This is done as shown below:
+     /* Initial functions. */
+     struct {
+       const char *name;     /* Name of function. */
+       MathFnP fn;           /* Corresponding <math.h> function. */
+     } initFns[]= {
+       { "sin", sin },
+       { "cos", cos },
+       { "atan", atan },
+       { "ln", log },
+       { "exp", exp },
+       { "sqrt", sqrt }
+     };
+     
+     static void
+     initSyms(void)
+     {
+       const unsigned n= sizeof(initFns)/sizeof(initFns[0]);
+       unsigned i;
+       for (i= 0; i < n; i++) {
+         setIDFn(getID(initFns[i].name), initFns[i].fn);
+       }
+     }
+
+   By simply editing the initialization list and adding the necessary
+include files, you can add additional functions to the calculator.
+
+   The new version of `main' includes a call to `initSyms', the
+function defined above which initializes the symbol table:
+     int main()
+     {
+       initSyms();
+       return yyparse();
+     }
+
+
+File: zyacc.info,  Node: Mfcalc Scanner,  Next: Mfcalc StrSpace,  Prev: Mfcalc Symtab,  Up: Multi-function Calc
+
+The `mfcalc' Scanner
+--------------------
+
+   The function `yylex' must now recognize numeric values,
+single-character arithmetic operators and identifiers.  The recognition
+of numeric values and single-character arithmetic operators is exactly
+as before.  In order to recognize identifiers, the following code
+fragment is added to `yylex()' after the code for recognizing numbers:
+
+       /* Char starts an identifier => read the name.  */
+       if (isalpha(c)) {
+         ungetc(c, stdin);
+         yylval.id= readID();
+         return ID_TOK;
+       }
+
+   After checking if the current character is a letter, the code
+fragment calls `readID()' after pushing back the current character.
+`readID()' reads the current character into a dynamically sized buffer
+as shown below.  After completing the read, `readID()' calls `getID()'
+routine which interfaces to the string-space.  `getID()' will return a
+unique `char *' pointer for the identifier.  If the returned `char *'
+pointer is not equal to the dynamically allocated buffer, then the
+identifier had been seen previously and the dynamic buffer is freed.
+
+     /* Read alphanumerics from stdin into a buffer.  Check
+      * if identical to previous ident: if so return pointer
+      * to previous, else return pointer to new buffer.
+      * Assumes char after ident is not an EOF.
+      */
+     static const char *
+     readID(void)
+     {
+       enum { SIZE_INC= 40 };
+       unsigned size= SIZE_INC;
+       char *buf= malloc(size);
+       unsigned i= 0;
+       int c;
+       const char *ident;
+     
+       do { /* Accumulate stdin into strSpace. */
+         c= getchar();
+         if (i >= size) buf= realloc(buf, size*= 2);
+         buf[i++]= c;
+       } while (isalnum(c));
+     
+       ungetc(c, stdin); buf[i - 1]= '\0'; /* Undo extra read. */
+       buf= realloc(buf, i); /* Resize buf to be only as big as needed. */
+     
+       ident= getID(buf);    /* Search string-space. */
+     
+       if (ident != buf) free(buf); /* Previously existed. */
+       return ident;
+     }
+
+
+File: zyacc.info,  Node: Mfcalc StrSpace,  Next: Why a StrSpace,  Prev: Mfcalc Scanner,  Up: Multi-function Calc
+
+The `mfcalc' String Space
+-------------------------
+
+   The string-space is maintained as a linked list of `Ident's as shown
+below.  The `getID()' function does a linear search through the linked
+list for its `name' argument: if found it returns a pointer to the
+previously entered `name', if not found, it adds a new entry at the
+head of the list and returns the `name' argument.
+
+     /* String space ADT to map identifiers into IDNums. */
+     typedef struct Ident {
+       const char *name;     /* NUL-terminated chars of identifier. */
+       struct Ident *succ;   /* Next entry in linear chain. */
+     } Ident;
+     
+     /* The string space is a chain of Ident's. */
+     static Ident *strSpace;
+     
+     static const char *
+     getID(const char *name)
+     {
+       Ident *p;
+       for (p= strSpace; p != NULL; p= p->succ) {
+         if (strcmp(name, p->name) == 0) break;
+       }
+       if (!p) {
+         p= malloc(sizeof(Ident));
+         p->name= name;
+         p->succ= strSpace; strSpace= p;
+       }
+       return p->name;
+     }
+
+
+File: zyacc.info,  Node: Why a StrSpace,  Prev: Mfcalc StrSpace,  Up: Multi-function Calc
+
+Why a Separate String Space
+---------------------------
+
+   It is possible to design `mfcalc' so that the scanner interns
+identifiers directly using the symbol table, avoiding the need for a
+separate string space.  Though that is adequate for `mfcalc', such an
+approach may be unwieldy for more complex applications because of the
+reasons outlined below.
+
+   A symbol table is a mapping from identifiers to objects like
+variables and functions; in many applications (like programming
+languages with separate name-spaces or multiple scopes) this mapping is
+typically one-to-many.  Hence maintaining a symbol table usually
+requires understanding the context within which a identifier is used.
+If the scanner is solely responsible for maintaining the symbol table,
+then it must keep track of the context within which an identifier is
+used -- this complicates the scanner.  If other higher level modules
+like the parser share the maintenance of the symbol table with the
+scanner, then the symbol table interface may become complex due to
+order-dependencies and feedback between modules.
+
+   The separate string table avoids some of these complications.  Though
+the implementation given for `mfcalc' required two searches for each
+identifier (one within the string space, the other within the symbol
+table), it is possible to get by with a single search.
+
+
+File: zyacc.info,  Node: MfCalc with Sugared Syntax,  Next: Polynomial Calc,  Prev: Multi-function Calc,  Up: Examples
+
+The Multi Function Calculator Using a Sugared Syntax
+====================================================
+
+   One disadvantage of the `$I' syntax used for specifying the semantic
+attributes of grammar symbols is that correctly specifying the I is
+often tedious, especially with long rules.  More seriously, if a rule
+changes then the I in a `$I' may also change: this can make maintaining
+such grammars error-prone.
+
+   Another disadvantage is that the attributes of grammar symbols are
+declared in section 1 of the grammar file (using `%union', `%type' and
+other declarations), rather than near where they are actually used in
+section 2.  This conflicts with modern software engineering practice,
+where entities are declared near or at the point of first use.
+
+   Zyacc permits syntactic sugar which overcomes these deficiencies.  It
+allows named attribute variables to refer to the semantic attributes,
+thus making it possible to refer to semantic attributes without having
+to count grammar symbols.  It also allows the semantic attributes of a
+nonterminal to be declared on the left-hand side of rules for that
+nonterminal.
+
+   The syntax is illustrated by repeating the grammar for the `mfcalc'
+using the new syntax:
+     input
+       : /* empty */
+       | input line
+       ;
+     
+     line
+       : '\n'
+       | exp($v) '\n'                { printf ("\t%.10g\n", $v); }
+       | error '\n'                  { yyerrok; }
+       ;
+     
+     exp(double $v)
+       : ID_TOK($id)                 { $v= getIDVal($id); }
+       | ID_TOK($id) '=' exp($v)     { setIDVal($id, $v); }
+       | ID_TOK($id) '(' exp($v1) ')'{ $v= (*(getIDFn($id)))($v1); }
+       | NUM_TOK($v)
+       | exp($v1) '+' exp($v2)       { $v= $v1 + $v2; }
+       | exp($v1) '-' exp($v2)       { $v= $v1 - $v2; }
+       | exp($v1) '*' exp($v2)       { $v= $v1 * $v2; }
+       | exp($v1) '/' exp($v2)       { $v= $v1 / $v2; }
+       | '-' exp($v1)  %prec NEG     { $v= -$v1; }
+       | exp($v1) '^' exp($v2)       { $v= pow($v1, $v2); }
+       | '(' exp($v1) ')'            { $v= $v1; }
+       ;
+     /* End of grammar */
+     %%
+
+The semantic attributes of a grammar symbol are written within
+parentheses following the grammar symbols using a positional notation
+similar to that of function application in C.  The types of the
+semantic attributes for a nonterminal are declared on the left-hand
+side of a rule using a syntax similar to that for function prototype
+declarations in C.
+
+   In the above example, `exp' has a single semantic attribute which
+represents the value of the expression; its value is computed on-the-fly
+as an `exp' is parsed.  This attribute is named `$v' and is declared to
+be of type `double' on the common left-hand side of the rules for
+`exp'.  This declaration is similar to that of a formal parameter in a
+function definition.
+
+   The attributes of right-hand side symbols detail the flow of semantic
+information among the grammatical constructs constituting the rule.  For
+example in the first rule for `exp' repeated below, the terminal
+`ID_TOK' representing a variable has an attribute referred to `$id'
+within that rule.  The action for that rule computes the attribute `$v'
+for the left-hand side `exp' in terms of this `$id' using the function
+`getIDVal()' which looks up the value of the variable using the current
+symbol table.
+     exp(double $v)
+       : ID_TOK($id)                 { $v= getIDVal($id); }
+       | ID_TOK($id) '=' exp($v)     { setIDVal($id, $v); }
+
+Similarly, in the second rule which describes an assignment expression,
+the `$v' for the left-hand side `exp' is computed via the `exp' on the
+right-hand side: this is indicated by using the same name `$v' for both
+occurrences.
+
+   The sugared syntax allows the attributes of a nonterminal to be
+declared when that nonterminal occurs on the left-hand side of a rule.
+Since this can never happen for a terminal symbol, the attributes of
+terminal symbols must still be declared in section 1 of the Zyacc file
+as follows:
+     %token <val>(double $v) NUM_TOK         /* Double precision number */
+     %token <id>(const char *$id) ID_TOK     /* Identifiers. */
+
+We have enhanced the `<val>' type tag previously used for a `NUM_TOK'
+by a parenthesized list containing declarations for its semantic
+attributes, namely a single attribute named `$v' of type `double'.
+Similarly an `ID_TOK' has a semantic type with type tag `<id>' with a
+single `const char *' semantic attribute named `$id'.
+
+   If the sugared syntax is used for the entire grammar, then there is
+no need for a `%union' directive.  In fact, Zyacc generates one
+automatically; for the above grammar, it will generate something similar
+to:
+     typedef union {
+       struct { double v; } val;      /* NUM_TOK */
+       struct { const char *id; } id; /* ID_TOK */
+     } YYSTYPE;
+
+The `union' has a separate `struct' field for each sugared `%token'
+declaration and for each nonterminal.
+
+   The semantic attributes of a terminal are stored in the field in the
+`union' which has a name identical to the `<TYPE>' tag used in the
+`%token' declaration for that terminal.  The fields in the `struct' are
+identical to the attributes declared for that `<TYPE>' tag in the token
+declaration, except that the `$'s are removed.  Hence the above
+`%token' declarations result in the fields `val' and `id' in the union,
+with each of them being a `struct' containing the fields `v' and `id'
+repectively.
+
+   Since the programmer controls the names used in the fields in the
+`union' for terminals, the programmer should use the same names when
+setting up semantic information for the terminals in the scanner.  For
+the above grammar, the only change necessary in the scanner is to
+change assignments to `yylval' to access the appropriate fields in the
+`union'.  Specifically, the code for numbers and identifiers in
+`yylex()' is changed to:
+       /* Char starts a number => parse the number.    */
+       if (c == '.' || isdigit (c)) {
+         ungetc (c, stdin);
+         scanf ("%lf", &yylval.val.v);
+         return NUM_TOK;
+       }
+     
+       /* Char starts an identifier => read the name.  */
+       if (isalpha(c)) {
+         ungetc(c, stdin);
+         yylval.id.id= readID();
+         return ID_TOK;
+       }
+
+The semantic attributes for each nonterminal are stored in a separate
+`struct' field within the `union'.  The types of the fields used within
+the `struct' for a nonterminal are identical to the types declared for
+the attributes of that nonterminal.  However, the names used for and
+within this field are implementation defined; that should not be a
+problem, as there is no need for the programmer to access them directly.
+
+   Using these named attributes overcomes the disadvantages mentioned
+earlier for the numeric `$'-variables.  However, the resulting grammars
+tend to be somewhat more verbose.  The new notation does not by itself
+add anything to the power of the grammars, which is why we refer to it
+as syntactic sugar.  However when used in conjunction with the features
+mentioned in the next couple of sections, the named attribute variables
+do add to the power of the grammars.
+
+
+File: zyacc.info,  Node: Polynomial Calc,  Next: Lazy Calc,  Prev: MfCalc with Sugared Syntax,  Up: Examples
+
+A Multi Function Calculator Which Evaluates Polynomials
+=======================================================
+
+   Consider enhancing our calculator with an evaluation operator `@',
+which evaluates a polynomial.  This operator can be used as in `x @ [5,
+2, 3]' to denote the polynomial `5*x^2 + 2*x + 3'.  The polynomial
+coefficients within the square brackets are allowed to be arbitrary
+expressions (including nested polynomial evaluations).  The `@'
+operator should associate to the left and have the highest precedence
+(greater than that of exponentiation).  An example of the use of this
+polynomial calculator is shown below:
+     $ polycalc
+     3@[4, 5, 1]
+             52
+     2 * 3@[4, 5, 1]
+             104
+     3@[4, 2@[8, 4, 2, 1], 1]
+             292
+     $
+
+   It is easy enough to force the `@' operator to have the required
+precedence by simply adding a `%left' declaration after the declaration
+for the exponentiation operator as shown below.
+     %right '^'              /* Exponentiation */
+     %left '@'               /* Polynomial application */
+
+Unfortunately, evaluating the polynomial is not that easy.
+
+   One solution to this problem is to not evaluate the polynomial as its
+coefficients are being parsed, but to merely store its coefficient
+values in some data structure which will be the semantic attribute for
+the coefficient list.  Once the coefficient list has been parsed, the
+data structure containing the coefficients and the value of the point at
+which evaluation is requested can be passed to some action routine which
+evaluates the polynomial at that point.  Assuming that the coefficients
+have been evaluated into an (`n+1')-element array `coeffs[]', a scheme
+like the following is typical for the action routine:
+     /* Evaluate nth-degree polynomial
+      * coeffs[n]*point^n + coeffs[n-1]*point^(n-1) + ... + coeffs[0]
+      */
+     double evalPoly(double point, double coeffs[], int n)
+     {
+       double sum= 0;
+       int i;
+       for (i= n; i >= 0; i--) sum= sum*point + coeffs[i];
+       return sum;
+     }
+
+
+Unfortunately, this requires auxiliary storage and a non-trivial data
+structure to handle nested polynomials.  Fortunately in Zyacc, the
+computation represented by the above code can be performed on-the-fly
+during parsing using a special type of semantic attributes known as
+*inherited attributes* described below.
+
+   All the attributes seen in the previous examples are known as
+*synthesized attributes*.  An attribute for a construct is said to be a
+*synthesized attribute* if the value of that attribute directly depends
+only on the semantic attributes of the constituents of that construct
+and not on the semantic attributes of a surrounding construct.  For
+example, the value of a `exp' is independent of the larger `exp' within
+which it may appear.
+
+   A little reflection shows that synthesized attributes are not
+sufficient to evaluate polynomials on-the-fly during parsing: the
+contribution made by each coefficient to the final value depends not
+only on the value of the coefficient but also on the point at which the
+polynomial is being evaluated (the value of the expression before the
+`@' operator), as well as the position of the coefficient in the list
+of polynomial coefficients.
+
+   Inherited attributes allow us to get around this problem: they allow
+us to pass in information about the surrounding context to a grammatical
+construct.  Inherited attributes are declared using the `%in' keyword
+as shown in the following extract of the `polycalc' grammar:
+     coeffs(%in double $sum, %in double $point, %out double $v)
+       : exp($v1)                    { $v= $sum*$point + $v1; }
+       | coeffs($sum, $point, $v1)
+         ',' exp($v2)                { $v= $v1*$point + $v2; }
+       ;
+     
+     exp(double $v)
+       : exp($v1) '@'
+         '[' coeffs(0.0, $v1, $v) ']'
+
+`polycalc' is derived from `mfcalc'.  Besides adding an operator
+declaration for `@' as described above, these rules represent the only
+other addition needed to `mfcalc'.  `coeffs' is a new nonterminal used
+to represent a comma-separated list of polynomial coefficient
+expressions.  It has three semantic attributes: the first two are
+inherited attributes `$sum' and `$point' and correspond to the
+variables with the same name used in the `evalPoly' C-function.  The
+last attribute is a synthesized attribute declared using `%out' (the
+`%out' is *usually* optional) which is the value of the entire
+polynomial at point.
+
+   The first rule for `coeffs'
+     coeffs(%in double $sum, %in double $point, %out double $v)
+       : exp($v1)                    { $v= $sum*$point + $v1; }
+
+deals with the situation where there is only a single polynomial
+coefficient which has not been processed: in that case the value of the
+polynomial is the value of the polynomial so far (`$sum') multiplied by
+the value of the point (`$point') plus the value of the coefficient
+(`$v1').
+
+   The second rule
+     coeffs(%in double $sum, %in double $point, %out double $v)
+       : coeffs($sum, $point, $v1)
+         ',' exp($v2)                { $v= $v1*$point + $v2; }
+
+deals with the situation when there is more than one remaining
+coefficient.  In that case, the remaining coefficients can be decomposed
+into all but the last coefficient (described by the first `coeffs' on
+the right-hand side) and the last coefficient (described by the `',''
+followed by `exp').  If we assume that the value of the polynomial
+represented by all but the last coefficient is `$v1', then the value of
+the entire polynomial is `$v1*$point + $v2' where `$v2' is the value of
+the last coefficient.
+
+   Notice that the computation performed by the above rules is
+identical to the computation performed within the `for'-loop of the
+`evalPoly' function.  The initialization of `sum' to `0' is performed
+in the rule for `exp'
+     exp(double $v)
+       : exp($v1) ''
+         '[' coeffs(0.0, $v1, $v) ']'
+
+which passes in a value of `0.0' for the `$sum' inherited attribute of
+`coeffs' and the value of the point (`$v1') for the `$point' inherited
+attribute.  The synthesized attribute `$v' computed for `coeffs' is the
+value of the left-hand side `exp'.
+
+
+File: zyacc.info,  Node: Lazy Calc,  Next: Exercises,  Prev: Polynomial Calc,  Up: Examples
+
+A Calculator Which Omits Some Parentheses
+=========================================
+
+   The previously developed multi-function calculator `mfcalc' requires
+its (single) function argments to be within parentheses.  Consider
+enhancing it for lazy people who prefer not to type those parentheses,
+as illustrated by the following interaction log:
+     $
+     lazycalc
+     exp ln 7
+             7
+     pi = 3.141592653589
+             3.141592654
+     sin pi/4
+             0.7071067812
+     (sin pi/4)^2 + (cos pi/4)^2
+             1
+     $
+
+A first attempt may be to simply declare a right-associative precedence
+level for function application between that of binary addition and
+multiplication operators as shown below (without any semantic
+attributes):
+      ...
+     %right '='
+     %left '-' '+'
+     %right FN               /* Prefix function application. */
+     %left '*' '/'
+     %left NEG               /* Negation--unary minus */
+     %right '^'              /* Exponentiation */
+      ...
+     %%
+      ...
+     exp
+       : ID_TOK exp %prec FN
+      ...
+
+Unfortunately, a little reflection shows that this is not enough.  Given
+simply the token sequence `ID_TOK - ID_TOK', a human would not know
+whether the sequence represents a function (given by the first
+`ID_TOK') applied to a unary minus expression (`- ID_TOK'), or a
+subtraction of the variable represented by the second `ID_TOK' from the
+variable represented by the first `ID_TOK'.  If a human being cannot
+distinguish between these two meanings purely on the basis of syntax,
+then there is no way that Zyacc can do so.
+
+   The way a human would distinguish between the above two sequences
+would be to consider the semantics for the first `ID_TOK'.  If the first
+`ID_TOK' represents a function, then the sequence would correspond to a
+function application, else to a subtraction expression.  However, this
+means that the way a token sequence is parsed depends on the semantics
+of the tokens in the sequence.
+
+   Generic yacc does not allow any way for the semantics to affect a
+parse.  However, Zyacc allows arbitrary semantic predicates to affect a
+parse.  A *semantic predicate* can be any arbitrary C expression E
+written on the right-hand side of a rule as `%test(E)'.  If at parse
+time, the rule in which a semantic predicate occurs is potentially
+applicable, then the predicate is evaluated: if the predicate succeeds
+(returns non-zero), then the rule in which the `%test' is embedded wins
+out over other rules.  So for our `lazycalc' example, the rule for
+function application becomes
+     exp(double $v)
+       : ID_TOK($id)  %test(isFn($id))
+         exp($v1) %prec FN           { $v= (*(getIDFn($id)))($v1); }
+
+`isFn()' is a trivial C function which interfaces to the symbol table,
+returning 1 iff its argument is a function.
+     /* Return nonzero iff name is a function. */
+     static unsigned
+     isFn(const char *name)
+     {
+       Sym *p= getSym(name, 0);
+       return (p != NULL && p->type == FN_SYM);
+     }
+
+   Semantic predicates allow relatively clean solutions to problems
+which are otherwise rather painful to solve.  They should not be
+overused.  In particular, they should not be used when simpler
+mechanisms suffice as they make a Zyacc grammar harder to understand --
+to understand Zyacc's parsing decisions when semantic predicates are
+used it is no longer sufficient to merely consider the
+statically-defined grammar rules, but it is also necessary to consider
+the semantics defined at parse time.
+
+
+File: zyacc.info,  Node: Exercises,  Prev: Lazy Calc,  Up: Examples
+
+Exercises
+=========
+
+   These example programs are both powerful and flexible. You may easily
+add new functions, and it is a simple job to modify this code to install
+predefined variables such as `pi' or `e' as well.  The following
+exercises suggest several simple enhancements.
+
+  1. Add some new functions from `math.h' to the initialization list for
+     `mfcalc'.
+
+  2. Modify `mfcalc' to add another array that contains constants and
+     their values.  Then modify `initSyms' to add these constants to the
+     symbol table.  It will be easiest to give the constants type
+     `VAR_SYM'.
+
+  3. Modify your solution to the previous exercise, so that the values
+     of constants cannot be modified.  (Hint: introduce a new symbol
+     type `CONST_SYM').
+
+  4. Is it possible to modify `mfcalc' so as to allow implicit
+     multiplication: i.e. your calculator should allow `2 + 3 x' as
+     equivalent to `2 + 3*x'?
+
+  5. How would you modify `mfcalc' to add array variables such that an
+     array is accessed using `ARRAYNAME(INDEX)' where ARRAYNAME is an
+     `ID_TOK' representing the name of the array and INDEX is an `exp'
+     representing the value used to index the array.  Syntactically, an
+     array access is identical to a function application, and your
+     answer should concentrate on how your parser can distinguish
+     between the two.
+
+
+
+File: zyacc.info,  Node: Grammar File,  Next: Interface,  Prev: Examples,  Up: Top
+
+Zyacc Grammar Files
+*******************
+
+   Zyacc takes as input a context-free grammar specification and
+produces a C-language function that recognizes correct instances of the
+grammar.
+
+   The Zyacc grammar input file conventionally has a name ending in
+`.y'.
+
+* Menu:
+
+* Grammar Outline::             Overall layout of the grammar file.
+* Symbols::                     Terminal and nonterminal symbols.
+* Rules::                       How to write grammar rules.
+* Recursion::                   Writing recursive rules.
+* Semantics::                   Semantic values and actions.
+* Declarations::                All kinds of Zyacc declarations are described here.
+* Multiple Parsers::            Putting more than one Zyacc parser in one program.
+
+
+File: zyacc.info,  Node: Grammar Outline,  Next: Symbols,  Prev: Grammar File,  Up: Grammar File
+
+Outline of a Zyacc Grammar
+==========================
+
+   A Zyacc grammar file has four main sections, shown here with the
+appropriate delimiters:
+
+     %{
+     C DECLARATIONS
+     %}
+     
+     ZYACC DECLARATIONS
+     
+     %%
+     GRAMMAR RULES
+     %%
+     
+     ADDITIONAL C CODE
+
+   Comments enclosed in `/* ... */' may appear in any of the sections.
+
+* Menu:
+
+* C Declarations::              Syntax and usage of the C declarations section.
+* Zyacc Declarations::          Syntax and usage of the Zyacc declarations section.
+* Grammar Rules::               Syntax and usage of the grammar rules section.
+* C Code::                      Syntax and usage of the additional C code section.
+
+
+File: zyacc.info,  Node: C Declarations,  Next: Zyacc Declarations,  Prev: Grammar Outline,  Up: Grammar Outline
+
+The C Declarations Section
+--------------------------
+
+   The C DECLARATIONS section contains macro definitions and
+declarations of functions and variables that are used in the actions in
+the grammar rules.  These are copied to the beginning of the parser
+file so that they precede the definition of `yyparse'.  You can use
+`#include' to get the declarations from a header file.  If you don't
+need any C declarations, you may omit the `%{' and `%}' delimiters that
+bracket this section.
+
+
+File: zyacc.info,  Node: Zyacc Declarations,  Next: Grammar Rules,  Prev: C Declarations,  Up: Grammar Outline
+
+The Zyacc Declarations Section
+------------------------------
+
+   The ZYACC DECLARATIONS section contains declarations that define
+terminal and nonterminal symbols, specify precedence, and so on.  In
+some simple grammars you may not need any declarations.  *Note Zyacc
+Declarations: Declarations.
+
+
+File: zyacc.info,  Node: Grammar Rules,  Next: C Code,  Prev: Zyacc Declarations,  Up: Grammar Outline
+
+The Grammar Rules Section
+-------------------------
+
+   The "grammar rules" section contains one or more Zyacc grammar
+rules, and nothing else.  *Note Syntax of Grammar Rules: Rules.
+
+   There must always be at least one grammar rule, and the first `%%'
+(which precedes the grammar rules) may never be omitted even if it is
+the first thing in the file.
+
+
+File: zyacc.info,  Node: C Code,  Prev: Grammar Rules,  Up: Grammar Outline
+
+The Additional C Code Section
+-----------------------------
+
+   The ADDITIONAL C CODE section is copied verbatim to the end of the
+parser file, just as the C DECLARATIONS section is copied to the
+beginning.  This is the most convenient place to put anything that you
+want to have in the parser file but which need not come before the
+definition of `yyparse'.  For example, the definitions of `yylex' and
+`yyerror' often go here.  *Note Parser C-Language Interface: Interface.
+
+   If the last section is empty, you may omit the `%%' that separates it
+from the grammar rules.
+
+   The Zyacc parser itself contains many static variables whose names
+start with `yy' and many macros whose names start with `YY'.  It is a
+good idea to avoid using any such names (except those documented in this
+manual) in the additional C code section of the grammar file.
+
+
+File: zyacc.info,  Node: Symbols,  Next: Rules,  Prev: Grammar Outline,  Up: Grammar File
+
+Symbols, Terminal and Nonterminal
+=================================
+
+   "Symbols" in Zyacc grammars represent the grammatical classifications
+of the language.
+
+   A "terminal symbol" (also known as a "token type") represents a
+class of syntactically equivalent tokens.  You use the symbol in grammar
+rules to mean that a token in that class is allowed.  The symbol is
+represented in the Zyacc parser by a numeric code, and the `yylex'
+function returns a token type code to indicate what kind of token has
+been read.  You don't need to know what the code value is; you can use
+the symbol to stand for it.
+
+   A "nonterminal symbol" stands for a class of syntactically equivalent
+groupings.  The symbol name is used in writing grammar rules.  By
+convention, it should be all lower case.
+
+   Symbol names can contain letters, digits (not at the beginning),
+underscores and periods.  Periods make sense only in nonterminals.
+
+   There are two ways of writing terminal symbols in the grammar:
+
+   * A "named token type" is written with an identifier, like an
+     identifier in C.  By convention, it should be all upper case.  Each
+     such name must be defined with a Zyacc declaration such as
+     `%token'.  *Note Token Type Names: Token Decl.
+
+   * A "character token type" (or "literal token") is written in the
+     grammar using the same syntax used in C for character constants;
+     for example, `'+'' is a character token type.  A character token
+     type doesn't need to be declared unless you need to specify its
+     semantic value data type (*note Data Types of Semantic Values:
+     Value Type.), associativity, or precedence (*note Operator
+     Precedence: Precedence.).
+
+     By convention, a character token type is used only to represent a
+     token that consists of that particular character.  Thus, the token
+     type `'+'' is used to represent the character `+' as a token.
+     Nothing enforces this convention, but if you depart from it, your
+     program will confuse other readers.
+
+     All the usual escape sequences used in character literals in C can
+     be used in Zyacc as well, but you must not use the null character
+     as a character literal because its ASCII code, zero, is the code
+     `yylex' returns for end-of-input (*note Calling Convention for
+     `yylex': Calling Convention.).
+
+   How you choose to write a terminal symbol has no effect on its
+grammatical meaning.  That depends only on where it appears in rules and
+on when the parser function returns that symbol.
+
+   The value returned by `yylex' is always one of the terminal symbols
+(or 0 for end-of-input).  Whichever way you write the token type in the
+grammar rules, you write it the same way in the definition of `yylex'.
+The numeric code for a character token type is simply the ASCII code for
+the character, so `yylex' can use the identical character constant to
+generate the requisite code.  Each named token type becomes a C macro in
+the parser file, so `yylex' can use the name to stand for the code.
+(This is why periods don't make sense in terminal symbols.) *Note
+Calling Convention for `yylex': Calling Convention.
+
+   If `yylex' is defined in a separate file, you need to arrange for the
+token-type macro definitions to be available there.  Use the `-d'
+option when you run Zyacc, so that it will write these macro definitions
+into a separate header file `NAME.tab.h' which you can include in the
+other source files that need it.  *Note Invoking Zyacc: Invocation.
+
+   The symbol `error' is a terminal symbol reserved for error recovery
+(*note Error Recovery::.); you shouldn't use it for any other purpose.
+In particular, `yylex' should never return this value.
+
+
+File: zyacc.info,  Node: Rules,  Next: Recursion,  Prev: Symbols,  Up: Grammar File
+
+Syntax of Grammar Rules
+=======================
+
+   A Zyacc grammar rule has the following general form:
+
+     RESULT: COMPONENTS...
+             ;
+
+where RESULT is the nonterminal symbol that this rule describes and
+COMPONENTS are various terminal and nonterminal symbols that are put
+together by this rule (*note Symbols::.).
+
+   For example,
+
+     exp
+       : exp '+' exp
+       ;
+
+says that two groupings of type `exp', with a `+' token in between, can
+be combined into a larger grouping of type `exp'.
+
+   Whitespace in rules is significant only to separate symbols.  You
+can add extra whitespace as you wish.
+
+   Scattered among the components can be ACTIONS that determine the
+semantics of the rule.  An action looks like this:
+
+     {C STATEMENTS}
+
+Usually there is only one action and it follows the components.  *Note
+Actions::.
+
+   Multiple rules for the same RESULT can be written separately or can
+be joined with the vertical-bar character `|' as follows:
+
+     RESULT
+       : RULE1-COMPONENTS...
+       | RULE2-COMPONENTS...
+       ...
+       ;
+
+They are still considered distinct rules even when joined in this way.
+
+   If COMPONENTS in a rule is empty, it means that RESULT can match the
+empty string.  For example, here is how to define a comma-separated
+sequence of zero or more `exp' groupings:
+
+     expseq
+       : /* empty */
+       | expseq1
+       ;
+     
+     expseq1
+       : exp
+       | expseq1 ',' exp
+       ;
+
+It is customary to write a comment `/* empty */' in each rule with no
+components.
+

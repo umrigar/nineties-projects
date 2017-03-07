@@ -1,0 +1,111 @@
+#! /bin/sh
+#*** DO NOT EDIT. ***
+#This file was automatically produced by m4 using a command like:
+#m4 -DDEPEND_CMD="./libdep libzlex.a yy" <mklibsrc.m4 >THIS_FILE
+
+#nm command used to analyze object file.
+NM="nm -u"
+
+#Library header file.
+libhdr="libzlexp.h"
+
+case $# in
+  1) oFile=$1;;
+  2) oFile=$1;
+     if test -d $2 
+     then
+       libSrcDir=$2
+     else
+       destFile=$2
+     fi;;
+  3) oFile=$1; libSrcDir=$2; destFile=$3;;
+  *) echo Usage: $0 OBJECT_FILE [LIBRARY_SOURCE_DIRECTORY] [DEST_FILE]; 
+     exit 1;;
+esac
+
+if test ! -f $oFile 
+then
+  echo Object file $oFile not found; exit 1;
+fi
+
+if test -z "$libSrcDir"
+then
+  libSrcDir=`echo $0 | sed -e "s%/[^/]*$%%"`
+fi
+
+if test ! -d $libSrcDir
+then
+  echo "Library source directory $libSrcDir invalid."; exit 1
+fi
+
+if test -z "$destFile"
+then
+  destFile=libsrc.c
+fi
+
+test -f $destFile || echo '/*' Library sources. '*/' >$destFile
+
+fns=`$NM $oFile \
+     | sed -n 's/.*\(yy[a-zA-Z0-9_]*\).*/\1/p' \
+     | tr '\012' ' '`
+
+for fn in $fns
+do
+  deps=`grep $fn <<EOF
+yyBytesBuffer: bytesbuf.c membuf.c move.c fatal.c makebuf.c
+yyCreateBuffer: creatbuf.c makebuf.c fatal.c
+yyDebugMsg: debug.c
+yyDefaultMsg: debug.c
+yyDeleteBuffer: delbuf.c savetext.c move.c fatal.c
+yyEOFMsg: debug.c
+yyFlushBuffer: flushbuf.c sentinel.c creatbuf.c move.c shiftbuf.c swtchbuf.c fatal.c makebuf.c
+yyGet: get.c sentinel.c creatbuf.c move.c shiftbuf.c swtchbuf.c fatal.c makebuf.c
+yyLess: less.c makeadj.c movetext.c shiftbuf.c move.c sentinel.c fatal.c creatbuf.c swtchbuf.c makebuf.c
+yyMakeAdjText: makeadj.c movetext.c shiftbuf.c move.c sentinel.c fatal.c creatbuf.c swtchbuf.c makebuf.c
+yyMakeBuf: makebuf.c fatal.c
+yyMemBuffer: membuf.c makebuf.c fatal.c
+yyMore: more.c sentinel.c creatbuf.c move.c shiftbuf.c swtchbuf.c fatal.c makebuf.c
+yyMoveBytes: move.c
+yyMoveText: movetext.c move.c
+yyPopState: ssstk.c fatal.c
+yyProcessSentinel: sentinel.c creatbuf.c move.c shiftbuf.c swtchbuf.c fatal.c makebuf.c
+yyPushState: ssstk.c fatal.c
+yyReplace: replace.c move.c shiftbuf.c sentinel.c fatal.c creatbuf.c swtchbuf.c makebuf.c
+yyRestart: restart.c sentinel.c creatbuf.c move.c shiftbuf.c swtchbuf.c fatal.c makebuf.c
+yySaveText: savetext.c move.c fatal.c
+yyShiftBuffer: shiftbuf.c move.c sentinel.c fatal.c creatbuf.c swtchbuf.c makebuf.c
+yyStringBuffer: strngbuf.c bytesbuf.c membuf.c move.c fatal.c makebuf.c
+yySwitchToBuffer: swtchbuf.c sentinel.c fatal.c creatbuf.c move.c shiftbuf.c makebuf.c
+yyTerminate: terminat.c
+yyTopState: ssstk.c fatal.c
+yyUnput: unput.c move.c shiftbuf.c sentinel.c fatal.c creatbuf.c swtchbuf.c makebuf.c
+yyUpdateSentinel: sentinel.c creatbuf.c move.c shiftbuf.c swtchbuf.c fatal.c makebuf.c
+yyZlexFatal: fatal.c
+yywrap: wrap.c
+
+EOF
+`
+  if test "$deps"
+  then
+    deps=`echo $deps | cut -f2 -d:`
+    deps="$libhdr $deps"
+    for f in $deps
+    do
+      echo -n "$f... "
+      if test ! -f $libSrcDir/$f
+      then
+        echo "Could not find library source file $f."; exit 1;
+      fi
+      hdr="===File: $f==="
+      if grep "$hdr" $destFile >/dev/null 2>/dev/null 
+      then
+	echo "already present."
+      else
+        echo '/* ' $hdr ' */' >>$destFile ; 
+        sed -e "/$libhdr/d" $libSrcDir/$f >>$destFile
+        echo "added."
+      fi
+    done
+  fi
+done
+exit 0

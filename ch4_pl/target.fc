@@ -1,0 +1,11 @@
+{
+  read [right];
+  G3260: left := ~ [];
+  if ~ 0 = first_sym(right) then goto G31158 else goto G31394;
+  G31158: right := cons(~ 1, tl(right));
+  return right;
+  G31394: left := cons(first_sym(right), left);
+  right := tl(right);
+  if ~ 0 = first_sym(right) then goto G31158 else goto G31394
+} .
+

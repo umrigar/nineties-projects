@@ -1,0 +1,64 @@
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.o .c .y .l
+
+.c.o:
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $<
+
+.c:
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $< $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+
+
+#The following targets use ZYACC_PATH and ZYACC_SEARCH_PATH.  If ZYACC_PATH is
+#defined, it should not end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+
+ZYACCFLAGS=	-d -v
+
+.y.c:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+
+.y.o:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.y:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+#The following targets use ZLEX_PATH and ZLEX_SEARCH_PATH.  If ZLEX_PATH is
+#defined, it should not end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+.l.c:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+
+.l.o:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.l:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+

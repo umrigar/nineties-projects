@@ -1,0 +1,608 @@
+#! /usr/bin/perl -sw
+
+use strict;
+
+use FileHandle;
+
+#Configuration parameters.
+
+use vars qw($bold $italic $code $tab $format);
+
+my $BOLD_DELIM= $bold || '*';
+
+my $ITALIC_DELIM= $italic || '"';
+
+my $CODE_DELIM= $code || '`';
+
+my $TAB= $tab || 8;
+
+my $FORMAT= $format || 'html';
+
+#End configuration section.
+
+my $PATH= $0;
+$PATH=~ s@/[^/]+$@@;
+push @INC, $PATH;
+
+my $BOLD_RE= <<END_BOLD_RE;
+(\\$BOLD_DELIM)
+  ( (?:[^\\$BOLD_DELIM] | \\$BOLD_DELIM\\$BOLD_DELIM)* )
+\\$BOLD_DELIM
+END_BOLD_RE
+
+my $ITALIC_RE= <<END_ITALIC_RE;
+(\\$ITALIC_DELIM)
+  ( (?:[^\\$ITALIC_DELIM] | \\$ITALIC_DELIM\\$ITALIC_DELIM)* )
+\\$ITALIC_DELIM
+END_ITALIC_RE
+
+my $CODE_RE= <<END_CODE_RE;
+(\\$CODE_DELIM)
+  ( (?:[^\\$CODE_DELIM] | \\$CODE_DELIM\\$CODE_DELIM)* )
+\\$CODE_DELIM
+END_CODE_RE
+
+my $REF_START= <<END_REF_START;
+(?: http: | https: | ftp: | mailto: | \\.\\./ | \\./ | \\# )
+END_REF_START
+
+sub parseText($) {
+  my($text)= @_;
+  my(@parse)= ();
+  my $parenDepth= 0;
+  my $length= 0;
+  while ($text =~ m[(.*?)		#regular text.
+	          (?:
+		   $BOLD_RE |                 #bold markup (possibly empty).
+		   $ITALIC_RE |               #italic markup (possibly empty).
+		   $CODE_RE |                 #code markup (possibly empty).
+		   \(\<($REF_START[^>]+)\>\) |#Ref in paren.
+		   \<($REF_START[^>]+)\> |    #Ref not in paren.
+		   ((?-i)\b[a-z]\w*[A-Z]\w*\b) | #word with internal caps.
+                   (\b\w*\_\w*\b) |	       #word with underscores.
+		   (\w+\() |		       #function application.
+		   (\)) |		       #matching paren for function.
+		   \<\+([^\>]+)\> |	       #label definition.
+                   \.(<[^>]+>) |	      #quoted passthru
+		   (\$\$)([^\$]+)\$\$ |	      #display math
+                   (\$)([^\$]+)\$	      #inline math	
+		   )]giosx) {
+     $length+= length($&);
+     my $preText= $1;
+     my $isBold= defined $2;
+     my $boldText= $3;
+     my $isItalic= defined $4;
+     my $italicText= $5;
+     my $isCode= defined $6;
+     my $codeText= $7;
+     my $previousRef= $8;
+     my $ref= $9;
+     my $ttWord= $10 || $11;
+     my $fnWord= $12;
+     my $rParen= $13;
+     my $def= $14;
+     my $passThru= $15;
+     my $isDisplayMath= defined $16;
+     my $displayMath= $17;
+     my $isInlineMath= $18;
+     my $inlineMath= $19;
+     my($preText1, $lastWord)= $preText =~ (/^(.*\s+)?(\S+)\s*$/s);
+     my($preTextX, $isNeg)= $preText =~ /^(.*)(\.)$/s;
+     my $preTextZ= 
+         $isBold ? ($isNeg ? "$preTextX*$boldText*" 
+	 	           : defined $boldText ? $preText : "$preText*")
+       : $isItalic ? ($isNeg ? "$preTextX\"$italicText\"" 
+		             : defined $italicText ? $preText : "$preText\"") 
+       : $isCode ? ($isNeg ? "$preTextX\`$codeText\`"
+		           : defined $codeText ? $preText : "$preText\`") 
+       : $isDisplayMath ? ($isNeg ? "$preTextX\$\$$displayMath\$\$"
+		                  : defined $displayMath ? $preText 
+			                                 : "$preText\$\$") 
+       : $isInlineMath ? ($isNeg ? "$preTextX\$$inlineMath\$"
+		                 : defined $inlineMath ? $preText 
+			                               : "$preText\$")
+       : $previousRef ? ($isNeg ? "$preTextX(<$previousRef>)" : $preText1 )
+       : $ref ? ($isNeg ? "$preTextX<$ref>" : $preText ) 
+       : $ttWord ? ($isNeg ? "$preTextX$ttWord" : $preText ) 
+       : $fnWord ? ($isNeg ? "$preTextX$fnWord" : $preText )
+       : $rParen ? ($isNeg ? "$preTextX)" 
+                           : $parenDepth == 0 ? "$preText)" : $preText)
+       : $def ? ($isNeg ? "$preTextX<+$def>" : $preText) 
+       : $preText;
+     push @parse, [ 'TEXT', $preTextZ ] if ($preTextZ);
+     if ($isNeg) {
+     }
+     elsif (defined $boldText) {
+       my $boldTextX= $boldText;
+       $boldTextX=~ s/\Q$BOLD_DELIM$BOLD_DELIM\E/$BOLD_DELIM/g;
+       push @parse, [ 'BOLD', $boldTextX ];
+     }  
+     elsif (defined $italicText) {
+       my $italicTextX= $italicText;
+       $italicTextX=~ s/\Q$ITALIC_DELIM$ITALIC_DELIM\E/$ITALIC_DELIM/g;
+       push @parse, [ 'ITALIC', $italicTextX ];
+     }
+     elsif (defined $codeText) {
+       my $codeTextX= $codeText;
+       $codeTextX=~ s/\Q$CODE_DELIM$CODE_DELIM\E/$CODE_DELIM/g;
+       push @parse, [ 'CODE', $codeTextX ];
+     }
+     elsif (defined $displayMath) {
+       push @parse, [ 'DISPLAY_MATH', $displayMath ];
+     }
+     elsif (defined $inlineMath) {
+       push @parse, [ 'INLINE_MATH', $inlineMath ];
+     }
+     elsif ($previousRef) {
+       if (!$lastWord) {
+         warn "no normal case previous word to link for $previousRef\n";
+	 $lastWord= ' ';
+       }
+       push @parse, [ 'LINK', $previousRef, $lastWord ];
+     }
+     elsif (defined $ttWord) {
+       push @parse, [ 'CODE', $ttWord ];
+     }
+     elsif (defined $fnWord) {
+       push @parse, [ 'CODE', $fnWord ];
+       $parenDepth++;
+     }
+     elsif ($rParen && $parenDepth > 0) {
+       push @parse, [ 'CODE', $rParen ];
+       $parenDepth--;
+     }
+     elsif ($ref) {
+       push @parse, [ 'LINK', $ref, $ref ];
+     }
+     elsif ($def) {
+       push @parse, [ 'DEF', $def ];
+     }
+     elsif ($passThru) {
+       push @parse, [ 'PASSTHRU', $passThru ];
+     }
+  }
+  my($lastText)= substr($text, $length);
+  push @parse, [ 'TEXT', $lastText ] if ($lastText);
+  return \@parse;
+}
+
+
+
+#Return a ref to a list containing refs to hashes describing paragraphs.
+sub classifyParas($$)
+{
+  my($paras, $leftMargin)= @_;
+  my(@classifiedParas)= ();
+  foreach my $p (@$paras) {
+    my($contents, $nLines, $paraType)= @$p;
+    my $type= [ 'PARA' ];
+    my($initialSpace)= ($contents =~ /^(\ *)/);
+    my $indent= length($initialSpace);
+    my $isRagged= 0;
+    my $subIndent= $indent;
+    while ($contents =~ /\n(\ +)/g) {
+      my $spaceLen= length($1);
+      if ($subIndent == $indent) {
+        $subIndent= $spaceLen; 
+      }
+      elsif ($subIndent != $spaceLen) { 
+        $subIndent= -1; $isRagged= 1; 
+        last;
+      }
+    }
+    if ($subIndent == $indent && 
+        $contents =~ /^(\ +([\-\+\*o]|\w+[\.\)])\ +)/) {
+      $subIndent= length($1);
+    }
+    my $para;
+    if ($paraType == 1) {
+      $para= { type => 'VERBATIM', 
+               contents => $contents, 
+               indent => $indent,
+             };
+    }
+    elsif ($paraType == 2) {
+      $para= { type => 'TABLE', 
+               contents => parseTable($contents), 
+               indent => $indent,
+             };
+    }
+    elsif ($contents !~ /\S\S/) {
+      my $heading= $contents;
+      $heading=~ s/(\S)\ /$1/g;
+      $heading=~ s/\n/ /g;
+      $heading=~ s/\s\s+/ /g;
+      $heading=~ s/^\s+//g;
+      $para= { type => 'HEADING', 
+               contents => parseText($heading), 
+	       level => 1,
+	       indent => -1,
+	     };
+    }
+    elsif ($isRagged || $contents =~ /\w\ {2}/) {
+      $para= { type => 'OBEY', 
+               contents => parseText($contents), 
+               indent => $indent,
+             };
+    }
+    elsif ($nLines == 2 && $contents =~ /\n(\s*)(\-+|\=+)\n/ 
+           && length($1) == $indent) {
+      my $headLevel= (substr($2, 0, 1) eq '=') ? 2 : 3;
+      my($space,$heading)= ($contents =~ /^(\s*)([^\n]+)/);
+      $headLevel += 2 if (length($space) == $leftMargin);
+      $para= { type=> 'HEADING', 
+               contents => parseText($heading), 
+               level=> $headLevel,
+	       indent => -1,
+	     };
+    }
+    elsif ($contents =~ /^\ +([\-\+\*o])\ +(.*)$/s) {
+      $para= { type => 'ITEMIZED', 
+               contents => parseText($2), 
+               indent => $indent, 
+               subIndent => $subIndent, 
+               marker => $1, 
+  	     };
+    }
+    elsif ($contents =~ /^\ +(\w+)[\.\)]\ +(.*)$/s) {
+      $para= { type => 'ORDERED', 
+               contents => parseText($2), 
+               indent => $indent, 
+	       subIndent => $subIndent,
+	       marker => $1,
+             };
+    }
+    elsif ($contents =~ /^\ +([^:\n]+)::\n(.*)$/s) {
+      $para= { type => 'DESC', 
+               contents => parseText($2), 
+               indent => $indent, 
+	       subIndent => $subIndent,
+	       marker => parseText($1),
+	     };
+    }
+    else {
+      $para= { type => 'PARA', 
+               contents => parseText($contents), 
+	       indent => $subIndent,
+             };
+    }
+    push @classifiedParas, $para;
+  }
+  if (@classifiedParas && $classifiedParas[0]->{type} ne 'HEADING') {
+    unshift @classifiedParas, { type => 'HEADING',
+                                contents => '',
+			        level => 0,
+				indent => -1,
+			      };
+  }
+  return [ \@classifiedParas, $leftMargin ];
+}
+
+#Return a ref to a list of paragraphs read from file fName.  A paragraph
+#is defined to be a sequence of non-blank lines or a sequence of lines
+#enclosed within *identical* ---- rules.
+sub readFile($)
+{
+  my($fName)= @_;
+  open(FILE, $fName) || die "cannot read $fName: $!\n";
+  my(@paras)= ();
+  my $contents= '';
+  my $endParaRE= '';
+  my $inPara= 0;
+  my $nLines= 0;
+  my $paraType= 0;
+  my $leftMargin= 9999999;
+  while (<FILE>) {
+    my $line= $_;
+    chomp $line;
+    while ($line=~ s/\t+/' ' x (length($&) * $TAB - length($`) % $TAB)/e) { };
+    $line=~ s/\s+$//;
+    my($leadingSpace)= ($line =~ /^(\ *)/);
+    my($indent)= length($leadingSpace);
+    $leftMargin= $indent if ($indent < $leftMargin);
+    if ($inPara) {
+      if ($line =~ /$endParaRE/) {
+        push @paras, [ $contents, $nLines, $paraType ];
+	$inPara= 0;
+	$contents= ""; $nLines= 0;
+      }
+      else {
+        $contents.= "$line\n";
+	$nLines++;
+      }
+    }
+    elsif ($line =~ /^\s*\-+$/) {
+      $inPara= 1;
+      $endParaRE= "^$line\$";
+      $paraType= 1;
+    }
+    elsif ($line =~ /^\s*\=+$/) {
+      $inPara= 1;
+      $endParaRE= "^$line\$";
+      $paraType= 2;
+    }
+    elsif ($line !~ /^\s*$/) {
+      $contents= "$line\n";
+      $nLines= 1;
+      $endParaRE= "^\\s*\$";
+      $inPara= 1;
+      $paraType= 0;
+    }
+  }
+  push @paras, [ $contents, $nLines, $paraType ] if ($contents);
+  close FILE;
+  return classifyParas(\@paras, $leftMargin);
+}
+
+sub parseRow($$$) {
+  my($row, $colStarts, $dataType)= @_;
+  my @lines= split /\n/, $row;
+  my @entries;
+  foreach my $line (@lines) {
+    my $len= length $line;
+    for (my $i= 0; $i < @$colStarts && $colStarts->[$i][0] < $len; $i++) {
+      my $colStart= $colStarts->[$i][0];
+      my $colEnd= 
+	($i == @$colStarts - 1) ? $len : $colStarts->[$i + 1][0];
+      $colEnd= $len if ($colEnd > $len);
+      my $colContents= substr($line, $colStart, $colEnd - $colStart);
+      if (!defined $entries[$i]) {
+	my $type= ($colContents =~ /\|\s*$/) ? 'TABLE_HEADER' : $dataType;
+	$entries[$i]= [ $type, "", $colStarts->[$i][1], ];
+      }
+      $colContents=~ s/[\s\|]*$/\n/;
+      $entries[$i][1].= $colContents;      
+    }
+  }
+  foreach my $d (@entries) { $d->[1]= parseText($d->[1]); }
+  return \@entries;
+}
+
+sub parseTable($) {
+  my($contents)= @_;
+  my($header, $div, $body)= 
+    ($contents =~ /^(.+?)^(\s*[\^\<\>\|\-\+]+)$(.+)$/ms);
+  my($colStarts)= [];
+  while ($div =~ m/([\^\<\>])/gx) {
+    my($pos)= (@$colStarts) ? pos($div) : 0;
+    my $align= ($1 eq '<') ? 'LEFT' : ($1 eq '>') ? 'RIGHT' : 'CENTER';
+    push @$colStarts, [ $pos, $align ];
+  }
+  my $rows= [ [ 'TABLE_HEADING', 
+		parseRow($header, $colStarts, 'TABLE_HEADER') ] ];
+  my $rowDelimiterRE= ($body =~ /^\s*[-+]+$/m) ? '^\s*[-+]+$' : "\n";
+  $body.= ('-' x 10) . "\n" if ($rowDelimiterRE ne "\n");
+  while ($body =~ /(.+?)$rowDelimiterRE/msg) {
+    push @$rows, [ 'TABLE_ROW', parseRow($1, $colStarts, 'TABLE_DATA') ];
+  }
+  return $rows;
+}
+
+use vars qw($TEST_READ_FILE);
+
+if ($TEST_READ_FILE) {
+  my($parasRef, $leftMargin)= @{readFile($ARGV[0])};
+  local $"= "\n";
+  foreach my $p (@$parasRef) {
+    foreach my $k (sort keys %$p) {
+      print "$k: $p->{$k}\n";
+    }
+    print "-"x24, "\n";
+  }
+  exit;
+}
+
+=pod COMMENT
+Doc
+  : [ Section... ]
+  ;
+Section
+  : [ 'SECTION' HEADING_PARA LEVEL Block... ]
+  ;
+Block
+  : ItemizedList
+  | OrderedList
+  | DescList
+  | PrimList
+  | Quote
+  ;
+Quote
+  : [ 'QUOTE' PrimList... ]	#really should only consist of PARA PrimList.
+  ;
+ItemizedList
+  : [ 'ITEMIZED_LIST' MARKER ItemizedItem... ]
+  ;
+ItemizedItem
+  : [ "ITEMIZED_ITEM" TEXT MARKER Block... ]
+  ;
+OrderedList
+  : [ 'ORDERED_LIST' MARKER OrderedItem... ]
+  ;
+OrderedItem
+  : [ "ORDERED_ITEM" TEXT MARKER Block... ]
+  ;
+DescList
+  : [ 'DESC_LIST' DescItem... ]
+  ;
+Descitem
+  : [ "DESC_ITEM" TEXT DESC_TERM Block... ]
+  ;
+PrimList
+  : [ Primitive ... ]
+  ;
+Primitive
+  : [ "PARA" PARA_TEXT ]
+  | [ "OBEY" OBEY_TEXT ]
+  | [ "VERBATIM" VERBATIM_TEXT ]
+  ;
+=cut
+
+my %TYPE_CONTAINER= (
+  ITEMIZED => [ 'ITEMIZED_LIST', 'marker' ],
+  ORDERED =>  [ 'ORDERED_LIST', 'marker' ],
+  DESC =>     [ 'DESC_LIST' ],
+  PARA =>     [ 'QUOTE' ],
+);
+
+my %LIST_TYPE= map { ($_, 1) } qw(ITEMIZED ORDERED DESC);
+	
+my %INDENT_DONT_CARE= map { ($_, 1) } qw(OBEY VERBATIM TABLE);
+
+sub parseParas($$$$$$$)
+{
+  my($paras, $paraNRef, $leftMargin, $indent, $hdrLevel, $marker, $parse)= @_;
+  while ($$paraNRef < @$paras) {
+    my($para)= $paras->[$$paraNRef];
+    my($paraType)= $para->{type};
+    my($paraIndent)= $para->{indent};
+    my($paraMarker)= $para->{marker} || '';
+    my($nextMarker)= $marker;
+    $nextMarker++ if ($marker && $paraType eq 'ORDERED');
+    my($paraSubIndent)= $para->{subIndent} || $paraIndent;
+    if ($paraType eq 'HEADING') {
+      if ($para->{level} <= $hdrLevel) {
+	return;
+      }
+      else {
+        my $block= [ ];
+	my $level= $para->{level};
+        push @$parse, [ "HEAD$level", $para->{contents}, $block ];
+        $$paraNRef++;
+	parseParas($paras, $paraNRef, $leftMargin, $leftMargin, 
+		   $level, '', $block);
+      }
+    }
+    elsif ($INDENT_DONT_CARE{$paraType} || 
+	   $paraType eq 'PARA' && $indent == $paraIndent) {
+      push @$parse, [ $paraType, $para->{contents} ];
+      $$paraNRef++;
+    }
+    elsif ($paraIndent < $indent) {
+      return;
+    }
+    elsif ($paraIndent > $indent || ($marker && $paraMarker ne $nextMarker)) {
+      my($container)= $TYPE_CONTAINER{$paraType};
+      die "bad para type $paraType in parseParas()\n" if (!$container);
+      my $block= [ $container->[0] ];
+      push @$parse, $block;
+      for (my $i= 1; $i < @$container; $i++) {
+	push @$block, $para->{$container->[$i]};
+      }
+      my $itemsParse= [];
+      push @$block, $itemsParse;
+      parseParas($paras, $paraNRef, $leftMargin, $paraIndent, 
+		 999, '', $itemsParse);
+    }
+    else { # $paraIndent == $indent
+      if ($LIST_TYPE{$paraType}) {
+	my $block= [ ];
+	push @$parse, 
+             [ "${paraType}_ITEM", $para->{contents}, $paraMarker, $block ];
+        $$paraNRef++;
+	parseParas($paras, $paraNRef, $leftMargin, 
+		   $para->{subIndent}, 999, $paraMarker, $block);
+      }
+      else {
+        push @$parse, [ $paraType, $para->{contents} ];
+        $$paraNRef++;
+      }
+    }
+  }
+}
+
+
+use vars qw($TEST_PARSE_PARAS);
+
+use Data::Dumper;
+
+if ($TEST_PARSE_PARAS) {
+  my($parasRef, $leftMargin)= @{readFile($ARGV[0])};
+  my $nParas= 0;
+  my @parse;
+  parseParas($parasRef, \$nParas, $leftMargin, -2,  0, '', \@parse);
+  print Dumper(@parse);
+  exit;
+}
+
+#Output utility functions.
+
+sub formatTable($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  if (@$currentParse == 0) {
+    return;
+  }
+  my $head= $currentParse->[0];
+  if (ref $head eq 'ARRAY') {
+    for (my $i= 0; $i < @$currentParse; $i++) {
+      formatTable($outFile, $fmtTable, $topParse, $currentParse->[$i]);
+    }
+  }
+  else {
+    my $fmtOps= $fmtTable->{$head};
+    die "no format defined for $head\n" if (!$fmtOps);
+    for (my $i= 0; $i < @$fmtOps; $i++) {
+      my $fmtOp= $fmtOps->[$i];
+      my $fmtOpType= ref $fmtOp;
+      if (!$fmtOpType) {
+	my $result= $fmtOp;
+	$result=~ s/\$\$|\$(\d+)/($1) ? $currentParse->[$1] : '$'/eg;
+        print $outFile $result;
+      }
+      elsif ($fmtOpType eq 'CODE') {
+        no strict 'refs';
+        &$fmtOp($outFile, $fmtTable, $topParse, $currentParse);
+      }
+    }
+  }
+}
+
+sub formatTable1($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  formatTable($outFile, $fmtTable, $topParse, $currentParse->[1]);
+}
+
+sub formatTable2($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  formatTable($outFile, $fmtTable, $topParse, $currentParse->[2]);
+}
+
+sub formatTable3($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  formatTable($outFile, $fmtTable, $topParse, $currentParse->[3]);
+}
+
+sub formatTable4($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  formatTable($outFile, $fmtTable, $topParse, $currentParse->[4]);
+}
+
+sub formatTable5($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  formatTable($outFile, $fmtTable, $topParse, $currentParse->[5]);
+}
+
+sub formatTable6($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  formatTable($outFile, $fmtTable, $topParse, $currentParse->[6]);
+}
+
+
+#Main program:
+
+require("$FORMAT.fmt") || die "could not include file $FORMAT.sty\n";
+
+my $fName= $ARGV[0];
+my($parasRef, $leftMargin)= @{readFile($fName)};
+my $nParas= 0;
+my @parse= ();
+parseParas($parasRef, \$nParas, $leftMargin, -2,  0, '', \@parse);
+#print Dumper(\@parse);
+doFormat($fName, ['DOC', \@parse]);
+

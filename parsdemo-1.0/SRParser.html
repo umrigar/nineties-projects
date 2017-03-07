@@ -1,0 +1,124 @@
+<HTML><HEAD>
+<TITLE>Shift-Reduce Parser Applet</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Shift-Reduce Parser Applet</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/28 17:18:04 umrigar"
+</FONT>
+
+<P> This page contains a java applet which demonstrates the operation of a
+recursive-descent parser for a <A HREF="simpcomp_2.html"
+TARGET="left">simple language</A> consisting of assignment statements and
+arithmetic expressions.  An <A HREF="srintro.html">introduction</A> to
+shift-reduce parsing is also available.
+
+
+<H2>Applet Layout</H2>
+
+<P> The layout of the applet is as shown below.  You can click on any of the
+yellow areas to get a fuller description in the frame to the left.
+
+<P>
+<CENTER>
+
+<IMG SRC="srapplet.gif" USEMAP="#appletMap">
+
+</CENTER>
+
+<MAP NAME="appletMap">
+
+<AREA SHAPE=rect COORDS="10,130,110,165" TARGET="left" 
+      HREF="sroutput.html#srtable">
+<AREA SHAPE=rect COORDS="10,180,110,215" TARGET="left" 
+      HREF="controls.html#update">
+<AREA SHAPE=rect COORDS="77,267,177,302" TARGET="left" 
+      HREF="controls.html#input">
+<AREA SHAPE=rect COORDS="200,267,300,302" TARGET="left" 
+      HREF="controls.html#step">
+<AREA SHAPE=rect COORDS="320,267,420,302" TARGET="left" 
+      HREF="controls.html#run">
+<AREA SHAPE=rect COORDS="440,267,540,302" TARGET="left" 
+      HREF="controls.html#speed">
+<AREA SHAPE=rect COORDS="485,180,585,215" TARGET="left" 
+      HREF="sroutput.html#trace">
+<AREA SHAPE=rect COORDS="235,15,335,50" TARGET="left" 
+      HREF="sroutput.html#tree">
+
+</MAP>
+
+<H2>Running the Applet</H2>
+
+<P> Please be patient: depending on the speed of your network connection,
+the applet may take a few minutes to load.  Here it is...
+
+<HR>
+<APPLET CODE="zdu.parsdemo.ParsDemo.class"
+   NAME="SRParser" WIDTH=500 HEIGHT=300 HSPACE=10 VSPACE=10> 
+Your browser does not appear to be java-enabled.
+</APPLET>
+<HR>
+
+If you find the size of the applet embedded above inconvenient, then you
+can
+
+<APPLET CODE="zdu.parsdemo.FullFrame.class" 
+  WIDTH=40 HEIGHT=25 ALIGN="ABSMIDDLE">
+<PARAM NAME="APPLET_ALG" VALUE="SR">
+start <EM>(but your browser doesn't appear to be java-enabled)</EM> 
+<CODE>:-(</CODE>
+</APPLET>
+
+another copy of the applet in a separate window which you may resize to your
+convenience (if permitted to do so by the security model used by your
+browser).
+
+<P> Any misbehavior of the applet may be due to known <A HREF="compat.html">
+incompatiblities</A>.
+
+<P>
+
+If you have clicked the <CODE>update</CODE> button in the applet above and
+if your platform is suitable, then the details (LR(0) items, etc) of the
+current state are shown in the browser frame to the left of this frame.  You
+can click on the links in that frame to look at the details of the parser
+construction.
+
+<P>
+
+The traditional <EM>goto</EM> step of traditional compiler texts, is broken
+up into two substeps by the applet.  In the first substep, the subtree for
+the reduction is constructed off the stack.  In the second substep, the
+state revealed on top of the stack is used to lookup the <CODE>goto</CODE>
+table and put the constructed subtree onto the stack.
+
+<P>
+
+A word about parser start-up and termination.  The parse-tree shown in the
+applet's top window does not include the effects of the augmenting production:
+<PRE>
+	$S: program &lt;EOF&gt; 
+</PRE> 
+Hence, when the parser starts up, the first step which puts <CODE>$S</CODE>
+onto the parse stack has no effect on the parse-tree.  Similarly, an attempt
+to reduce by the augmenting production effectively terminates the parse.
+
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+<NOFRAMES>
+<!-- this noframes tag doesn't work as expected in Netscape 3.0 -->
+<A TARGET="_parent" HREF="srframe.html">Shift-Reduce Parsing Page</A>
+</NOFRAMES>
+
+
+
+</BODY>
+
+</HTML>

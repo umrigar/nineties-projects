@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<HEAD><TITLE>States Without Closure Items for simpcomp.y</TITLE>
+</HEAD><BODY><H1>States Without Closure Items for simpcomp.y</H1>
+Automatically generated from simpcomp.y by <A HREF="http://opal.cs.binghamton.edu/~zdu/zyacc">zyacc</A> version 1.03<BR>
+<P>Click <a href="simpcomp.html">here</a> to return to the main menu.
+<PRE>
+<a name= "State-0-without-closure-items">State   0</a>:	<a href= "simpcomp_3.html#State-0-with-closure-items">Click here for state 0 with closure items</a>
+  0: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-0">$S</a>: . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-1">&lt;EOF&gt;</a> 
+      <a href= "simpcomp_2.html#State-2-without-closure-items">GOTO   2</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a>
+      <a href= "simpcomp_2.html#State-3-without-closure-items">GOTO   3</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>
+      <a href= "simpcomp_2.html#State-4-without-closure-items">GOTO   4</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>
+      <a href= "simpcomp_2.html#State-1-without-closure-items">SHIFT 1</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+DEFAULT: Error
+
+<a name= "State-1-without-closure-items">State   1</a>:	<a href= "simpcomp_3.html#State-1-with-closure-items">Click here for state 1 with closure items</a>
+  4: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-4">ID</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-6">':='</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> 
+      <a href= "simpcomp_2.html#State-5-without-closure-items">SHIFT 5</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">':='</a>
+DEFAULT: Error
+
+<a name= "State-2-without-closure-items">State   2</a>:	<a href= "simpcomp_3.html#State-2-with-closure-items">Click here for state 2 with closure items</a>
+  0: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-0">$S</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-1">&lt;EOF&gt;</a> 
+      <a href= "simpcomp_2.html#State-6-without-closure-items">SHIFT 6</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">&lt;EOF&gt;</a>
+DEFAULT: Error
+
+<a name= "State-3-without-closure-items">State   3</a>:	<a href= "simpcomp_3.html#State-3-with-closure-items">Click here for state 3 with closure items</a>
+  1: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-1-in-state-3">REDUCE 1</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a>)
+
+<a name= "State-4-without-closure-items">State   4</a>:	<a href= "simpcomp_3.html#State-4-with-closure-items">Click here for state 4 with closure items</a>
+  2: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a> . 
+  3: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-7">';'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a> 
+      <a href= "simpcomp_2.html#State-7-without-closure-items">SHIFT 7</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-7">';'</a>
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-2-in-state-4">REDUCE 2</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>)
+
+<a name= "State-5-without-closure-items">State   5</a>:	<a href= "simpcomp_3.html#State-5-with-closure-items">Click here for state 5 with closure items</a>
+  4: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-4">ID</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-6">':='</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> 
+      <a href= "simpcomp_2.html#State-11-without-closure-items">GOTO  11</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>
+      <a href= "simpcomp_2.html#State-12-without-closure-items">GOTO  12</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>
+      <a href= "simpcomp_2.html#State-13-without-closure-items">GOTO  13</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-6-without-closure-items">State   6</a>:	<a href= "simpcomp_3.html#State-6-with-closure-items">Click here for state 6 with closure items</a>
+  0: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-0">$S</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-1">program</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-1">&lt;EOF&gt;</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-0-in-state-6">REDUCE 0</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-0">$S</a>)
+
+<a name= "State-7-without-closure-items">State   7</a>:	<a href= "simpcomp_3.html#State-7-with-closure-items">Click here for state 7 with closure items</a>
+  3: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-7">';'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a> 
+      <a href= "simpcomp_2.html#State-14-without-closure-items">GOTO  14</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>
+      <a href= "simpcomp_2.html#State-4-without-closure-items">GOTO   4</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>
+      <a href= "simpcomp_2.html#State-1-without-closure-items">SHIFT 1</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+DEFAULT: Error
+
+<a name= "State-8-without-closure-items">State   8</a>:	<a href= "simpcomp_3.html#State-8-with-closure-items">Click here for state 8 with closure items</a>
+ 13: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-12">'('</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-13">')'</a> 
+      <a href= "simpcomp_2.html#State-15-without-closure-items">GOTO  15</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>
+      <a href= "simpcomp_2.html#State-12-without-closure-items">GOTO  12</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>
+      <a href= "simpcomp_2.html#State-13-without-closure-items">GOTO  13</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-9-without-closure-items">State   9</a>:	<a href= "simpcomp_3.html#State-9-with-closure-items">Click here for state 9 with closure items</a>
+ 14: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-4">ID</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-14-in-state-9">REDUCE 14</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>)
+
+<a name= "State-10-without-closure-items">State  10</a>:	<a href= "simpcomp_3.html#State-10-with-closure-items">Click here for state 10 with closure items</a>
+ 15: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-5">NUM</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-15-in-state-10">REDUCE 15</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>)
+
+<a name= "State-11-without-closure-items">State  11</a>:	<a href= "simpcomp_3.html#State-11-with-closure-items">Click here for state 11 with closure items</a>
+  4: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-4">ID</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-6">':='</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> . 
+  5: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-8">'+'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+  6: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-9">'-'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+      <a href= "simpcomp_2.html#State-16-without-closure-items">SHIFT 16</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-8">'+'</a>
+      <a href= "simpcomp_2.html#State-17-without-closure-items">SHIFT 17</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-9">'-'</a>
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-4-in-state-11">REDUCE 4</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a>)
+
+<a name= "State-12-without-closure-items">State  12</a>:	<a href= "simpcomp_3.html#State-12-with-closure-items">Click here for state 12 with closure items</a>
+  7: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . 
+  8: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-10">'*'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+  9: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-11">'/'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+ 10: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-3">'div'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+ 11: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-2">'mod'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-21-without-closure-items">SHIFT 21</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">'mod'</a>
+      <a href= "simpcomp_2.html#State-20-without-closure-items">SHIFT 20</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">'div'</a>
+      <a href= "simpcomp_2.html#State-18-without-closure-items">SHIFT 18</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-10">'*'</a>
+      <a href= "simpcomp_2.html#State-19-without-closure-items">SHIFT 19</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-11">'/'</a>
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-7-in-state-12">REDUCE 7</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>)
+
+<a name= "State-13-without-closure-items">State  13</a>:	<a href= "simpcomp_3.html#State-13-with-closure-items">Click here for state 13 with closure items</a>
+ 12: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-12-in-state-13">REDUCE 12</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>)
+
+<a name= "State-14-without-closure-items">State  14</a>:	<a href= "simpcomp_3.html#State-14-with-closure-items">Click here for state 14 with closure items</a>
+  3: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">assgnStmt</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-7">';'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-3-in-state-14">REDUCE 3</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">stmts</a>)
+
+<a name= "State-15-without-closure-items">State  15</a>:	<a href= "simpcomp_3.html#State-15-with-closure-items">Click here for state 15 with closure items</a>
+ 13: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-12">'('</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-13">')'</a> 
+  5: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-8">'+'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+  6: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-9">'-'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+      <a href= "simpcomp_2.html#State-16-without-closure-items">SHIFT 16</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-8">'+'</a>
+      <a href= "simpcomp_2.html#State-17-without-closure-items">SHIFT 17</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-9">'-'</a>
+      <a href= "simpcomp_2.html#State-22-without-closure-items">SHIFT 22</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-13">')'</a>
+DEFAULT: Error
+
+<a name= "State-16-without-closure-items">State  16</a>:	<a href= "simpcomp_3.html#State-16-with-closure-items">Click here for state 16 with closure items</a>
+  5: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-8">'+'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+      <a href= "simpcomp_2.html#State-23-without-closure-items">GOTO  23</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>
+      <a href= "simpcomp_2.html#State-13-without-closure-items">GOTO  13</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-17-without-closure-items">State  17</a>:	<a href= "simpcomp_3.html#State-17-with-closure-items">Click here for state 17 with closure items</a>
+  6: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-9">'-'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> 
+      <a href= "simpcomp_2.html#State-24-without-closure-items">GOTO  24</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>
+      <a href= "simpcomp_2.html#State-13-without-closure-items">GOTO  13</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-18-without-closure-items">State  18</a>:	<a href= "simpcomp_3.html#State-18-with-closure-items">Click here for state 18 with closure items</a>
+  8: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-10">'*'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-25-without-closure-items">GOTO  25</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-19-without-closure-items">State  19</a>:	<a href= "simpcomp_3.html#State-19-with-closure-items">Click here for state 19 with closure items</a>
+  9: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-11">'/'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-26-without-closure-items">GOTO  26</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-20-without-closure-items">State  20</a>:	<a href= "simpcomp_3.html#State-20-with-closure-items">Click here for state 20 with closure items</a>
+ 10: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-3">'div'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-27-without-closure-items">GOTO  27</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-21-without-closure-items">State  21</a>:	<a href= "simpcomp_3.html#State-21-with-closure-items">Click here for state 21 with closure items</a>
+ 11: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-2">'mod'</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-28-without-closure-items">GOTO  28</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>
+      <a href= "simpcomp_2.html#State-9-without-closure-items">SHIFT 9</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">ID</a>
+      <a href= "simpcomp_2.html#State-10-without-closure-items">SHIFT 10</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">NUM</a>
+      <a href= "simpcomp_2.html#State-8-without-closure-items">SHIFT 8</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-12">'('</a>
+DEFAULT: Error
+
+<a name= "State-22-without-closure-items">State  22</a>:	<a href= "simpcomp_3.html#State-22-with-closure-items">Click here for state 22 with closure items</a>
+ 13: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-12">'('</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-13">')'</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-13-in-state-22">REDUCE 13</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a>)
+
+<a name= "State-23-without-closure-items">State  23</a>:	<a href= "simpcomp_3.html#State-23-with-closure-items">Click here for state 23 with closure items</a>
+  5: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-8">'+'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . 
+  8: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-10">'*'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+  9: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-11">'/'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+ 10: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-3">'div'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+ 11: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-2">'mod'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-21-without-closure-items">SHIFT 21</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">'mod'</a>
+      <a href= "simpcomp_2.html#State-20-without-closure-items">SHIFT 20</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">'div'</a>
+      <a href= "simpcomp_2.html#State-18-without-closure-items">SHIFT 18</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-10">'*'</a>
+      <a href= "simpcomp_2.html#State-19-without-closure-items">SHIFT 19</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-11">'/'</a>
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-5-in-state-23">REDUCE 5</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>)
+
+<a name= "State-24-without-closure-items">State  24</a>:	<a href= "simpcomp_3.html#State-24-with-closure-items">Click here for state 24 with closure items</a>
+  6: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-9">'-'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . 
+  8: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-10">'*'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+  9: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-11">'/'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+ 10: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-3">'div'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+ 11: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> . <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-2">'mod'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> 
+      <a href= "simpcomp_2.html#State-21-without-closure-items">SHIFT 21</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-2">'mod'</a>
+      <a href= "simpcomp_2.html#State-20-without-closure-items">SHIFT 20</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-3">'div'</a>
+      <a href= "simpcomp_2.html#State-18-without-closure-items">SHIFT 18</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-10">'*'</a>
+      <a href= "simpcomp_2.html#State-19-without-closure-items">SHIFT 19</a> on <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-11">'/'</a>
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-6-in-state-24">REDUCE 6</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-4">expr</a>)
+
+<a name= "State-25-without-closure-items">State  25</a>:	<a href= "simpcomp_3.html#State-25-with-closure-items">Click here for state 25 with closure items</a>
+  8: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-10">'*'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-8-in-state-25">REDUCE 8</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>)
+
+<a name= "State-26-without-closure-items">State  26</a>:	<a href= "simpcomp_3.html#State-26-with-closure-items">Click here for state 26 with closure items</a>
+  9: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-11">'/'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-9-in-state-26">REDUCE 9</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>)
+
+<a name= "State-27-without-closure-items">State  27</a>:	<a href= "simpcomp_3.html#State-27-with-closure-items">Click here for state 27 with closure items</a>
+ 10: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-3">'div'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-10-in-state-27">REDUCE 10</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>)
+
+<a name= "State-28-without-closure-items">State  28</a>:	<a href= "simpcomp_3.html#State-28-with-closure-items">Click here for state 28 with closure items</a>
+ 11: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>: <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-terminal-2">'mod'</a> <a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-6">factor</a> . 
+DEFAULT: <a href= "simpcomp_5.html#Lookaheads-for-reducing-by-11-in-state-28">REDUCE 11</a> (<a href= "simpcomp_4.html#List-of-states-accessed-by-non-terminal-5">term</a>)
+
+</PRE>
+<P>Click <a href="simpcomp.html">here</a> to return to the main menu.
+</BODY>

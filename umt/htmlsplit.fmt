@@ -1,0 +1,257 @@
+use FileHandle;
+
+use strict;
+
+use vars qw($uname $email);
+
+my $UNAME= $uname || "zerksis d. umrigar";
+my $EMAIL= $email || 'umrigar@binghamton.edu';
+
+my $formatTable= {
+  'DOC' => [
+     \&formatTable1,
+  ],
+  'PARA' => [
+    "<p>\n", \&formatTable1, "</p>\n", 
+  ],
+  'QUOTE' => [
+    "<blockquote>\n", \&formatTable1, "</blockquote>\n",
+  ],
+  'CODE' => [
+    "<tt>", \&htmlText1, "</tt>",
+  ],
+  'BOLD' => [
+    "<b>", \&htmlText1, "</b>",
+  ],
+  'ITALIC' => [
+    "<i>", \&htmlText1, "</i>",
+  ],
+  'LINK' => [
+    "<a href=\"\$1\">", \&htmlText2, "</a>",
+  ],
+  'DEF' => [
+    "<a name=\"\$1\"> </a>",
+  ],
+  'PASSTHRU' => [
+    "\$1",
+  ],
+  'TEXT' => [
+    \&htmlText1,
+  ],
+  'HEAD0' => [
+  ],
+  'HEAD1' => [
+     \&doDoc,
+  ],
+  'HEAD2' => [
+    \&doPage,
+  ],
+  'HEAD3' => [
+    '<h3>', \&formatTable1, "</h3>\n", \&formatTable2,
+  ],
+  'HEAD4' => [
+    '<h4>', \&formatTable1, "</h4>\n", \&formatTable2,
+  ],
+  'HEAD5' => [
+    '<h5>', \&formatTable1, "</h5>\n", \&formatTable2,
+  ],
+  'ITEMIZED_LIST' => [
+    "<ul>\n",  \&formatTable2, "</ul>\n",
+  ],
+  'ITEMIZED_ITEM' => [
+    "<p><li>\n", \&formatTable1, \&formatTable3, "</p>\n"
+  ],
+  'ORDERED_LIST' => [
+    "<ol type=\"\$1\">\n",  \&formatTable2, "</ol>\n",
+  ],
+  'ORDERED_ITEM' => [
+    "<p><li>\n", \&formatTable1, \&formatTable3, "</p>\n"
+  ],
+  'DESC_LIST' => [
+    "<dl>\n",  \&formatTable1, "</dl>\n",
+  ],
+  'DESC_ITEM' => [
+    "<p><dt>", \&formatTable2, "<dd>\n", \&formatTable1, "</p>\n", 
+    \&formatTable3,
+  ],
+  'OBEY' => [
+    "<pre>\n", \&formatTable1, "</pre>\n",
+  ],
+  'VERBATIM' => [
+    "<pre>\n", \&htmlText1, "</pre>\n",
+  ],
+  'TABLE' => [
+    "<pre>\n", \&htmlText1, "</pre>\n",
+  ],
+
+};
+      
+#Global variables: used by doFormat(), doDoc() and doPage() routines.
+my $srcName;		#The name of the source file.
+my $baseName;		#The source file name with the extension removed.
+my $pageN;		#The number of the current page being output.
+my $lastPageN;		#The number of the last page.
+my $level;		#The level in the document: 1 or 2.
+
+sub doDoc($$$$)
+{
+  my($dummyFH, $fmtTable, $topParse, $currentParse)= @_;
+  my $tocFH= new FileHandle ">${baseName}_000.html" 
+              or die "could not write ${baseName}_000.html\n";
+  print $tocFH "<html>\n";
+  print $tocFH "<head>\n";
+  if (@{$currentParse->[1]}) {
+    print $tocFH "<title>\n"; 
+    formatTable1($tocFH, $fmtTable, $topParse, $currentParse); 
+    print $tocFH "</title>\n";
+  }
+  print $tocFH "</head>\n";
+  print $tocFH "<body bgcolor=\"\#ffffff\">\n";
+  if (@{$currentParse->[1]}) {
+    print $tocFH "<h1 align=\"center\">\n"; 
+    formatTable1($tocFH, $fmtTable, $topParse, $currentParse); 
+    print $tocFH "</h1>\n";
+  }
+  print $tocFH "<ul>\n";
+  $level= 1;
+  $pageN= 0;
+  formatTable2($tocFH, $fmtTable, $topParse, $currentParse);
+  print $tocFH "</ul>\n";
+  doFooter($tocFH, 0, $pageN);
+  print $tocFH "</body>\n";
+  print $tocFH "</html>\n";
+  close $tocFH;
+
+  $lastPageN= $pageN;
+  $pageN= 0;
+  $level= 2;
+  formatTable2(undef, $fmtTable, $topParse, $currentParse);
+}
+
+sub doPage($$$$)
+{
+  my($fh, $fmtTable, $topParse, $currentParse)= @_;
+  my $pageName= sprintf("${baseName}_%03d.html", ++$pageN);
+  if ($level == 1) {
+    print $fh "<li><a href= \"$pageName\">\n";
+    formatTable1($fh, $fmtTable, $topParse, $currentParse);
+    print $fh "</a></li><br>\n";
+  }
+  else {
+    my $pageFH= new FileHandle ">$pageName" 
+          or die "could not write $pageName\n";
+    print $pageFH "<html>\n";
+    print $pageFH "<head>\n";
+    if (@{$currentParse->[1]}) {
+      print $pageFH "<title>\n"; 
+      formatTable1($pageFH, $fmtTable, $topParse, $currentParse); 
+      print $pageFH "</title>\n";
+    }
+    print $pageFH "<body bgcolor=\"\#ffffff\">\n";
+    if (@{$currentParse->[1]}) {
+      print $pageFH "<h1 align=\"center\">\n"; 
+      formatTable1($pageFH, $fmtTable, $topParse, $currentParse); 
+      print $pageFH "</h1>\n";
+    }
+    formatTable2($pageFH, $fmtTable, $topParse, $currentParse);
+    doFooter($pageFH, $pageN, $lastPageN);
+    print $pageFH "</body>\n";
+    print $pageFH "</html>\n";
+    close $pageFH;
+  }
+}
+
+
+sub htmlText($$)
+{
+  my($fileHandle, $text)= @_;
+  $text=~ s/\&/\&amp;/g;
+  $text=~ s/\</\&lt;/g;
+  $text=~ s/\>/\&gt;/g;
+  print $fileHandle $text;
+} 
+
+sub htmlText1($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  htmlText($outFile, $currentParse->[1]);
+}
+
+sub htmlText2($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  htmlText($outFile, $currentParse->[2]);
+}
+
+sub doFooter($$$)
+{
+  my($fh, $n, $lastN)= @_;
+  my $timeStamp= localtime;
+
+  my $previous= "";
+  if ($n == 1) { 
+    $previous= <<END_PREVIOUS;
+<img src="../../icons/previous_motif_gr.gif"
+     width="63" height="24" alt="previous">
+END_PREVIOUS
+  }
+  elsif ($n > 1) {
+    my $n1= $n - 1;
+    my $previousName= sprintf("${baseName}_%03d.html", $n1);
+    $previous= <<END_PREVIOUS;
+<a href="$previousName">
+<img src="../../icons/previous_motif.gif" 
+     width="63" height="24" alt="previous">
+</a>
+END_PREVIOUS
+  }
+
+  my $upName= ($n == 0) ? "../" : "${baseName}_000.html";
+  my $up= <<END_UP;
+<a href="$upName">
+<img src="../../icons/up_motif.gif" width="26" height="24" alt="up">
+</a>
+END_UP
+
+  my $next= "";
+  if ($n >= $lastN) { 
+    $next= <<END_NEXT;
+<img src="../../icons/next_motif_gr.gif" width="37" height="24" alt="next">
+END_NEXT
+  }
+  elsif ($n >= 1) {
+    my $n1= $n + 1;
+    my $nextName= sprintf("${baseName}_%03d.html", $n1);
+    $next= <<END_NEXT;
+<a href="$nextName">
+<img src="../../icons/next_motif.gif" width="37" height="24" alt="next">
+</a>
+END_NEXT
+  }
+
+  print $fh <<END_FOOTER;
+<!-- Begin Standard Footer -->
+<hr>
+$previous
+$up
+$next
+<p>
+Produced automatically from <a href="$srcName">$srcName</a> 
+on <i>$timeStamp</i>.<br>
+<a href="mailto:$EMAIL">$UNAME</a>
+<!-- End Standard Footer -->
+END_FOOTER
+}
+
+
+#Top-level driver routine.
+sub doFormat($$)
+{
+  my($inFile, $parse)= @_;
+  $srcName= $inFile;
+  $baseName= $inFile;
+  $baseName=~ s/\.[^\.]+$//;
+  formatTable(undef, $formatTable, $parse, $parse);
+}
+
+1;

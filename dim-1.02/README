@@ -1,0 +1,61 @@
+Last Update Time-stamp: "97/08/08 17:20:31 zdu"
+
+For documentation on using the package, see the comments at the beginning
+of Dim.h.
+
+For documentation on generating Dim.h from Dim.hm4 see the comments at the
+beginning of Dim.hm4.
+
+CURRENT STATUS:
+
+The package should currently be regarded merely as "proof-of-concept."  For
+it to be practical, the compiler used should be much more stable than the
+one I am currently using (g++) and generate better code.
+
+Versions of this package have been compiled under gcc 2.5.8, gcc 2.6.0 and
+gcc 2.6.3, 2.7.2.  Unfortunately, this package continues to stress g++.
+
+Under gcc 2.6.3 the slide example compiles.  However the ratPow and period
+examples (with DIM_NO_CHECK defined) give an internal compiler error.  On
+the slideBug.cc example (which is slide.cc with dimensional errors) gcc
+2.6.3 signals the first dimensional error, and then gets "confused and bails
+out."  gcc 2.5.8 used to find all dimensional errors.
+
+Under gcc 2.7.2 the slide example compiles.  On the slideBug.cc example
+(which is slide.cc with dimensional errors) gcc 2.7.2 signals the first
+dimensional error, and then gets "confused and bails out."  gcc 2.5.8 used
+to find all dimensional errors.  ratPow and period examples (with
+DIM_NO_CHECK and DIM_GPP_BUG defined) appear to work.
+
+COMPILATION:
+
+To compile the output routines for subsequent linking do:
+
+gcc -c dimOut.cc
+
+To compile the example program (for example slide.cc) use the command:
+
+gcc slide.cc dimOut.o -lg++ -lm -o slide
+
+Similarly for slideBug.cc.  For ratPow.cc and period.cc, see the comments
+at the start of those files.
+
+NOTES:
+
+1.  I believe that the proposed C++ standard removes the restriction imposed
+by the ARM which did not allow int template-arguments in function templates.
+Hence the idea behind the Sigplan paper conforms FULLY with my understanding
+of the proposed C++ standard. 
+
+2.  After publication of the Sigplan paper, I received email from Lee
+Nackman (lrn@watson.ibm.com) informing me that essentially the same ideas
+are used in the book "Scientific and Engineering C++: An Introduction with
+Advanced Techniques and Examples," by John J. Barton and Lee R. Nackman,
+Addison-Wesley, 1994, ISBN 0-201-53393-6.  He also told me that the
+problematic feature referred to in (1) above was accepted by the IBM CSet++
+compilers for OS/2 and AIX.
+
+FEEDBACK:
+
+Please direct all bug-reports or comments to zdu@acm.org.
+

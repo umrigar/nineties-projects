@@ -1,0 +1,1608 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Zyacc Grammar Files</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_3.html">previous</A>, <A HREF="zyacc_5.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<H1><A NAME="SEC37" HREF="zyacc_toc.html#SEC37">Zyacc Grammar Files</A></H1>
+<P>
+Zyacc takes as input a context-free grammar specification and produces a
+C-language function that recognizes correct instances of the grammar.
+<P>
+The Zyacc grammar input file conventionally has a name ending in <SAMP>`.y'</SAMP>.
+<P>
+<H2><A NAME="SEC38" HREF="zyacc_toc.html#SEC38">Outline of a Zyacc Grammar</A></H2>
+<P>
+A Zyacc grammar file has four main sections, shown here with the
+appropriate delimiters:
+<P>
+<PRE>
+%{
+<VAR>C declarations</VAR>
+%}
+
+<VAR>Zyacc declarations</VAR>
+
+%%
+<VAR>Grammar rules</VAR>
+%%
+
+<VAR>Additional C code</VAR>
+</PRE>
+<P>
+Comments enclosed in <SAMP>`/* ... */'</SAMP> may appear in any of the sections.
+<P>
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<H3><A NAME="SEC39" HREF="zyacc_toc.html#SEC39">The C Declarations Section</A></H3>
+<P>
+The <VAR>C declarations</VAR> section contains macro definitions and
+declarations of functions and variables that are used in the actions in the
+grammar rules.  These are copied to the beginning of the parser file so
+that they precede the definition of <CODE>yyparse</CODE>.  You can use
+<SAMP>`#include'</SAMP> to get the declarations from a header file.  If you don't
+need any C declarations, you may omit the <SAMP>`%{'</SAMP> and <SAMP>`%}'</SAMP>
+delimiters that bracket this section.
+<P>
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+<H3><A NAME="SEC40" HREF="zyacc_toc.html#SEC40">The Zyacc Declarations Section</A></H3>
+<P>
+The <VAR>Zyacc declarations</VAR> section contains declarations that define
+terminal and nonterminal symbols, specify precedence, and so on.
+In some simple grammars you may not need any declarations.
+See section <A HREF="zyacc_4.html#SEC63">Zyacc Declarations</A>.
+<P>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<H3><A NAME="SEC41" HREF="zyacc_toc.html#SEC41">The Grammar Rules Section</A></H3>
+<P>
+The <DFN>grammar rules</DFN> section contains one or more Zyacc grammar
+rules, and nothing else.  See section <A HREF="zyacc_4.html#SEC44">Syntax of Grammar Rules</A>.
+<P>
+There must always be at least one grammar rule, and the first
+<SAMP>`%%'</SAMP> (which precedes the grammar rules) may never be omitted even
+if it is the first thing in the file.
+<P>
+<A NAME="IDX56"></A>
+<A NAME="IDX57"></A>
+<H3><A NAME="SEC42" HREF="zyacc_toc.html#SEC42">The Additional C Code Section</A></H3>
+<P>
+The <VAR>additional C code</VAR> section is copied verbatim to the end of
+the parser file, just as the <VAR>C declarations</VAR> section is copied to
+the beginning.  This is the most convenient place to put anything
+that you want to have in the parser file but which need not come before
+the definition of <CODE>yyparse</CODE>.  For example, the definitions of
+<CODE>yylex</CODE> and <CODE>yyerror</CODE> often go here.  See section <A HREF="zyacc_5.html#SEC77">Parser C-Language Interface</A>.
+<P>
+If the last section is empty, you may omit the <SAMP>`%%'</SAMP> that separates it
+from the grammar rules.
+<P>
+The Zyacc parser itself contains many static variables whose names start
+with <SAMP>`yy'</SAMP> and many macros whose names start with <SAMP>`YY'</SAMP>.  It is a
+good idea to avoid using any such names (except those documented in this
+manual) in the additional C code section of the grammar file.
+<P>
+<A NAME="IDX58"></A>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<A NAME="IDX61"></A>
+<H2><A NAME="SEC43" HREF="zyacc_toc.html#SEC43">Symbols, Terminal and Nonterminal</A></H2>
+<P>
+<DFN>Symbols</DFN> in Zyacc grammars represent the grammatical classifications
+of the language.
+<P>
+A <DFN>terminal symbol</DFN> (also known as a <DFN>token type</DFN>) represents a
+class of syntactically equivalent tokens.  You use the symbol in grammar
+rules to mean that a token in that class is allowed.  The symbol is
+represented in the Zyacc parser by a numeric code, and the <CODE>yylex</CODE>
+function returns a token type code to indicate what kind of token has been
+read.  You don't need to know what the code value is; you can use the
+symbol to stand for it.
+<P>
+A <DFN>nonterminal symbol</DFN> stands for a class of syntactically equivalent
+groupings.  The symbol name is used in writing grammar rules.  By convention,
+it should be all lower case.
+<P>
+Symbol names can contain letters, digits (not at the beginning),
+underscores and periods.  Periods make sense only in nonterminals.
+<P>
+There are two ways of writing terminal symbols in the grammar:
+<P>
+<UL>
+<LI>
+A <DFN>named token type</DFN> is written with an identifier, like an
+identifier in C.  By convention, it should be all upper case.  Each
+such name must be defined with a Zyacc declaration such as
+<CODE>%token</CODE>.  See section <A HREF="zyacc_4.html#SEC64">Token Type Names</A>.
+
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+<A NAME="IDX64"></A>
+<LI>
+A <DFN>character token type</DFN> (or <DFN>literal token</DFN>) is written in
+the grammar using the same syntax used in C for character constants;
+for example, <CODE>'+'</CODE> is a character token type.  A character token
+type doesn't need to be declared unless you need to specify its
+semantic value data type (see section <A HREF="zyacc_4.html#SEC47">Data Types of Semantic Values</A>), associativity, or
+precedence (see section <A HREF="zyacc_6.html#SEC89">Operator Precedence</A>).
+
+By convention, a character token type is used only to represent a
+token that consists of that particular character.  Thus, the token
+type <CODE>'+'</CODE> is used to represent the character <SAMP>`+'</SAMP> as a
+token.  Nothing enforces this convention, but if you depart from it,
+your program will confuse other readers.
+
+All the usual escape sequences used in character literals in C can be
+used in Zyacc as well, but you must not use the null character as a
+character literal because its ASCII code, zero, is the code
+<CODE>yylex</CODE> returns for end-of-input (see section <A HREF="zyacc_5.html#SEC80">Calling Convention for <CODE>yylex</CODE></A>).
+</UL>
+<P>
+How you choose to write a terminal symbol has no effect on its
+grammatical meaning.  That depends only on where it appears in rules and
+on when the parser function returns that symbol.
+<P>
+The value returned by <CODE>yylex</CODE> is always one of the terminal symbols
+(or 0 for end-of-input).  Whichever way you write the token type in the
+grammar rules, you write it the same way in the definition of <CODE>yylex</CODE>.
+The numeric code for a character token type is simply the ASCII code for
+the character, so <CODE>yylex</CODE> can use the identical character constant to
+generate the requisite code.  Each named token type becomes a C macro in
+the parser file, so <CODE>yylex</CODE> can use the name to stand for the code.
+(This is why periods don't make sense in terminal symbols.)  
+See section <A HREF="zyacc_5.html#SEC80">Calling Convention for <CODE>yylex</CODE></A>.
+<P>
+If <CODE>yylex</CODE> is defined in a separate file, you need to arrange for the
+token-type macro definitions to be available there.  Use the <SAMP>`-d'</SAMP>
+option when you run Zyacc, so that it will write these macro definitions
+into a separate header file <TT>`<VAR>name</VAR>.tab.h'</TT> which you can include
+in the other source files that need it.  See section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>.
+<P>
+The symbol <CODE>error</CODE> is a terminal symbol reserved for error recovery
+(see section <A HREF="zyacc_7.html#SEC99">Error Recovery</A>); you shouldn't use it for any other purpose.
+In particular, <CODE>yylex</CODE> should never return this value.
+<P>
+<A NAME="IDX65"></A>
+<A NAME="IDX66"></A>
+<A NAME="IDX67"></A>
+<H2><A NAME="SEC44" HREF="zyacc_toc.html#SEC44">Syntax of Grammar Rules</A></H2>
+<P>
+A Zyacc grammar rule has the following general form:
+<P>
+<PRE>
+<VAR>result</VAR>: <VAR>components</VAR>...
+        ;
+</PRE>
+<P>
+where <VAR>result</VAR> is the nonterminal symbol that this rule describes
+and <VAR>components</VAR> are various terminal and nonterminal symbols that
+are put together by this rule (see section <A HREF="zyacc_4.html#SEC43">Symbols, Terminal and Nonterminal</A>).  
+<P>
+For example,
+<P>
+<PRE>
+exp
+  : exp '+' exp
+  ;
+</PRE>
+<P>
+says that two groupings of type <CODE>exp</CODE>, with a <SAMP>`+'</SAMP> token in between,
+can be combined into a larger grouping of type <CODE>exp</CODE>.
+<P>
+Whitespace in rules is significant only to separate symbols.  You can add
+extra whitespace as you wish.
+<P>
+Scattered among the components can be <VAR>actions</VAR> that determine
+the semantics of the rule.  An action looks like this:
+<P>
+<PRE>
+{<VAR>C statements</VAR>}
+</PRE>
+<P>
+Usually there is only one action and it follows the components.
+See section <A HREF="zyacc_4.html#SEC49">Actions</A>.
+<A NAME="IDX68"></A>
+<P>
+Multiple rules for the same <VAR>result</VAR> can be written separately or can
+be joined with the vertical-bar character <SAMP>`|'</SAMP> as follows:
+<P>
+<PRE>
+<VAR>result</VAR>
+  : <VAR>rule1-components</VAR>...
+  | <VAR>rule2-components</VAR>...
+  ...
+  ;
+</PRE>
+<P>
+They are still considered distinct rules even when joined in this way.
+<P>
+If <VAR>components</VAR> in a rule is empty, it means that <VAR>result</VAR> can
+match the empty string.  For example, here is how to define a
+comma-separated sequence of zero or more <CODE>exp</CODE> groupings:
+<P>
+<PRE>
+expseq
+  : /* empty */
+  | expseq1
+  ;
+
+expseq1
+  : exp
+  | expseq1 ',' exp
+  ;
+</PRE>
+<P>
+It is customary to write a comment <SAMP>`/* empty */'</SAMP> in each rule
+with no components.
+<P>
+<A NAME="IDX69"></A>
+<H2><A NAME="SEC45" HREF="zyacc_toc.html#SEC45">Recursive Rules</A></H2>
+<P>
+A rule is called <DFN>recursive</DFN> when its <VAR>result</VAR> nonterminal appears
+also on its right hand side.  Nearly all Zyacc grammars need to use
+recursion, because that is the only way to define a sequence of any number
+of somethings.  Consider this recursive definition of a comma-separated
+sequence of one or more expressions:
+<P>
+<PRE>
+expseq1
+  : exp
+  | expseq1 ',' exp
+  ;
+</PRE>
+<A NAME="IDX70"></A>
+<A NAME="IDX71"></A>
+<P>
+Since the recursive use of <CODE>expseq1</CODE> is the leftmost symbol in the
+right hand side, we call this <DFN>left recursion</DFN>.  By contrast, here
+the same construct is defined using <DFN>right recursion</DFN>:
+<P>
+<PRE>
+expseq1
+  : exp
+  | exp ',' expseq1
+  ;
+</PRE>
+<P>
+Any kind of sequence can be defined using either left recursion or
+right recursion, but you should always use left recursion, because it
+can parse a sequence of any number of elements with bounded stack
+space.  Right recursion uses up space on the Zyacc stack in proportion
+to the number of elements in the sequence, because all the elements
+must be shifted onto the stack before the rule can be applied even
+once.  See section <A HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>, for
+further explanation of this.
+<A NAME="IDX72"></A>
+<P>
+<DFN>Indirect</DFN> or <DFN>mutual</DFN> recursion occurs when the result of the
+rule does not appear directly on its right hand side, but does appear
+in rules for other nonterminals which do appear on its right hand
+side.  
+<P>
+For example:
+<P>
+<PRE>
+expr
+  : primary
+  | primary '+' primary
+  ;
+
+primary
+  :  constant
+  | '(' expr ')'
+  ;
+</PRE>
+<P>
+defines two mutually-recursive nonterminals, since each refers to the
+other.
+<P>
+<A NAME="IDX73"></A>
+<A NAME="IDX74"></A>
+<H2><A NAME="SEC46" HREF="zyacc_toc.html#SEC46">Defining Language Semantics</A></H2>
+<P>
+The grammar rules for a language determine only the syntax.  The semantics
+are determined by the semantic values associated with various tokens and
+groupings, and by the actions taken when various groupings are recognized.
+<P>
+For example, the calculator calculates properly because the value
+associated with each expression is the proper number; it adds properly
+because the action for the grouping <SAMP>`<VAR>x</VAR> + <VAR>y</VAR>'</SAMP> is to add
+the numbers associated with <VAR>x</VAR> and <VAR>y</VAR>.
+<P>
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+<A NAME="IDX77"></A>
+<A NAME="IDX78"></A>
+<H3><A NAME="SEC47" HREF="zyacc_toc.html#SEC47">Data Types of Semantic Values</A></H3>
+<P>
+In a simple program it may be sufficient to use the same data type for
+the semantic values of all language constructs.  This was true in the
+RPN and infix calculator examples (see section <A HREF="zyacc_3.html#SEC13">Reverse Polish Notation Calculator</A>).
+<P>
+Zyacc's default is to use type <CODE>int</CODE> for all semantic values.  To
+specify some other type, define <CODE>YYSTYPE</CODE> as a macro, like this:
+<P>
+<PRE>
+#define YYSTYPE double
+</PRE>
+<P>
+This macro definition must go in the C declarations section of the grammar
+file (see section <A HREF="zyacc_4.html#SEC38">Outline of a Zyacc Grammar</A>).
+<P>
+Only types mentioned in a explicit <CODE>%union</CODE> declaration and types used
+for named attributes (see section <A HREF="zyacc_4.html#SEC52">Named Attributes</A>) for <EM>terminal</EM> symbols
+form part of <CODE>YYSTYPE</CODE>.  Hence if you use named attributes for
+nonterminals, then those associated types do not form part of
+<CODE>YYSTYPE</CODE>.  Since <CODE>YYSTYPE</CODE> is often used by a front-end component
+like a scanner, and the types used for nonterminals are more back-end
+oriented, the fact that the nonterminal types are not part of
+<CODE>YYSTYPE</CODE>, avoids an egregious coupling between front and back ends.
+<P>
+<H3><A NAME="SEC48" HREF="zyacc_toc.html#SEC48">More Than One Value Type</A></H3>
+<P>
+In most programs, you will need different data types for different kinds
+of tokens and groupings.  For example, a numeric constant may need type
+<CODE>int</CODE> or <CODE>long</CODE>, while a string constant needs type <CODE>char *</CODE>,
+and an identifier might need a pointer to an entry in the symbol table.
+<P>
+To use more than one data type for semantic values in one parser, Zyacc
+requires you to do two things:
+<P>
+<UL>
+<LI>
+Specify the entire collection of possible data types, with the
+<CODE>%union</CODE> Zyacc declaration (see section <A HREF="zyacc_4.html#SEC67">The Collection of Value Types</A>).
+
+<LI>
+Choose one of those types for each symbol (terminal or nonterminal)
+for which semantic values are used.  This is done for tokens with the
+<CODE>%token</CODE> Zyacc declaration (see section <A HREF="zyacc_4.html#SEC64">Token Type Names</A>) and for groupings
+with the <CODE>%type</CODE> Zyacc declaration (see section <A HREF="zyacc_4.html#SEC68">Nonterminal Symbols</A>).
+</UL>
+<P>
+<A NAME="IDX79"></A>
+<A NAME="IDX80"></A>
+<A NAME="IDX81"></A>
+<H3><A NAME="SEC49" HREF="zyacc_toc.html#SEC49">Actions</A></H3>
+<P>
+An action accompanies a syntactic rule and contains C code to be executed
+each time an instance of that rule is recognized.  The task of most actions
+is to compute a semantic value for the grouping built by the rule from the
+semantic values associated with tokens or smaller groupings.
+<P>
+An action consists of C statements surrounded by braces, much like a
+compound statement in C.  It can be placed at any position in the rule; it
+is executed at that position.  Most rules have just one action at the end
+of the rule, following all the components.  Actions in the middle of a rule
+are tricky and used only for special purposes (see section <A HREF="zyacc_4.html#SEC51">Actions in Mid-Rule</A>).
+<P>
+The C code in an action can refer to the semantic values of the components
+matched by the rule with the construct <CODE>$<VAR>n</VAR></CODE>, which stands for
+the value of the <VAR>n</VAR>th component.  The semantic value for the grouping
+being constructed is <CODE>$$</CODE>.  (Zyacc translates both of these constructs
+into array element references when it copies the actions into the parser
+file.)
+<P>
+Here is a typical example:
+<P>
+<PRE>
+exp
+  : exp '+' exp { $$ = $1 + $3; }
+  ;
+</PRE>
+<P>
+This rule constructs an <CODE>exp</CODE> from two smaller <CODE>exp</CODE> groupings
+connected by a plus-sign token.  In the action, <CODE>$1</CODE> and <CODE>$3</CODE>
+refer to the semantic values of the two component <CODE>exp</CODE> groupings,
+which are the first and third symbols on the right hand side of the rule.
+The sum is stored into <CODE>$$</CODE> so that it becomes the semantic value of
+the addition-expression just recognized by the rule.  If there were a
+useful semantic value associated with the <SAMP>`+'</SAMP> token, it could be
+referred to as <CODE>$2</CODE>.<A NAME="IDX82"></A>
+<P>
+If you don't specify an action for a rule, Zyacc supplies a default:
+<CODE>$$ = $1</CODE>.  Thus, the value of the first symbol in the rule becomes
+the value of the whole rule.  Of course, the default rule is valid only
+if the two data types match.  There is no meaningful default action for
+an empty rule; every empty rule must have an explicit action unless the
+rule's value does not matter.
+<P>
+<CODE>$<VAR>n</VAR></CODE> with <VAR>n</VAR> zero or negative is allowed for reference
+to tokens and groupings on the stack <EM>before</EM> those that match the
+current rule.  This is a very risky practice, and to use it reliably
+you must be certain of the context in which the rule is applied.  Here
+is a case in which you can use this reliably:
+<P>
+<PRE>
+foo
+  : expr bar '+' expr  { ... }
+  | expr bar '-' expr  { ... }
+  ;
+
+bar
+  : /* empty */ 
+    { previous_expr = $0; }
+  ;
+</PRE>
+<P>
+As long as <CODE>bar</CODE> is used only in the fashion shown here, <CODE>$0</CODE>
+always refers to the <CODE>expr</CODE> which precedes <CODE>bar</CODE> in the
+definition of <CODE>foo</CODE>.
+<P>
+<A NAME="IDX83"></A>
+<A NAME="IDX84"></A>
+<H3><A NAME="SEC50" HREF="zyacc_toc.html#SEC50">Data Types of Values in Actions</A></H3>
+<P>
+If you have chosen a single data type for semantic values, the <CODE>$$</CODE>
+and <CODE>$<VAR>n</VAR></CODE> constructs always have that data type.
+<P>
+If you have used <CODE>%union</CODE> to specify a variety of data types, then you
+must declare a choice among these types for each terminal or nonterminal
+symbol that can have a semantic value.  Then each time you use <CODE>$$</CODE> or
+<CODE>$<VAR>n</VAR></CODE>, its data type is determined by which symbol it refers to
+in the rule.  In this example,<P>
+<PRE>
+exp
+  : exp '+' exp { $$ = $1 + $3; }
+  ;
+</PRE>
+<P>
+<CODE>$1</CODE> and <CODE>$3</CODE> refer to instances of <CODE>exp</CODE>, so they all
+have the data type declared for the nonterminal symbol <CODE>exp</CODE>.  If
+<CODE>$2</CODE> were used, it would have the data type declared for the
+terminal symbol <CODE>'+'</CODE>, whatever that might be.<P>
+Alternatively, you can specify the data type when you refer to the value,
+by inserting <SAMP>`&#60;<VAR>type</VAR>&#62;'</SAMP> after the <SAMP>`$'</SAMP> at the beginning of the
+reference.  For example, if you have defined types as shown here:
+<P>
+<PRE>
+%union {
+  int itype;
+  double dtype;
+}
+</PRE>
+<P>
+then you can write <CODE>$&#60;itype&#62;1</CODE> to refer to the first subunit of the
+rule as an integer, or <CODE>$&#60;dtype&#62;1</CODE> to refer to it as a double.
+<P>
+<A NAME="IDX85"></A>
+<A NAME="IDX86"></A>
+<H3><A NAME="SEC51" HREF="zyacc_toc.html#SEC51">Actions in Mid-Rule</A></H3>
+<P>
+Occasionally it is useful to put an action in the middle of a rule.
+These actions are written just like usual end-of-rule actions, but they
+are executed before the parser even recognizes the following components.
+<P>
+A mid-rule action may refer to the components preceding it using
+<CODE>$<VAR>n</VAR></CODE>, but it may not refer to subsequent components because
+it is run before they are parsed.
+<P>
+The mid-rule action itself counts as one of the components of the rule.
+This makes a difference when there is another action later in the same rule
+(and usually there is another at the end): you have to count the actions
+along with the symbols when working out which number <VAR>n</VAR> to use in
+<CODE>$<VAR>n</VAR></CODE>.
+<P>
+The mid-rule action can also have a semantic value.  The action can set
+its value with an assignment to <CODE>$$</CODE>, and actions later in the rule
+can refer to the value using <CODE>$<VAR>n</VAR></CODE>.  Since there is no symbol
+to name the action, there is no way to declare a data type for the value
+in advance, so you must use the <SAMP>`$&#60;...&#62;'</SAMP> construct to specify a
+data type each time you refer to this value.
+<P>
+There is no way to set the value of the entire rule with a mid-rule
+action, because assignments to <CODE>$$</CODE> do not have that effect.  The
+only way to set the value for the entire rule is with an ordinary action
+at the end of the rule.
+<P>
+Here is an example from a hypothetical compiler, handling a <CODE>let</CODE>
+statement that looks like <SAMP>`let (<VAR>variable</VAR>) <VAR>statement</VAR>'</SAMP> and
+serves to create a variable named <VAR>variable</VAR> temporarily for the
+duration of <VAR>statement</VAR>.  To parse this construct, we must put
+<VAR>variable</VAR> into the symbol table while <VAR>statement</VAR> is parsed, then
+remove it afterward.  Here is how it is done:
+<P>
+<PRE>
+stmt
+  : LET '(' var ')'
+      { $&#60;context&#62;$ = push_context (); declare_variable ($3); }
+    stmt
+      { $$ = $6; pop_context ($&#60;context&#62;5); }
+</PRE>
+<P>
+As soon as <SAMP>`let (<VAR>variable</VAR>)'</SAMP> has been recognized, the first
+action is run.  It saves a copy of the current semantic context (the
+list of accessible variables) as its semantic value, using alternative
+<CODE>context</CODE> in the data-type union.  Then it calls
+<CODE>declare_variable</CODE> to add the new variable to that list.  Once the
+first action is finished, the embedded statement <CODE>stmt</CODE> can be
+parsed.  Note that the mid-rule action is component number 5, so the
+<SAMP>`stmt'</SAMP> is component number 6.
+<P>
+After the embedded statement is parsed, its semantic value becomes the
+value of the entire <CODE>let</CODE>-statement.  Then the semantic value from the
+earlier action is used to restore the prior list of variables.  This
+removes the temporary <CODE>let</CODE>-variable from the list so that it won't
+appear to exist while the rest of the program is parsed.
+<P>
+Taking action before a rule is completely recognized often leads to
+conflicts since the parser must commit to a parse in order to execute the
+action.  For example, the following two rules, without mid-rule actions,
+can coexist in a working parser because the parser can shift the open-brace
+token and look at what follows before deciding whether there is a
+declaration or not:
+<P>
+<PRE>
+compound
+  : '{' declarations statements '}'
+  | '{' statements '}'
+  ;
+</PRE>
+<P>
+But when we add a mid-rule action as follows, the rules become nonfunctional:
+<P>
+<PRE>
+compound
+  :   { prepare_for_local_variables (); }
+    '{' declarations statements '}'
+  | '{' statements '}'
+  ;
+</PRE>
+<P>
+Now the parser is forced to decide whether to run the mid-rule action
+when it has read no farther than the open-brace.  In other words, it
+must commit to using one rule or the other, without sufficient
+information to do it correctly.  (The open-brace token is what is called
+the <DFN>look-ahead</DFN> token at this time, since the parser is still
+deciding what to do about it.  See section <A HREF="zyacc_6.html#SEC87">Look-Ahead Tokens</A>.)
+<P>
+You might think that you could correct the problem by putting identical
+actions into the two rules, like this:
+<P>
+<PRE>
+compound
+  :   { prepare_for_local_variables (); }
+    '{' declarations statements '}'
+  |   { prepare_for_local_variables (); }
+    '{' statements '}'
+  ;
+</PRE>
+<P>
+But this does not help, because Zyacc does not realize that the two actions
+are identical.  (Zyacc never tries to understand the C code in an action.)
+<P>
+If the grammar is such that a declaration can be distinguished from a
+statement by the first token (which is true in C), then one solution which
+does work is to put the action after the open-brace, like this:
+<P>
+<PRE>
+compound
+  : '{' 
+      { prepare_for_local_variables (); }
+     declarations statements '}'
+  | '{' statements '}'
+  ;
+</PRE>
+<P>
+Now the first token of the following declaration or statement,
+which would in any case tell Zyacc which rule to use, can still do so.
+<P>
+Another solution is to bury the action inside a nonterminal symbol which
+serves as a subroutine:
+<P>
+<PRE>
+subroutine
+  : /* empty */
+      { prepare_for_local_variables (); }
+  ;
+
+
+compound
+  : subroutine '{' declarations statements '}'
+  | subroutine '{' statements '}'
+  ;
+</PRE>
+<P>
+Now Zyacc can execute the action in the rule for <CODE>subroutine</CODE> without
+deciding which rule for <CODE>compound</CODE> it will eventually use.  Note that
+the action is now at the end of its rule.  Any mid-rule action can be
+converted to an end-of-rule action in this way, and this is what Zyacc
+actually does to implement mid-rule actions.
+<P>
+<H3><A NAME="SEC52" HREF="zyacc_toc.html#SEC52">Named Attributes</A></H3>
+<P>
+In addition to the <CODE>$<VAR>i</VAR></CODE> numbered attribute notation discussed
+previously, Zyacc allows the attributes of grammar symbols to be
+referred to using named attributes.  The first character in a attribute
+name must be '$' and the remaining characters can consist of
+alphanumerics or the underscore character '_'.  The syntax for using
+named attributes is similar to that for function parameters in C.
+<P>
+Declarations for named attributes result in automatic additions of
+fields to the <CODE>%union</CODE> declaration (see section <A HREF="zyacc_4.html#SEC48">More Than One Value Type</A>).  In
+fact, there is no need for a <CODE>%union</CODE> declaration if the grammar
+contains only named attributes without any numbered attributes being
+used at all.
+<P>
+An example of the use of named attributes in contained in the
+<CODE>nmcalc</CODE> program discussed in the tutorial section (see section <A HREF="zyacc_3.html#SEC33">The Multi Function Calculator Using a Sugared Syntax</A>).
+<P>
+<H4><A NAME="SEC53" HREF="zyacc_toc.html#SEC53">Named Terminal Attributes</A></H4>
+<P>
+The named attributes for terminal symbols must be declared in a
+parenthesized list following the <CODE>&#60;<VAR>type</VAR>&#62;</CODE> tag in a
+<CODE>%token</CODE>, <CODE>%left</CODE>, <CODE>%right</CODE> or <CODE>%nonassoc</CODE>
+declaration.  Here are some examples of terminal attribute declarations:
+<PRE>
+%token  &#60;id&#62;(const char *$id, unsigned $lineNum) ID_TOK
+%left   &#60;addOp&#62;(unsigned $lineNum)               '+' '-'
+</PRE>
+The first example declares that the terminal <CODE>ID_TOK</CODE> has its semantic
+attributes packaged together with type tag <CODE>&#60;id&#62;</CODE>.  Each such
+<CODE>&#60;id&#62;</CODE> package contains two attributes: an attribute named
+<CODE>$id</CODE> of type <CODE>const char *</CODE> and an attribute named
+<CODE>$lineNum</CODE> of type <CODE>unsigned</CODE>.  Similarly, the second example
+declares that the tokens <CODE>'+'</CODE> and <CODE>'-'</CODE> are left-associative
+with their attributes packaged together in packages of type tag
+<CODE>&#60;addOp&#62;</CODE>.  Each such package contains a single <CODE>unsigned</CODE>
+attribute named <CODE>$lineNum</CODE>.
+<P>
+Each occurrence of <CODE>&#60;<VAR>type</VAR>&#62;(<VAR>Type1</VAR> $<VAR>a1</VAR>, ...,
+<VAR>TypeM</VAR> $<VAR>aM</VAR>)</CODE> results in the field <CODE>struct {<VAR>Type1</VAR>
+<VAR>a1</VAR>; ...; <VAR>TypeM</VAR> <VAR>aM</VAR>;} <VAR>type</VAR>;</CODE> being added to
+the <CODE>%union</CODE> declaration (see section <A HREF="zyacc_4.html#SEC48">More Than One Value Type</A>).  For instance,
+the above two examples would add the following fields to the
+<CODE>%union</CODE>:
+<PRE>
+struct { const char *id; unsigned lineNum; } id;
+struct { unsigned lineNum; } addOp;
+</PRE>
+The above fields would be used within the scanner to ensure that the
+correct semantic value is passed via <CODE>yylval</CODE> (see section <A HREF="zyacc_5.html#SEC81">Semantic Values of Tokens</A>).  For the above examples, appropriate assignments may be
+<PRE>
+  yylval.id.id= ...; yylval.id.lineNum= ...;
+  ...
+  yylval.addOp.lineNum= ...;
+</PRE>
+<P>
+<H4><A NAME="SEC54" HREF="zyacc_toc.html#SEC54">Named Nonterminal Attributes</A></H4>
+<P>
+When a nonterminal is used on the left-hand side of a rule, its semantic
+attributes should be declared within a parenthesized list following that
+nonterminal.  For example, a comma-separated list of identifiers
+(represented by <CODE>ID_TOK</CODE>s) may
+have two attributes consisting of a list of the identifiers and the
+length of the list respectively:
+<PRE>
+idList(List *$idList, unsigned $len)
+  : ID_TOK($id)         
+        { $idList= appendToList(NULL, $id); $len= 1; }
+  | idList($idList1, $len1) ID_TOK($id)
+        { $idList= appendToList($idList1, $id); $len= $len1 + 1; }
+</PRE>
+where <CODE>appendToList()</CODE> appends its second argument to the list
+represented by its first argument.
+<P>
+If the same nonterminal is used on the left-hand side of several rules,
+then though the attributes may have different names, their types must be
+identical, modulo spelling of whitespace.  Hence the above rules could
+be written as:
+<PRE>
+idList(List *$idList, unsigned $len)
+  : ID_TOK($id)         
+        { $idList= appendToList(NULL, $id); $len= 1; }
+  ;
+idList(List    *$idList2, unsigned    $len2)
+  : idList($idList1, $len1) ID_TOK($id)
+        { $idList2= appendToList($idList1, $id); $len2= $len1 + 1; }
+  ;
+</PRE>
+However
+<PRE>
+idList(List *$idList, unsigned $len)
+  : ID_TOK($id)         
+        { $idList= appendToList(NULL, $id); $len= 1; }
+  ;
+idList(List*$idList2, unsigned $len2)
+  : idList($idList1, $len1) ID_TOK($id)
+        { $idList2= appendToList($idList1, $id); $len2= $len1 + 1; }
+  ;
+</PRE>
+would be illegal as the second declaration has no whitespace after the
+<SAMP>`List*'</SAMP>.
+<P>
+The types using named attributes for nonterminal symbols are not added to
+the <CODE>YYSTYPE</CODE> declaration, but are merely maintained internally within
+the generated parser.  This has the advantage that the scanner need not know
+about types used only for nonterminal attributes.  
+<P>
+<H3><A NAME="SEC55" HREF="zyacc_toc.html#SEC55">Inherited Attributes</A></H3>
+<P>
+The numeric <CODE>$<VAR>i</VAR></CODE> variables in a generic yacc are a form of
+synthesized attributes -- they allow a grammatical construct to pass
+information up to its surrounding context.  Inherited attributes allow a
+construct to inherit information from its surrounding context.
+Unfortunately, yacc supports inherited attributes only in a very limited
+and dangerous way: the programmer uses <CODE>$<VAR>i</VAR></CODE> variables with
+<CODE><VAR>i</VAR> &#60;= 0</CODE> (see section <A HREF="zyacc_4.html#SEC49">Actions</A>).
+<P>
+Hence using yacc is like using a programming language where procedures
+are not allowed to have input parameters.  The only method of passing
+information into such procedures is by using global variables -- the
+exact method used by many yacc programs.
+<P>
+<H4><A NAME="SEC56" HREF="zyacc_toc.html#SEC56">Inherited Attributes Notation</A></H4>
+<P>
+Zyacc supports a form of inherited attributes which can be evaluated
+during LR parsing -- grammars with such attributes are called
+LR-attributed grammars.  LR-attributed grammars are a subset of the
+L-attributed grammars (where all attributes can be evaluated in a single
+left-to-right pass).  On the other hand, they are a superset of the
+S-attributed grammars (those supported by yacc) which permit only
+synthesized attributes.
+<P>
+An inherited attribute is declared by starting the declaration with the
+<CODE>%in</CODE> keyword as in:
+<PRE>
+idList(%in int $type, unsigned $len)
+  : idList($type, $len1)
+    ID_TOK($id)
+    { addIDToSymTab($id, $type); $len= $len1 + 1; }
+  | /* empty */
+    { $len= 0; }
+  ;
+</PRE>
+where <CODE>$type</CODE> is an inherited attribute defining the type for all
+the identifiers (<CODE>ID_TOK</CODE>s) in a list of identifiers
+(<CODE>idList</CODE>), <CODE>$len</CODE> is a synthesized attribute giving the
+number of identifiers in the list and <CODE>addIDToSymTab(<VAR>id</VAR>,
+<VAR>type</VAR>)</CODE> adds identifier <VAR>id</VAR> with type <VAR>type</VAR> to the symbol
+table.
+<P>
+This rule could represent a list of identifiers within a declaration,
+with their type being inherited from the context established by the
+declaration.  That type is represented by the inherited attribute $type.
+The synthesized attribute $len computes the number of identifiers in the
+list.  $type is passed down unchanged through the recursive nonterminal
+IDList, being used to install the type of an identifier into the symbol
+table at every stage of the recursion.  $len is initialized to 0 for the
+empty identifier list and then incremented for every identifier in the
+list.  This pattern of attribute passing is similar to the pattern of
+parameter passing in any applicative programming language.
+<P>
+A synthesized attribute is declared by starting a declaration with the
+<CODE>%out</CODE> keyword.  An attribute declaration must have a <CODE>%in</CODE> or
+<CODE>%out</CODE> keyword only if the declaration is the first declaration for
+a left-hand side nonterminal and the previous rule was not terminated by
+a <SAMP>`;'</SAMP>.  If a declaration does not have a <CODE>%in</CODE> or <CODE>%out</CODE>
+keyword, then the omitted keyword defaults to <CODE>%out</CODE>.
+<P>
+Terminal symbols can only have synthesized attributes.
+<P>
+<H4><A NAME="SEC57" HREF="zyacc_toc.html#SEC57">Attribute Flow Restrictions</A></H4>
+<P>
+Since the attributes in a Zyacc grammar are intended to be evaluated
+completely during a left-to-right parse, there are certain restrictions
+on the information flow among the attributes.  To understand these
+restrictions, one first needs to understand which attribute occurrences
+<EM>define</EM> attribute values and which attribute occurrences
+<EM>apply</EM> a value.
+<P>
+The <EM>defining attribute positions</EM> in a rule are the positions on
+the left-hand side whose attributes have been declared %in and the
+positions on the right-hand side whose attributes have been declared
+%out.  The values of the corresponding attributes are computed outside
+the rule.
+<P>
+The <EM>applied attribute positions</EM> in a rule are the positions on
+the left-hand side whose attributes have been declared %out and the
+positions on the right-hand side whose attributes have been declared
+%in.  The values of the corresponding attributes are computed within the
+rule.
+<P>
+We now describe some (fairly natural) restrictions on the pattern of
+attributes in a rule.
+<P>
+<UL>
+
+<LI>
+On the left-hand side of a rule, we are only allowed to have distinct
+attribute declarations for the attributes of the rule nonterminal.
+
+<LI>
+On the right-hand side of a rule, we are allowed to have attribute
+expressions (any C-expression involving some (or possibly no) named
+attributes subject to the following restrictions.
+
+<OL>
+
+<LI>
+An attribute expression occurring in a %out attribute position of a
+right-hand side grammar symbol (a defining position) can only consist of
+a single attribute variable.  Furthermore, this must be the first
+occurrence of that attribute variable on the right-hand side.
+
+<LI>
+An attribute expression occurring in a %in attribute position of a
+right-hand side grammar symbol (a applied position) can only contain
+attribute variables which have occurred earlier in defining positions of
+the rule (earlier %out positions in the right-hand side or %in position
+on the left-hand side).
+
+
+<LI>
+A particular attribute variable can only occur once in a defining
+attribute position.
+
+<LI>
+The final terminating action (if any) of a rule can only contain
+attribute variables which have occurred earlier in the rule.
+
+<LI>
+If a mid-rule action (see section <A HREF="zyacc_4.html#SEC51">Actions in Mid-Rule</A>) contains the first
+occurrence of an attribute variable (this would make it a %out attribute
+for the newly created nonterminal), then that attribute variable must
+occur as the attribute expression for some later nonterminal on the
+right-hand side.
+
+</OL>
+</UL>
+<P>
+Rules 1 and 2 express the left-to-right attribute flow.  Rule 3 ensures
+that all attributes are well-defined: i.e. each attribute only receives
+a single value within a rule.  Rule 4 expresses the fact that it would
+not make any sense to compute an attribute in the final terminating
+action without being able to pass the value somewhere.  Rule 5 allows
+zyacc to infer a type for the %out attribute variable of the newly
+created nonterminal.
+<P>
+By having both attribute declarations and the above rules, there is some
+redundancy.  In fact, zyacc uses the above rules to infer the
+<CODE>%in</CODE>/<CODE>%out</CODE> specifier for an attribute and checks for
+consistency with the declaration.
+<P>
+The above rules preclude the possibility of ensuring that the attribute
+values computed at two defining positions are the same by merely using
+the same attribute variable at those positions.  Consider the rule
+<PRE>
+exp(%out Type $type)
+  : exp($type) operator($type) term($type) 
+  ;
+</PRE>
+where the single attribute of <CODE>operator</CODE> is declared <CODE>%out</CODE>.
+The intent here is that the type of the <CODE>operator</CODE> must be
+identical to the types of its two operands.  Unfortunately, since all
+positions on the right-hand side are defining positions, the above rule
+violates rule 3.  We can rewrite the above rule as
+<PRE>
+exp(%out Type $type)
+  : exp($type1) operator($type) term($type2) 
+    { if ($type1 != $type || $type2 != $type) error(); }
+  ;
+</PRE>
+or use semantic tests (see section <A HREF="zyacc_4.html#SEC59">Semantic Tests</A>).
+<P>
+<H4><A NAME="SEC58" HREF="zyacc_toc.html#SEC58">Attribute Conflicts</A></H4>
+<P>
+Zyacc evaluates the values of inherited attributes during parsing.  If
+the value of an inherited attribute cannot be evaluated unambiguously,
+then Zyacc signals an attribute conflict.
+<P>
+Consider rules like the following:
+<PRE>
+s(%in int $a) 
+  : a($a + 1) ...
+  | a($a + 2) ...
+</PRE>
+When the parser is in a state where it is looking for a <CODE>s</CODE>, it is
+clearly also in a state where it is looking for a <CODE>a</CODE>.  It needs to
+evaluate the inherited attribute for <CODE>a</CODE>, but without knowing which
+rule is going to succeed (which may require unbounded lookahead), it
+does not know whether to evaluate it as <CODE>$a + 1</CODE> or <CODE>$a + 2</CODE>.
+This attribute value conflict is reported as an error by zyacc.
+<P>
+In the limited experience obtained so far with Zyacc, attribute
+conflicts are usually not much of a problem to work around.  A common
+situation is the following:
+<PRE>
+s 
+  : a(1) ...
+  | a(1) ...
+</PRE>
+Here there is really no conflict because equal attribute values are
+being passed to both uses of <CODE>a</CODE>.  However, since Zyacc does not
+understand any C it does not know that the two values are equal and
+signals a attribute conflict.  A simple workaround is to use:
+<PRE>
+s 
+  : a1 ...
+  | a1 ...
+  ;
+a1
+  : a(1)
+  ;
+</PRE>
+This workaround is similar to the workaround needed in yacc when a
+reduce-reduce conflict arises because identical internal actions in same
+rules are reduced in the same state (see section <A HREF="zyacc_6.html#SEC96">Reduce/Reduce Conflicts</A>). 
+<P>
+<H3><A NAME="SEC59" HREF="zyacc_toc.html#SEC59">Semantic Tests</A></H3>
+<P>
+It is often necessary to make a parsing decision based on the
+semantics of what is being parsed.  Though generic yacc does not allow
+the semantics to affect the parse, Zyacc does provide a method by which
+the outcome of runtime semantic tests can affect parsing decisions.
+<P>
+We first present a prototypical example where semantic tests are useful
+in making a parsing decision.  We then present the details of how
+semantic tests operate.  Finally, we present another example where
+semantic tests can be used to implement dynamically defined operator
+precedences and associativity.  Another example of the use of semantic
+tests can be found in the <CODE>lazycalc</CODE> program in the tutorial
+section (see section <A HREF="zyacc_3.html#SEC35">A Calculator Which Omits Some Parentheses</A>).
+<P>
+<H4><A NAME="SEC60" HREF="zyacc_toc.html#SEC60">A Prototypical Example</A></H4>
+<P>
+Consider a language which uses an expression like
+<CODE><VAR>identifier</VAR>(<VAR>arguments</VAR>)</CODE> to express both a function call
+and indexing of a array.  Consider writing a 1-pass compiler for this
+language using a on-the-fly code-generation strategy (the parser emits
+the code as it parses).  Since different code would need to be emitted
+for indexing an array versus passing arguments to a function, the parser
+would need to distinguish between the two situations before the
+<VAR>arguments</VAR> are parsed.  However, since both situations are
+syntactically identical, the parser would require semantic information
+to disambiguate between them.  Within the limited facilities of yacc,
+the programmer typically resorts to a time-honored lexical hack: if the
+scanner is about to deliver an identifier, it looks ahead to see if the
+next token is a left parenthesis; if so, it looks up the symbol table
+and deliver either a <CODE>FUNCTION_ID_TOK</CODE> or <CODE>ARRAY_ID_TOK</CODE>
+depending on the kind of the identifier.  In contrast, zyacc can use the
+following schema to solve this problem:
+<PRE>
+exp
+  : fnID '(' indexExpList ')'
+  | arrayID '(' fnArgList ')'
+  ;
+fnID
+  : ID_TOK($id) %test(idKind($id) == FN_KIND)
+  ;
+arrayID
+  : ID_TOK($id) %test(idKind($id) == ARRAY_KIND)
+  ;
+</PRE>
+In the above we have assumed that the terminal <CODE>ID_TOK</CODE> has a
+single <CODE>%out</CODE> attribute containing the identifier, and <CODE>idKind()</CODE>
+which returns the current kind of an identifier is part of the interface
+to the symbol-table.  The symbol table lookup has been shifted into the
+parser and any required lookahead analysis is handled by the parser
+generator.
+<P>
+Similar syntactic ambiguities occur in many languages.  One of the more
+notorious is the <CODE>typedef</CODE> problem in C, where a <CODE>typedef</CODE>
+identifier is redefined within an inner scope (see section <A HREF="zyacc_8.html#SEC101">Semantic Info in Token Types</A>).
+Lexical hacks for that situation are rather complex and/or incorrect.
+It is possible that the above %test facility could provide a relatively
+clean solution.
+<P>
+<H4><A NAME="SEC61" HREF="zyacc_toc.html#SEC61">Semantic Test Details</A></H4>
+<P>
+Syntactically, each occurrence of a <CODE>%test(<VAR>E</VAR>)</CODE> can be regarded as a
+unique empty nonterminal.
+<P>
+The expression <VAR>E</VAR> within the <CODE>%test(<VAR>E</VAR>)</CODE> can be any
+C-expression.  If the value of the test expression is 0, then the test
+fails, otherwise it succeeds.  If the test expression contains attribute
+variables, then those attribute variables are required to have had a
+previous defining occurrence in the rule (this restriction may be lifted
+in the future to allow the programmer to write tests like
+<CODE>%test(($result= expensiveLookup()) == SOME_VALUE)</CODE>).
+<P>
+When the parser enters a particular state, all the applicable
+<CODE>%test</CODE>s for that state are executed sequentially in the order of
+their occurrence in the source program.  If any of these <CODE>%test</CODE>s
+succeed, then the parser changes state as though it had succeeded in
+parsing the nonterminal corresponding to the succeeding <CODE>%test</CODE>.
+If all the <CODE>%test</CODE>s fail, then the parser takes whatever action it
+would have taken if rules with the applicable <CODE>%test</CODE>s had been
+deleted from that state.
+<P>
+When executing <CODE>%test</CODE>s, zyacc guarantees that its lookahead
+<CODE>yychar</CODE> is well-defined.  This makes it possible to let the
+semantic actions in a <CODE>%test</CODE> refer to the lookahead.  
+<P>
+<H4><A NAME="SEC62" HREF="zyacc_toc.html#SEC62">Semantic Test Example</A></H4>
+The fact that the lookahead token <CODE>yychar</CODE> is well-defined whenever
+a <CODE>%test</CODE> is evaluated makes possible the following overkill for
+the classic arithmetic expression grammar:
+<PRE>
+1 /* Test for %tests.  Resolve operator priorities using %tests. */
+2 
+3 %<B>token</B> &#60;val&#62;(<B>int</B> $v) DIGIT
+4 
+5 %{
+6 #<B>include</B> &#60;ctype.h&#62;
+7 #<B>include</B> &#60;stdio.h&#62;
+8 
+9 <B>static</B> <B>unsigned</B> <B>char</B> pri[128];  
+10 <B>void</B> yyerror();
+11 <B>int</B> yylex();
+12 
+13 <B>enum</B> { ADD_P= 1, MULT_P, UMINUS_P };
+14 
+15 %}
+16 
+17 %%
+18 Lines
+19   : Lines Exp($v) '\n' { printf("%d\n", $v); }
+20   | error '\n'
+21   | /* empty */
+22   ;
+23 Exp(<B>int</B> $v)
+24   : Exp($v1) '+' Exp($v2) %<B>test</B>(pri['+'] &#62;= pri[yychar])
+25       { $v= $v1 + $v2; }
+26   | Exp($v1) '-' Exp($v2) %<B>test</B>(pri['-'] &#62;= pri[yychar])
+27       { $v= $v1 - $v2; }
+28   | Exp($v1) '*' Exp($v2) %<B>test</B>(pri['*'] &#62;= pri[yychar])
+29       { $v= $v1 * $v2; }
+30   | Exp($v1) '/' Exp($v2) %<B>test</B>(pri['/'] &#62;= pri[yychar])
+31       { $v= $v1 / $v2; }
+32   | '-' Exp($v1) %<B>test</B>(UMINUS_P &#62;= pri[yychar])
+33       { $v= -$v1; }
+34   | '+' Exp($v1) %<B>test</B>(UMINUS_P &#62;= pri[yychar])
+35       { $v= $v1; }
+36   | DIGIT($v)
+37   | '(' Exp($v) ')'
+38   ;
+39 
+40 %%
+41 
+42 <B>int</B> yylex() {
+43   <B>int</B> c= getchar();
+44   <B>while</B> (isspace(c) &#38;&#38; c != '\n') c= getchar();
+45   <B>if</B> (c == EOF) <B>return</B> 0;
+46   <B>else</B> <B>if</B> isdigit(c) { yylval.val.v= c - '0'; <B>return</B> DIGIT; }
+47   <B>else</B> <B>return</B> c;
+48 }
+49 
+50 <B>void</B> yyerror(<B>const</B> <B>char</B> *s) {
+51   printf("%s\n", s);
+52 }
+53 
+54 <B>int</B> main() {
+55   pri['+']= pri['-']= ADD_P;
+56   pri['*']= pri['/']= MULT_P;
+57   <B>return</B> yyparse();
+58 }
+</PRE>
+<P>
+The code above examines the lookahead to instruct the parser whether to
+shift or to reduce (see section <A HREF="zyacc_6.html#SEC86">The Zyacc Parser Algorithm</A>).  The rules for the operators on
+lines 23 through 36 decide to reduce if the
+operator involved in the rule has priority greater than or equal to the
+priority of the incoming symbol in yychar.  Otherwise the lookahead is
+shifted.
+<P>
+The usual method for parsing arithmetic expressions is to either use
+multiple levels of nonterminals like <CODE>exp</CODE>, <CODE>term</CODE>,
+<CODE>factor</CODE> to specify the precedence levels, or to specify static
+disambiguating priorities for the operators using yacc's %left, %right
+and %nonassoc declarations (see section <A HREF="zyacc_3.html#SEC24">Infix Notation Calculator: <CODE>calc</CODE></A>).  The method in the
+example is similar to the second alternative but disambiguates
+dynamically using the operator priorities at parse time.  This makes it
+possible to write parsers for languages whose syntax can vary during
+parsing.  The Prolog parser distributed with this package uses the ideas
+outlined by the above example.
+<A NAME="IDX87"></A>
+<A NAME="IDX88"></A>
+<H2><A NAME="SEC63" HREF="zyacc_toc.html#SEC63">Zyacc Declarations</A></H2>
+<P>
+The <DFN>Zyacc declarations</DFN> section of a Zyacc grammar defines the symbols
+used in formulating the grammar and the data types of semantic values.
+See section <A HREF="zyacc_4.html#SEC43">Symbols, Terminal and Nonterminal</A>.  Additionally, a <CODE>%look</CODE> directive is allowed within
+each grammar rule to declare the lookahead properties of the grammar rule
+(see section <A HREF="zyacc_4.html#SEC74">Specifying the Lookahead</A>). 
+<P>
+All token type names (but not single-character literal tokens such as
+<CODE>'+'</CODE> and <CODE>'*'</CODE>) must be declared.  Nonterminal symbols must be
+declared if you need to specify which data type to use for the semantic
+value (see section <A HREF="zyacc_4.html#SEC48">More Than One Value Type</A>) from a
+explicit <CODE>%union</CODE> declaration; you should not declare the types of a
+non-terminal if it uses named attributes (see section <A HREF="zyacc_4.html#SEC52">Named Attributes</A>).
+<P>
+The first rule in the file also specifies the start symbol, by default.
+If you want some other symbol to be the start symbol, you must declare
+it explicitly (see section <A HREF="zyacc_2.html#SEC5">Languages and Context-Free Grammars</A>).
+<P>
+<A NAME="IDX89"></A>
+<A NAME="IDX90"></A>
+<A NAME="IDX91"></A>
+<H3><A NAME="SEC64" HREF="zyacc_toc.html#SEC64">Token Type Names</A></H3>
+<P>
+The basic way to declare a token type name (terminal symbol) is as follows:
+<P>
+<PRE>
+%token <VAR>name</VAR>
+</PRE>
+<P>
+Zyacc will convert this into a <CODE>#define</CODE> directive in
+the parser, so that the function <CODE>yylex</CODE> (if it is in this file)
+can use the name <VAR>name</VAR> to stand for this token type's code.
+<P>
+Alternatively, you can use <CODE>%left</CODE>, <CODE>%right</CODE>, or <CODE>%nonassoc</CODE>
+instead of <CODE>%token</CODE>, if you wish to specify precedence.
+See section <A HREF="zyacc_4.html#SEC65">Operator Precedence</A>.
+<P>
+You can explicitly specify the numeric code for a token type by appending
+an integer value in the field immediately following the token name:
+<P>
+<PRE>
+%token NUM_TOK 300
+</PRE>
+<P>
+It is generally best, however, to let Zyacc choose the numeric codes for
+all token types.  Zyacc will automatically select codes that don't conflict
+with each other or with ASCII characters.
+<P>
+In the event that the stack type is a union, you must augment the
+<CODE>%token</CODE> or other token declaration to include the data type
+alternative delimited by angle-brackets (see section <A HREF="zyacc_4.html#SEC48">More Than One Value Type</A>).  
+<P>
+For example:
+<P>
+<PRE>
+%union {              /* define stack type */
+  double val;
+  symrec *tptr;
+}
+%token &#60;val&#62; NUM_TOK      /* define token NUM_TOK and its type */
+</PRE>
+<P>
+<A NAME="IDX92"></A>
+<A NAME="IDX93"></A>
+<A NAME="IDX94"></A>
+<H3><A NAME="SEC65" HREF="zyacc_toc.html#SEC65">Operator Precedence</A></H3>
+<P>
+Use the <CODE>%left</CODE>, <CODE>%right</CODE> or <CODE>%nonassoc</CODE> declaration to
+declare a token and specify its precedence and associativity, all at
+once.  These are called <DFN>precedence declarations</DFN>.
+See section <A HREF="zyacc_6.html#SEC89">Operator Precedence</A>, for general information on operator precedence.
+<P>
+The syntax of a precedence declaration is the same as that of
+<CODE>%token</CODE>: either
+<P>
+<PRE>
+%left <VAR>symbols</VAR>...
+</PRE>
+<P>
+or
+<P>
+<PRE>
+%left &#60;<VAR>type</VAR>&#62; <VAR>symbols</VAR>...
+</PRE>
+<P>
+And indeed any of these declarations serves the purposes of
+<CODE>%token</CODE>.  Like <CODE>%token</CODE>, they also allow alternate names for
+a token so that a token can be referred to using a multi-character
+literal name within the grammar file.  But in addition, they specify the
+associativity and relative precedence for all the <VAR>symbols</VAR>:
+<P>
+<UL>
+<LI>
+The associativity of an operator <VAR>op</VAR> determines how repeated uses
+of the operator nest: whether <SAMP>`<VAR>x</VAR> <VAR>op</VAR> <VAR>y</VAR> <VAR>op</VAR>
+<VAR>z</VAR>'</SAMP> is parsed by grouping <VAR>x</VAR> with <VAR>y</VAR> first or by
+grouping <VAR>y</VAR> with <VAR>z</VAR> first.  <CODE>%left</CODE> specifies
+left-associativity (grouping <VAR>x</VAR> with <VAR>y</VAR> first) and
+<CODE>%right</CODE> specifies right-associativity (grouping <VAR>y</VAR> with
+<VAR>z</VAR> first).  <CODE>%nonassoc</CODE> specifies no associativity, which
+means that <SAMP>`<VAR>x</VAR> <VAR>op</VAR> <VAR>y</VAR> <VAR>op</VAR> <VAR>z</VAR>'</SAMP> is
+considered a syntax error.
+
+<LI>
+The precedence of an operator determines how it nests with other operators.
+All the tokens declared in a single precedence declaration have equal
+precedence and nest together according to their associativity.
+When two tokens declared in different precedence declarations associate,
+the one declared later has the higher precedence and is grouped first.
+</UL>
+<P>
+<H3><A NAME="SEC66" HREF="zyacc_toc.html#SEC66">Multi-Character Literal Tokens</A></H3>
+Zyacc allows you to specify both a literal name for a token as well as an
+identifier (as above).  Zyacc consistently uses single quotes to delimit
+literal names (as opposed to Bison's use of single quotes for single
+character literals and double quotes for multi-character literals).  Within
+the declaration, the two alternate names for a token may occur in either
+order, separated by a <SAMP>`='</SAMP>.  This allows you to refer to a token
+internally within the grammar file using the possibly more readable literal
+name, while using the identifier name to refer to the token in other files.
+For example, in
+<PRE>
+%left                  '&#60;&#60;=' = LSH_ASSGN  RSH_ASSGN = '&#62;&#62;=' 300
+%token &#60;lineNum&#62;        'for' = FOR_TOK
+</PRE>
+the first declaration defines two tokens.  The first token has two
+alternate names <CODE>'&#60;&#60;='</CODE> and <CODE>LSH_ASSGN</CODE>; since a value has not
+been specified for it, Zyacc will choose a value.  The second token has
+two alternate names <CODE>RSH_ASSGN</CODE> and <CODE>'&#62;&#62;='</CODE>.  Its value has
+been specified as 300.
+<P>
+The second declaration illustrates the fact that the alternate names can
+even be used with declarations which involve a <CODE>&#60;<VAR>type</VAR>&#62;</CODE> tag.
+<P>
+With the above declarations the grammar can contain rules like:
+<PRE>
+stmt
+  : 'for' '(' exp ';' exp ';' exp ')' stmt
+  ;
+exp
+  : exp '&#60;&#60;=' exp
+  | exp '&#62;&#62;=' exp
+  ; 
+</PRE>
+Whether the above is more readable than the alternative using
+<CODE>LSH_ASSGN</CODE>, <CODE>RSH_ASSGN</CODE> and <CODE>FOR_TOK</CODE> is a matter of
+personal preference.
+<P>
+<A NAME="IDX95"></A>
+<A NAME="IDX96"></A>
+<A NAME="IDX97"></A>
+<H3><A NAME="SEC67" HREF="zyacc_toc.html#SEC67">The Collection of Value Types</A></H3>
+<P>
+The <CODE>%union</CODE> declaration specifies the entire collection of possible
+data types for semantic values.  The keyword <CODE>%union</CODE> is followed by a
+pair of braces containing the same thing that goes inside a <CODE>union</CODE> in
+C.  
+<P>
+For example:
+<P>
+<PRE>
+%union {
+  double val;
+  symrec *tptr;
+}
+</PRE>
+<P>
+This says that the two alternative types are <CODE>double</CODE> and <CODE>symrec
+*</CODE>.  They are given names <CODE>val</CODE> and <CODE>tptr</CODE>; these names are used
+in the <CODE>%token</CODE> and <CODE>%type</CODE> declarations to pick one of the types
+for a terminal or nonterminal symbol (see section <A HREF="zyacc_4.html#SEC68">Nonterminal Symbols</A>).
+<P>
+Note that, unlike making a <CODE>union</CODE> declaration in C, you do not write
+a semicolon after the closing brace.
+<P>
+<A NAME="IDX98"></A>
+<A NAME="IDX99"></A>
+<A NAME="IDX100"></A>
+<H3><A NAME="SEC68" HREF="zyacc_toc.html#SEC68">Nonterminal Symbols</A></H3>
+<P>
+When you use <CODE>%union</CODE> to specify multiple value types, you must
+declare the value type of each nonterminal symbol for which values are
+used.  This is done with a <CODE>%type</CODE> declaration, like this:
+<P>
+<PRE>
+%type &#60;<VAR>type</VAR>&#62; <VAR>nonterminal</VAR>...
+</PRE>
+<P>
+Here <VAR>nonterminal</VAR> is the name of a nonterminal symbol, and <VAR>type</VAR>
+is the name given in the <CODE>%union</CODE> to the alternative that you want
+(see section <A HREF="zyacc_4.html#SEC67">The Collection of Value Types</A>).  You can give any number of nonterminal symbols in
+the same <CODE>%type</CODE> declaration, if they have the same value type.  Use
+spaces to separate the symbol names.
+<P>
+<A NAME="IDX101"></A>
+<A NAME="IDX102"></A>
+<A NAME="IDX103"></A>
+<A NAME="IDX104"></A>
+<A NAME="IDX105"></A>
+<H3><A NAME="SEC69" HREF="zyacc_toc.html#SEC69">Suppressing Conflict Warnings</A></H3>
+<P>
+Zyacc normally warns if there are any conflicts in the grammar
+(see section <A HREF="zyacc_6.html#SEC88">Shift/Reduce Conflicts</A>), but most real grammars have harmless shift/reduce
+conflicts which are resolved in a predictable way and would be difficult to
+eliminate.  It is desirable to suppress the warning about these conflicts
+unless the number of conflicts changes.  You can do this with the
+<CODE>%expect</CODE> declaration.
+<P>
+The declaration looks like this:
+<P>
+<PRE>
+%expect <VAR>n</VAR>
+</PRE>
+<P>
+Here <VAR>n</VAR> is a decimal integer.  The declaration says there should be no
+warning if there are <VAR>n</VAR> shift/reduce conflicts and no reduce/reduce
+conflicts.  The usual warning is given if there are either more or fewer
+conflicts, or if there are any reduce/reduce conflicts.
+<P>
+In general, using <CODE>%expect</CODE> involves these steps:
+<P>
+<UL>
+<LI>
+Compile your grammar without <CODE>%expect</CODE>.  Use the <SAMP>`-v'</SAMP> option
+to get a verbose list of where the conflicts occur.  Zyacc will also
+print the number of conflicts.
+
+<LI>
+Check each of the conflicts to make sure that Zyacc's default
+resolution is what you really want.  If not, rewrite the grammar and
+go back to the beginning.
+
+<LI>
+Add an <CODE>%expect</CODE> declaration, copying the number <VAR>n</VAR> from the
+number which Zyacc printed.
+</UL>
+<P>
+Now Zyacc will stop annoying you about the conflicts you have checked, but
+it will warn you again if changes in the grammar result in additional
+conflicts.
+<P>
+<A NAME="IDX106"></A>
+<A NAME="IDX107"></A>
+<A NAME="IDX108"></A>
+<A NAME="IDX109"></A>
+<H3><A NAME="SEC70" HREF="zyacc_toc.html#SEC70">The Start-Symbol</A></H3>
+<P>
+Zyacc assumes by default that the start symbol for the grammar is the first
+nonterminal specified in the grammar specification section.  The programmer
+may override this restriction with the <CODE>%start</CODE> declaration as follows:
+<P>
+<PRE>
+%start <VAR>symbol</VAR>
+</PRE>
+<P>
+<A NAME="IDX110"></A>
+<A NAME="IDX111"></A>
+<H3><A NAME="SEC71" HREF="zyacc_toc.html#SEC71">Multiple Start Symbols</A></H3>
+<P>
+Unlike other yaccs, Zyacc allows the user to declare more than one start
+nonterminal.  If the user does so, then <CODE>#define</CODE> statements are
+added to the generated parser for each start nonterminal and the
+programmer can call the generated parser function (see section <A HREF="zyacc_5.html#SEC78">The Parser Function <CODE>yyparse</CODE></A>) with its first parameter set to the desired start
+nonterminal.  If a pure parser has also been requested using the
+<CODE>pure_parser</CODE> directive (see section <A HREF="zyacc_5.html#SEC83">Calling Conventions for Pure Parsers</A>), then the additional
+arguments for the pure parser follow the start nonterminal in the argument
+list for the parsing function.
+<P>
+The following example  uses this feature to parse a line
+as either a prefix, infix or suffix arithmetic expression depending on the 
+first character in the line.  It accepts lines like the following:
+<P>
+<PRE>
+i(1+2)*3+4
+s12+3*4+
+p+*+1234
+</PRE>
+<P>
+The grammar uses the <CODE>%look</CODE> directive (see section <A HREF="zyacc_4.html#SEC74">Specifying the Lookahead</A>) to ensure that the lookahead is clear after each call to
+the parsing function.  Here it is:
+<P>
+<PRE>
+%<B>start</B> infix, prefix, suffix
+
+%%
+infix
+  : iExp '\n' %look(0) { <B>return</B> $1; }
+  ;
+iExp
+  : iExp '+' iTerm { $$= $1 + $3; }
+  | iTerm
+  ;
+iTerm
+  : iTerm '*' iFactor { $$= $1 * $3; }
+  | iFactor
+  ;
+iFactor
+  : digit 
+  | '(' iExp ')' { $$= $2; }
+  ;
+digit
+  : '0' { $$= 0; }
+  | '1' { $$= 1; }
+  | '2' { $$= 2; }
+  | '3' { $$= 3; }
+  | '4' { $$= 4; }
+  | '5' { $$= 5; }
+  | '6' { $$= 6; }
+  | '7' { $$= 7; }
+  | '8' { $$= 8; }
+  | '9' { $$= 9; }
+  ;
+
+prefix
+  : pExp '\n' %look(0) { <B>return</B> $1; }
+  ;
+pExp
+  : '+' pExp pExp { $$= $2 + $3; }
+  | '*' pExp pExp { $$= $2 * $3; }
+  | digit
+  ;
+
+suffix
+  : sExp '\n' %look(0) { <B>return</B> $1; }
+  ;
+sExp
+  : sExp sExp '+' { $$= $1 + $2; }
+  | sExp sExp '*' { $$= $1 * $2; }
+  | digit
+  ;
+
+</PRE>
+<P>
+The scanner function simply returns the next non-blank input character.  The
+parser driver shown below decides on which start nonterminal to use
+depending on the first character of each input line:
+<P>
+<PRE>
+<B>int</B> main() 
+/* Call infix grammar if line starts with 'i'; suffix grammar if line
+<TT> * </TT>starts with a 's'; prefix grammar if line starts with a 'p'.
+ */
+{
+  <B>int</B> c;
+  <B>while</B> ((c= getchar()) != EOF) {
+    <B>int</B> z= yyparse(c == 'i' ? infix : (c == 's' ? suffix : prefix));
+    printf("%d\n", z);
+  }
+  <B>return</B> 0;
+}
+
+</PRE>
+<P>
+<A NAME="IDX112"></A>
+<A NAME="IDX113"></A>
+<A NAME="IDX114"></A>
+<H3><A NAME="SEC72" HREF="zyacc_toc.html#SEC72">A Pure (Reentrant) Parser</A></H3>
+<P>
+A <DFN>reentrant</DFN> program is one which does not alter in the course of
+execution; in other words, it consists entirely of <DFN>pure</DFN> (read-only)
+code.  Reentrancy is important whenever asynchronous execution is possible;
+for example, a nonreentrant program may not be safe to call from a signal
+handler.  In systems with multiple threads of control, a nonreentrant
+program must be called only within interlocks.
+<P>
+The Zyacc parser is not normally a reentrant program, because it uses
+statically allocated variables for communication with <CODE>yylex</CODE>.  These
+variables include <CODE>yylval</CODE> and <CODE>yylloc</CODE>.
+<P>
+The Zyacc declaration <CODE>%pure_parser</CODE> says that you want the parser
+to be reentrant.  It looks like this:
+<P>
+<PRE>
+%pure_parser
+</PRE>
+<P>
+The effect is that the two communication variables become local
+variables in <CODE>yyparse</CODE>, and a different calling convention is used
+for the lexical analyzer function <CODE>yylex</CODE>.  See section <A HREF="zyacc_5.html#SEC83">Calling Conventions for Pure Parsers</A>, for the details of this.  The
+variable <CODE>yynerrs</CODE> also becomes local in <CODE>yyparse</CODE>
+(see section <A HREF="zyacc_5.html#SEC84">The Error Reporting Function <CODE>yyerror</CODE></A>).
+The convention for calling <CODE>yyparse</CODE> itself is unchanged.
+<P>
+<A NAME="IDX115"></A>
+<H3><A NAME="SEC73" HREF="zyacc_toc.html#SEC73">Option Declaration</A></H3>
+The Zyacc declarations section can contain <CODE>%option</CODE> directives
+followed by command-line options using only the form with long option
+names (see section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>), with any option value
+specified within the same word as the option name.  The options actually
+specified on the command-line override the options specified in the
+source file using this directive.  <CODE>%option</CODE> directives must
+precede all other directives.
+<P>
+<A NAME="IDX116"></A>
+<H3><A NAME="SEC74" HREF="zyacc_toc.html#SEC74">Specifying the Lookahead</A></H3>
+<P>
+When a Zyacc grammar rule is reduced, the parser may or may not require a
+lookahead token from the scanner before it can make the reduction decision.
+This can make a difference is situations where the scanner and parser are
+very tightly coupled, as when they are both accessing the same file.
+Typically, one needs to look at the generated parser description file(s) to
+check the relative states of the parser and scanner.  Zyacc provides the
+<CODE>%look</CODE> directive to automate this process.
+<P>
+Unlike other declarations, <CODE>%look</CODE> declarations occur within the rules
+in section 2 of the source file.  If the body of a rule contains the 
+declaration <CODE>%look(0)</CODE>, then that specifies that the rule is
+<STRONG>always</STRONG> reduced in a context which does not require a lookahead
+token from the scanner.  If the body of a rule contains the 
+declaration <CODE>%look(1)</CODE>, then that specifies that the rule is
+<STRONG>always</STRONG> reduced in a context which does require a lookahead
+token from the scanner.  If these specifications are violated, then
+Zyacc outputs a warning message at parser generation time.
+<P>
+The advantage of these declarations is that it makes grammars more
+maintainable.  Rather than having to manually redo an involved analysis
+regarding lookahead decisions each time a grammar is modified, Zyacc 
+does the analysis whenever it processes the grammar and reports
+any violations.
+<P>
+An example of the use of the <CODE>%look(0)</CODE> directive to ensure that the
+lookahead is clear before the parsing function returns can be found in
+section <A HREF="zyacc_4.html#SEC71">Multiple Start Symbols</A>.
+<P>
+<A NAME="IDX117"></A>
+<A NAME="IDX118"></A>
+<A NAME="IDX119"></A>
+<H3><A NAME="SEC75" HREF="zyacc_toc.html#SEC75">Zyacc Declaration Summary</A></H3>
+<P>
+Here is a summary of all Zyacc declarations:
+<P>
+<DL COMPACT>
+<DT><CODE>%union</CODE>
+<DD>Declare the collection of data types that semantic values may have
+(see section <A HREF="zyacc_4.html#SEC67">The Collection of Value Types</A>).
+
+<DT><CODE>%token</CODE>
+<DD>Declare a terminal symbol (token type name) with no precedence
+or associativity specified (see section <A HREF="zyacc_4.html#SEC64">Token Type Names</A>).
+
+<DT><CODE>%right</CODE>
+<DD>Declare a terminal symbol (token type name) that is right-associative
+(see section <A HREF="zyacc_4.html#SEC65">Operator Precedence</A>).
+
+<DT><CODE>%left</CODE>
+<DD>Declare a terminal symbol (token type name) that is left-associative
+(see section <A HREF="zyacc_4.html#SEC65">Operator Precedence</A>).
+
+<DT><CODE>%nonassoc</CODE>
+<DD>Declare a terminal symbol (token type name) that is nonassociative
+(using it in a way that would be associative is a syntax error)
+(see section <A HREF="zyacc_4.html#SEC65">Operator Precedence</A>).
+
+<DT><CODE>%type</CODE>
+<DD>Declare the type of semantic values for a nonterminal symbol
+(see section <A HREF="zyacc_4.html#SEC68">Nonterminal Symbols</A>).
+
+<DT><CODE>%start</CODE>
+<DD>Specify the grammar's start symbol (see section <A HREF="zyacc_4.html#SEC70">The Start-Symbol</A>).
+
+<DT><CODE>%expect</CODE>
+<DD>Declare the expected number of shift-reduce conflicts
+(see section <A HREF="zyacc_4.html#SEC69">Suppressing Conflict Warnings</A>).
+
+<DT><CODE>%pure_parser</CODE>
+<DD>Request a pure (reentrant) parser program (see section <A HREF="zyacc_4.html#SEC72">A Pure (Reentrant) Parser</A>).
+<DT><CODE>%option</CODE>
+<DD>Specify a command-line option from within the grammar file
+(see section <A HREF="zyacc_4.html#SEC73">Option Declaration</A>).
+</DL>
+<P>
+<H2><A NAME="SEC76" HREF="zyacc_toc.html#SEC76">Multiple Parsers in the Same Program</A></H2>
+<P>
+Most programs that use Zyacc parse only one language and therefore contain
+only one Zyacc parser.  But what if you want to parse more than one
+language with the same program?  Then you need to avoid a name conflict
+between different definitions of <CODE>yyparse</CODE>, <CODE>yylval</CODE>, and so on.
+<P>
+The easy way to do this is to use the option <SAMP>`-p <VAR>prefix</VAR>'</SAMP>
+(see section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>).  This renames the interface functions and
+variables of the Zyacc parser to start with <VAR>prefix</VAR> instead of
+<SAMP>`yy'</SAMP>.  You can use this to give each parser distinct names that do
+not conflict.
+<P>
+The precise list of symbols renamed is <CODE>yyparse</CODE>, <CODE>yylex</CODE>,
+<CODE>yyerror</CODE>, <CODE>yynerrs</CODE>, <CODE>yylval</CODE>, <CODE>yychar</CODE> and
+<CODE>yydebug</CODE>.  For example, if you use <SAMP>`-p c'</SAMP>, the names become
+<CODE>cparse</CODE>, <CODE>clex</CODE>, and so on.
+<P>
+<STRONG>All the other variables and macros associated with Zyacc are not
+renamed.</STRONG> These others are not global; there is no conflict if the same
+name is used in different parsers.  For example, <CODE>YYSTYPE</CODE> is not
+renamed, but defining this in different ways in different parsers causes
+no trouble (see section <A HREF="zyacc_4.html#SEC47">Data Types of Semantic Values</A>).
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_3.html">previous</A>, <A HREF="zyacc_5.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

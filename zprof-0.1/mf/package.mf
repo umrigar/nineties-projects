@@ -1,0 +1,13 @@
+#This target sets up symbolic links so that package specific files in
+#the top-level directory can be referred to using generic names.
+#Call as 'make PACKAGE=package setup-package', to setup the top-directory
+#for package.
+
+setup-package:
+		for f in *.$(PACKAGE) ; \
+                do \
+		  $(LN) -s $$f `basename $$f .$(PACKAGE)` ; \
+		done
+		autoheader; autoconf
+		$(MAKE_MF_IN)
+		./configure

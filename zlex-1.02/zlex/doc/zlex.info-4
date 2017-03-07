@@ -1,0 +1,1311 @@
+This is Info file zlex.info, produced by Makeinfo-1.64 from the input
+file zlex.texi.
+
+
+File: zlex.info,  Node: End-of-file Actions,  Next: Terminating a Scanner,  Prev: Wrapping Up,  Up: End-of-File and Termination
+
+`<<EOF>>' Pattern Actions
+=========================
+
+   If the `yywrap' function (*note Wrapping Up::.) returns non-zero,
+then the scanner executes the actions associated with its `<<EOF>>'
+actions if any.  These actions provide another opportunity for the
+programmer to reset the scanner so as to continue scanning.  The
+following points need to be noted:
+
+   * `yytext' and `yyleng' are not defined for `<<EOF>>' patterns.
+     Hence the actions for `<<EOF>>' patterns should not refer to these
+     variables.
+
+   * If `yyin' is pointed to a new `FILE' pointer within an `<<EOF>>'
+     action, then scanning will continue.  For compatibility with old
+     versions of `flex', the `YY_NEW_FILE' and `YY_RESTART' actions
+     (*note Restarting a Scanner::.) may be used after resetting `yyin'
+     but is not necessary.
+
+   * The scanner can switch to a new buffer by using a
+     `yy_switch_to_buffer' action (*note Switching Buffers::.).
+
+   * The scanner can execute a return statement.
+
+   * It can execute a `yyterminate()' action (*note Terminating a
+     Scanner::.).
+
+   * Control can simply fall off the end of the `<<EOF>>' action.  In
+     that case, the scanner will return to its caller with a
+     `YY_EOF_OUT' (which defaults to `YY_NULL').
+
+
+File: zlex.info,  Node: Terminating a Scanner,  Next: Restarting a Scanner,  Prev: End-of-file Actions,  Up: End-of-File and Termination
+
+Terminating a Scanner: `yyterminate'
+====================================
+
+   `yyterminate()' terminates the scanner and returns a `YY_EOF_OUT'
+(which defaults to 0) to the caller.  Subsequent calls to the scanner
+will continue to return with `YY_EOF_OUT', until a `yyrestart',
+`YY_NEW_FILE' or `yy_switch_to_buffer' action is executed.
+
+   The canonical form `YY_TERMINATE()' can also be used instead.
+
+
+File: zlex.info,  Node: Restarting a Scanner,  Prev: Terminating a Scanner,  Up: End-of-File and Termination
+
+Restarting a Scanner: `yyrestart'
+=================================
+
+   The action `yyrestart(fileP)' restarts scanning, taking input from
+the file with the `stdio' `FILE' pointer `fileP'.  The current contents
+of the Zlex buffer are discarded.  The canonical name `YY_RESTART' can
+also be used instead.
+
+   If `yyin' has been pointed to a new file, then the action
+`YY_NEW_FILE' (without any arguments) tells the scanner that a new file
+has been setup in `yyin'.  `YY_NEW_FILE' is equivalent to
+`yyrestart(yyin)'.
+
+
+File: zlex.info,  Node: The Main Scanner Function,  Next: Debugging,  Prev: End-of-File and Termination,  Up: Top
+
+The Main Scanner Function
+*************************
+
+   The top-level scanner function in a Zlex scanner has default name
+`yylex'.  The user can customize the name and declaration of the
+function, as well as define macros to cause certain actions to be taken.
+
+* Menu:
+
+* Main Scanner Function::       Naming the main scanner function.
+* Declaring the Scanner Function::  Declaring the main scanner
+                                function.
+* Initialization::              Initialization within function.
+* An Action for Every Pattern::  A pre-action for every pattern.
+* Separator Between Actions::   Controlling `break' within actions.
+* Termination Return Value::    Value returned on termination.
+* Pattern Numbers::             Accessing number of matched pattern.
+
+
+File: zlex.info,  Node: Main Scanner Function,  Next: Declaring the Scanner Function,  Prev: The Main Scanner Function,  Up: The Main Scanner Function
+
+The Main Scanner Function: `yylex'
+==================================
+
+   The name of the main scanning function defaults to `yylex', but like
+other names, the name of this function can be changed to an arbitrary
+name by defining the macro `YY_LEX' to the new name.  Alternatively,
+the prefix used for the name can be changed by using the `--prefix'
+option (*note Function Names::.).  Hence to change the name of the main
+scanning function to `scan', the programmer merely need have the line
+
+     #define YY_LEX scan
+
+in the C-code section of section 1 of the Zlex file.
+
+
+File: zlex.info,  Node: Declaring the Scanner Function,  Next: Initialization,  Prev: Main Scanner Function,  Up: The Main Scanner Function
+
+Declaring the Scanner Function: `YY_DECL'
+=========================================
+
+   The macro `YY_DECL' gives the default declaration of the scanner
+function.  Its definition is equivalent to:
+
+     #ifndef YY_DECL
+     #define YY_DECL int YY_LEX(void)
+     #endif
+
+The programmer can change this declaration by suitably `#define'ing
+`YY_DECL' in the C-code section of section 1 of the Zlex file.  See
+*Note Termination Return Value:: for how to use `YY_DECL' to declare a
+scanner function which returns a `struct' rather than a `int'.
+
+
+File: zlex.info,  Node: Initialization,  Next: An Action for Every Pattern,  Prev: Declaring the Scanner Function,  Up: The Main Scanner Function
+
+Initialization: `YY_USER_INIT'
+==============================
+
+   The macro `YY_USER_INIT' can be defined by the programmer to be code
+which will be executed when the scanner first starts up, before the
+first scan.  Its definition defaults to empty code.  It is useful for
+initializing variables used by the programmer.  Before the first call
+to the main scanner function, the only Zlex actions guaranteed to work
+are the buffer creation and switching routines (*note Buffer
+Management::.).
+
+   The scanner's buffer is statically initialized to a special
+initialization state.  If there is no buffer switching action before
+the first call to the scanner function, then the scanner buffer will
+still be in this special initialization state at the first call.  The
+first call to the scanner checks whether the buffer is in this special
+initialization state: if it is, it creates a new buffer corresponding
+to the current `yyin'; if it not, then it assumes that the programmer
+has created and switched to a valid buffer and uses that buffer without
+modification.  Note that the effect of using such a special
+initialization buffer in subsequent scanner calls is undefined.
+
+
+File: zlex.info,  Node: An Action for Every Pattern,  Next: Separator Between Actions,  Prev: Initialization,  Up: The Main Scanner Function
+
+Specifying a Pre-Action for every Pattern: `YY_USER_ACTION'
+===========================================================
+
+   The macro `YY_USER_ACTION' can be defined by the programmer to be
+code which will always be executed before any matched rule action.  Its
+definition defaults to empty code.
+
+
+File: zlex.info,  Node: Separator Between Actions,  Next: Termination Return Value,  Prev: An Action for Every Pattern,  Up: The Main Scanner Function
+
+Specifying the Separator Between Actions: `YY_BREAK'
+====================================================
+
+   The user actions specified in the Zlex file are copied into the main
+scanner function as part of a switch statement.  The macro `YY_BREAK'
+is used to separate the actions within the `switch' statement.  Its
+definition defaults to `break'.
+
+   Redefining this macro appears to be of limited utility.  This
+feature is included for compatibility with `flex'.  The rationale for
+including this feature in `flex' was to prevent unreachable statement
+warnings when a user action naturally terminates with a control
+transfer like a `return'.  With this feature, the user can define
+`YY_BREAK' to be empty while ensuring that every action terminates with
+a transfer of control (inserting explicit breaks, if necessary), thus
+avoiding the warnings.
+
+
+File: zlex.info,  Node: Termination Return Value,  Next: Pattern Numbers,  Prev: Separator Between Actions,  Up: The Main Scanner Function
+
+Return Value on Termination: `YY_EOF_OUT'
+=========================================
+
+   The macro YY_EOF_OUT specifies the value to be returned by the
+scanner on end-of-file after `yywrap' returns 1 and the `<<EOF>>'
+actions (if any) do not reset the input `yyin'.  Its definition
+defaults to `YY_NULL' (*note The Null Value::.) but it can be redefined
+by the programmer in section 1 of the Zlex file.
+
+   For example, by using `YY_DECL' (*note Declaring the Scanner
+Function::.) macro, it is possible for the Zlex programmer to make the
+scanner return a `struct' rather than a `int'.  If this is done, then
+the value returned on end-of-file must also be a suitable `struct': this
+can be achieved by defining `YY_EOF_OUT' to a call of a suitable
+function returning the suitable `struct'.  Appropriate definitions and
+declarations are shown below:
+
+     %{
+     
+     /* Define the type returned by the scanner. */
+     typedef struct {
+       ...
+     } Token;
+     
+     /* Declare a function returning a special EOF Token struct. */
+     Token eofToken(void);
+     
+     /* Scanner declaration. */
+     #define YY_DECL Token YY_LEX(void)
+     
+     /* EOF return value definition. */
+     #define YY_EOF_OUT eofToken()
+     
+     %}
+
+
+File: zlex.info,  Node: Pattern Numbers,  Prev: Termination Return Value,  Up: The Main Scanner Function
+
+Pattern Numbers: `yy_act' and `YY_NUM_RULES'
+============================================
+
+   Within the actions, the macro `yy_act' refers to the pattern number
+which is currently being matched where the patterns from the Zlex source
+file are numbered starting at 1.  The macro `YY_NUM_RULES' refers to
+the total number of patterns for which actions exist in the generated
+scanner; this will usually be greater than the number of patterns
+explicitly specified by the programmer in the Zlex source file, since
+Zlex uses several pseudo-actions for its own purposes.
+
+
+File: zlex.info,  Node: Debugging,  Next: Multiple Scanners,  Prev: The Main Scanner Function,  Up: Top
+
+Debugging and Errors
+********************
+
+   Limited facilities are provided for debugging Zlex programs.  A C
+macro and a variable control whether debugging messages are output as a
+pattern is recognized.  In addition, it is also possible to obtain a
+more detailed trace detailing the action of the scanner as each
+individual character is scanned.
+
+* Menu:
+
+* Debugging Control::           A variable and macro which controls
+                                debugging.
+* Debugging Example::           Debugging example using `REJECT'.
+* Scanner Tracing::             Detailed trace of scanner actions.
+* Errors::                      Runtime error message control.
+
+
+File: zlex.info,  Node: Debugging Control,  Next: Debugging Example,  Prev: Debugging,  Up: Debugging
+
+Debugging Control
+=================
+
+   Several equivalent macros and a single variable control whether
+debugging messages are output to `stderr' as patterns are matched.
+
+   If the `--debug' option is specified when the scanner file is
+generated (*note Options List::.), or if the macro `YYDEBUG' is defined
+when the generated scanner file is compiled, and if at runtime, the
+variable with default name `yy_Zlex_debug' has a non-zero value, then
+messages are printed on `stderr' as patterns are matched.  Where
+applicable, the printed messages include the source file name and line
+number of the matched pattern, as well as the contents of `yytext'.
+The format is similar to that of compiler error messages of popular
+compilers like `gcc'; this makes it possible to use tools like `emacs'
+`compile-mode' to point to the appropriate pattern in the source file.
+*Note Compiling within emacs: (emacs)Compilation.
+
+   The macro `YY_ZL_DEBUG' is equivalent to `YYDEBUG'.  This alternate
+name is useful when a project uses both Zlex as well as a parser
+generated by a member of the `yacc'-family of parser generators.  The
+reason is that `YYDEBUG' is also used for similar purposes by such
+parser-generators; if the option `-DYYDEBUG' is passed as a C-compiler
+option to a `Makefile' for the project, both the generated Zlex scanner
+as well as the parser will run in debug-mode, resulting in rather
+confusing output.
+
+   The `extern' variable with default name `yy_zlex_debug' allows
+debugging messages to be turned on and off dynamically: messages are
+printed only when the variable has a non-zero value.  When debugging is
+turned on as described above, the variable is declared in the generated
+scanner and initialized to `1': hence message printing is initially
+enabled.
+
+   Like all other variable names, the name of this variable can be
+changed to an arbitrary name by defining the macro `YY_ZLEX_DEBUG' to
+the new name.  Alternatively, the prefix used for the name can be
+changed by using the `--prefix' option (*note Variable Names::.).
+
+
+File: zlex.info,  Node: Debugging Example,  Next: Scanner Tracing,  Prev: Debugging Control,  Up: Debugging
+
+A Debugging Example
+===================
+
+   Assume that the following scanner is defined in file `debug.l'.
+
+      01 /* Scanner which illustrates debugging messages. */
+      02
+      03 %option debug
+      04
+      05 %%
+      06
+      07 [[:digit:]]+                |
+      08 [[:alpha:]]+                REJECT;
+      09 .|\n
+
+   If the generated scanner is compiled and run on the input consisting
+of the single line
+
+     ab12
+
+the following output is produced on `stderr'.
+
+     debug.l:8: yytext= `ab'.
+     debug.l:8: yytext= `a'.
+     debug.l:9: yytext= `a'.
+     debug.l:8: yytext= `b'.
+     debug.l:9: yytext= `b'.
+     debug.l:7: yytext= `12'.
+     debug.l:7: yytext= `1'.
+     debug.l:9: yytext= `1'.
+     debug.l:7: yytext= `2'.
+     debug.l:9: yytext= `2'.
+     debug.l:9: yytext= `
+     '.
+     --EOF.
+
+
+File: zlex.info,  Node: Scanner Tracing,  Next: Errors,  Prev: Debugging Example,  Up: Debugging
+
+Scanner Tracing
+===============
+
+   If the scanner is compiled with the C macro `YYTRACE' `#define'd,
+then when the scanner is run it provides a detailed trace showing the
+action it takes at every character it scans.  The trace shows the
+transitions of the underlying finite automaton.  To decipher this
+trace, it is necessary to have compiled the scanner using the `--trace'
+option (*note Options List::.).  This is useful mainly for maintaining
+Zlex.
+
+
+File: zlex.info,  Node: Errors,  Prev: Scanner Tracing,  Up: Debugging
+
+Runtime Errors: `yyerr'
+=======================
+
+   It is possible for Zlex to encounter runtime errors under several
+conditions:
+
+   * Dynamic memory allocation fails.
+
+   * An error occurs while reading an input file.
+
+   * The programmer attempts to access an empty start state stack.
+
+   * The programmer attempts to switch to a `NULL' buffer.
+
+   * The scanner encounters a character which is not matched by any
+     pattern and the `--suppress-default' option (*note Options
+     List::.) has been specified.
+
+   When a runtime error is encountered, the generated scanner writes a
+message on the `FILE' pointer `yyerr' and terminates execution of the
+program.
+
+   Like all other variable names, the name of this variable can be
+changed to an arbitrary name by defining the macro `YY_ERR' to the new
+name.  Alternatively, the prefix used for the name can be changed by
+using the `--prefix' option (*note Variable Names::.).
+
+   When the scanner function is first entered it initializes `yyerr' to
+`stderr', unless the programmer has already initialized it to a
+non-`NULL' `FILE' pointer.  So if the generated scanner should output
+error messages to a file other than the standard error, the programmer
+need only initialize `yyerr' to a suitable `FILE' pointer.
+
+   All error messages are preceeded by the string which is the value of
+the macro `YY_PROGRAM_NAME' which defaults to `"Zlex scanner"'.  This
+macro can be redefined by the programmer in section 1 of the Zlex
+source file.
+
+
+File: zlex.info,  Node: Multiple Scanners,  Next: Invoking Zlex,  Prev: Debugging,  Up: Top
+
+Multiple Scanners
+*****************
+
+   Sometimes it is necessary to include multiple scanners in a program.
+For example, an application may need one scanner to scan a data file
+and another scanner to scan interactive user input.
+
+   Most of the global objects used by a generated scanner are declared
+`static'.  Hence their names are local to the generated C file.  Since
+different scanners are generated in different C files, the semantics of
+C preclude the possibility of a clash between the `static' names used in
+different scanners.  However there will be a link-time clash between the
+`extern' names used for global objects declared in different scanners.
+To circumvent this problem, Zlex allows the programmer to choose the
+names for the `extern' objects using one of the following schemes:
+
+  1. Using the `--prefix' option (*note Options List::.).  This is the
+     simpler alternative.
+
+  2. Defining macros giving the name of each `extern' object.
+
+* Menu:
+
+* Prefix Option::               Controlling prefix of names.
+* Redefining Name Macros::      Giving an arbitrary name to a scanner
+                                object.
+* Renaming Example::            Example which uses both methods.
+
+
+File: zlex.info,  Node: Prefix Option,  Next: Redefining Name Macros,  Prev: Multiple Scanners,  Up: Multiple Scanners
+
+Prefix Option
+=============
+
+   By default the name of each `extern' scanner object starts with the
+prefix `yy'.  This prefix can be changed by using the `--prefix' option
+(*note Options List::.).  The names which are affected are:
+
+`yy_current_buffer'
+     *Note Current Buffer::.
+
+`yy_Zlex_debug'
+     *Note Debugging Control::.
+
+`yydataP'
+     *Note Scanner State::.
+
+`yyerr'
+     *Note Errors::.
+
+`yyin'
+     *Note Input File Pointer::.
+
+`yyleng'
+     *Note Lexeme Length::.
+
+`yylex'
+     *Note Main Scanner Function::.
+
+`yylineno'
+     *Note Current Line Number::.
+
+`yyout'
+     *Note Output File Pointer::.
+
+`yytext'
+     *Note Lexeme Text::.
+
+`yywrap'
+     *Note Wrapping Up::.
+
+
+File: zlex.info,  Node: Redefining Name Macros,  Next: Renaming Example,  Prev: Prefix Option,  Up: Multiple Scanners
+
+Redefining Name Macros
+======================
+
+   Another method to ensure that the names of `extern' objects do not
+clash between multiple scanners is to redefine the macros which specify
+the names of these objects.  This should be done in a C-code section in
+section 1 of the Zlex file.  The macros and the objects they name are:
+
+`YY_CURRENT_BUFFER'
+     Names `yy_current_buffer' (*note Current Buffer::.).
+
+`YY_DATA_P'
+     Names `yydataP' (*note Scanner State::.).
+
+`YY_ERR'
+     Names `yyerr' (*note Errors::.).
+
+`YY_IN'
+     Names `yyin' (*note Input File Pointer::.).
+
+`YY_LENG'
+     Names `yyleng' (*note Lexeme Length::.).
+
+`YY_LEX'
+     Names `yylex' (*note Main Scanner Function::.).
+
+`YY_LINENO'
+     Names `yylineno' (*note Current Line Number::.).
+
+`YY_OUT'
+     Names `yyout' (*note Output File Pointer::.).
+
+`YY_TEXT'
+     Names `yytext' (*note Lexeme Text::.).
+
+`YY_WRAP'
+     Names `yywrap' (*note Wrapping Up::.).
+
+`YY_ZLEX_DEBUG'
+     Names `yy_Zlex_debug' (*note Debugging Control::.).
+
+   The generated scanner sets these macros to their default values (the
+default values factor in the `--prefix' option if it has been
+specified) only if they have not already been defined in section 1 of
+the Zlex file.  Hence the Zlex programmer can easily make the scanner
+use different external names, by simply defining these macros to
+suitable names in section 1 of the Zlex file.
+
+
+File: zlex.info,  Node: Renaming Example,  Prev: Redefining Name Macros,  Up: Multiple Scanners
+
+Renaming Example
+================
+
+   For example, to build a scanner which uses the names `yylex1',
+`yytext1', `yyleng1', `yyin1', `yyout1' for some of the `extern'
+objects, section 1 of the Zlex file would contain the following
+`#define''s:
+
+     %{
+     
+     #define YY_LEX  yylex1
+     #define YY_TEXT yytext1
+     #define YY_LENG yyleng1
+     #define YY_IN   yyin1
+     #define YY_OUT  yyout1
+     
+     %}
+
+The rest of the program would access this generated scanner as follows:
+The main scanning function would be called as `yylex1()'.  The lexeme
+text and length of the current token would be found in `yytext1' and
+`yyleng1'.  The `FILE' pointers `yyin1' and `yyout1' would be used for
+the input and output files of the generated scanner.  The function
+`yywrap()' will be called on end-of-file; this will be the `yywrap()'
+provided by the Zlex library, unless the Zlex programmer defines one
+elsewhere in the program.
+
+
+File: zlex.info,  Node: Invoking Zlex,  Next: Efficiency,  Prev: Multiple Scanners,  Up: Top
+
+Invoking Zlex
+*************
+
+   The command line needed to invoke Zlex has the format:
+
+     zlex [OPTIONS LIST] LEX-FILE [LEX-FILE...]
+
+   * If no LEX-FILEs are specified on the command line and the
+     `--lex-compat' option is not specified, then a help message is
+     printed on the standard output.
+
+   * If no LEX-FILEs are specified on the command line and the
+     `--lex-compat' option is specified, then Zlex reads the source file
+     from its standard input.
+
+   * If multiple LEX-FILESs are specified, then their concatenation is
+     treated as a single logical file.
+
+   * A LEX-FILE specified by the single character `-' stands for the
+     standard input.
+
+* Menu:
+
+* Option Conventions::
+* Option Sources::
+* Options::
+* Data Search List::
+
+
+File: zlex.info,  Node: Option Conventions,  Next: Option Sources,  Prev: Invoking Zlex,  Up: Invoking Zlex
+
+Option Conventions
+==================
+
+   A word which constitutes a command-line argument has two possible
+types: it is a "option word" if it begin with a `-' or `--' (with
+certain exceptions noted below), or if it follows an option word which
+requires an argument.  Otherwise it is a "non-option word".  An option
+word specifies the value of a Zlex option; a non-option word specifies a
+file name.
+
+   * Options with short single character names must begin with a single
+     `-'.
+
+   * Options with long multiple-character names must begin with `--'.
+     The name can consists of any alphanumeric characters along with
+     `-' and `_' characters.
+
+   * When a option is specified using a long name, it is sufficient to
+     specify an unambiguous prefix of its name.
+
+   * If an option has a value which must be one of several prespecified
+     values, then it is sufficient to specify an unambiguous prefix of
+     the value, in a manner similar to long option names.
+
+   * It is possible to specify an option value in the same word as the
+     option name.  For short option names, there should not be any
+     intervening characters between the short name and the value.  For
+     long option names, the long name should be separated from the
+     value using a single `=' character.
+
+   * If an option has an *optional* value, then the value must be
+     provided in the same word as the option name, as outlined above.
+
+   * If an option has a *required* value, then the value may be
+     provided in the same word as the option name as outlined above, or
+     it may be provided in the next word.  In the latter case, the
+     entire next word is taken to be the value (even if it looks like
+     an option starting with `-' or `--').
+
+   * Short names for multiple options which are not allowed to have any
+     values may be combined into a single word.  For example, if the
+     options `-l' and `-7' are not allowed to have any values, then
+     instead of specifying them using two words as `-l -7', they can be
+     specified using a single word `-l7'.
+
+   * If an option is given two incompatible values, then the option
+     which is specified later dominates.
+
+   * If the option consisting simply of the two characters `--' is
+     specified, then all the remaining words on the command line will
+     not be treated as options irrespective of whether they start with
+     `-' or `--'.  This makes it possible to specify file names
+     starting with a `-'.
+
+   * Option words and non-option words may be arbitrarily interspersed.
+
+   * Command-line options always override the options specified
+     elsewhere (*note Option Sources::.).
+
+
+File: zlex.info,  Node: Option Sources,  Next: Options,  Prev: Option Conventions,  Up: Invoking Zlex
+
+Option Sources
+==============
+
+   Besides the command-line, Zlex can read its options from several
+different sources.  In order of increasing priority these sources are
+the following:
+
+   * The file `zlex.opt'.  The file should contain only option names and
+     values separated by whitespace (newline counts as whitespace).  In
+     addition it may contain comments enclosed within `/*' and `*/'.
+     The file is searched for using Zlex's search list (*note Data
+     Search List::.).
+
+     The use of this file for setting defaults, makes it possible for a
+     site to setup default options for Zlex different from its builtin
+     defaults.  It also makes it easy to drop Zlex into a GUI toolset
+     where options are set using a graphical user interface.
+
+   * The environment variable `ZLEX_OPTIONS'.  If this variable is set,
+     then its value should contain only options and option values
+     separated by whitespace as on the command-line.  The procedure for
+     setting environment variables depends on the system you are using:
+     under the UNIX shell `csh' the `setenv' command can be used, under
+     the MS-DOS command-interpreter the `set' command can be used;
+     under the UNIX shell `sh' or `ksh' the `export' command can be
+     used.
+
+   * It is also possible to specify options directly within the Zlex
+     source file using the `%option', `%array' or `%pointer' directives
+     (*note Declarations Section::.).
+
+   Options specified by the environment variable `ZLEX_OPTIONS'
+overrides the options specified in the `zlex.opt' file.  Options
+specified in the Zlex source file override options specified in the
+`zlex.opt' file or `ZLEX_OPTIONS' environment variable.  Finally,
+command-line options always override options specified by all other
+sources.
+
+
+File: zlex.info,  Node: Options,  Next: Data Search List,  Prev: Option Sources,  Up: Invoking Zlex
+
+Options
+=======
+
+   Zlex provides a largely orthogonal set of options.  We can roughly
+classify the options according to which aspect of Zlex's functionality
+they affect.
+
+* Menu:
+
+* Runtime Input Options::
+* Runtime Algorithm Options::
+* Code Scanner Options::
+* Table Scanner Options::
+* Miscellaneous Options::
+* Options List::
+
+
+File: zlex.info,  Node: Runtime Input Options,  Next: Runtime Algorithm Options,  Prev: Options,  Up: Options
+
+Runtime Input Options
+---------------------
+
+   These options control how the generated Zlex scanner treats its
+input.
+
+`--16-bit'
+     Generate a 16-bit scanner which supports upto 65536 characters.
+     It is the programmers responsibility to ensure that all input
+     characters have a character code between 0 and 65535 inclusive.
+     This option should be used if the generated scanner is to support
+     Unicode characters.
+
+`--7-bit'
+`-7'
+     Generate a 7-bit scanner which supports upto 128 characters.  It
+     is the programmers responsibility to ensure that all input
+     characters have a character code between 0 and 127 inclusive.
+
+`--8-bit'
+`-8'
+     Generate a 8-bit scanner which supports upto 256 characters.  It
+     is the programmers responsibility to ensure that all input
+     characters have a character code between 0 and 255 inclusive.
+
+`--ignore-case[=1|0]'
+`-i[1|0]'
+`--caseless[=1|0]'
+`--case-insensitive[=1|0]'
+     Controls the case sensitivity of the generated scanner.  If the
+     value of the option is specified as 1, then the generated scanner
+     will not distinguish between upper-case and lower-case characters.
+     Note however, that the generated scanner will retain the case of
+     the characters constituting the current lexeme in `yytext'.  If
+     this option is not specified, then the generated scanner will be
+     case-sensitive.
+
+`--sentinel=CHAR-CODE'
+`-S CHAR-CODE'
+     Use the character with decimal code `CHAR-CODE' as the sentinel
+     character.  Scanning the sentinel character is likely to be slower
+     than scanning non-sentinel characters; this option allows the
+     programmer to change the sentinel character to a character which
+     may not occur frequently in the scanner input.  If this option is
+     not specified, then the sentinel character defaults to the
+     character whose code is 0.
+
+`--stdio[=1|0]'
+     By default, the generated scanner uses the underlying systems
+     `read()' function to read its input.  If this option is specified,
+     it uses a the `stdio' `fread()' function instead.  It may be
+     necessary to specify this option if your system does not take
+     kindly to mixing `stdio' `FILE' descriptors with `read()'.  The
+     generated scanner may be somewhat slower, and its interactive
+     operation may suffer, depending on the implementation of the
+     `fread()' function provided by the `stdio' library.  This option
+     will not have any effect if the programmer has redefined the
+     `YY_INPUT' macro (*note Redefining the Input Macro::.).
+
+
+File: zlex.info,  Node: Runtime Algorithm Options,  Next: Code Scanner Options,  Prev: Runtime Input Options,  Up: Options
+
+Runtime Algorithm Options
+-------------------------
+
+   The options described in this section affect aspects of the
+algorithm used by the generated scanner.  Options which affect scanner
+tables are described in *Note Table Scanner Options::.  Options which
+affect generated scanners which minimize their use of tables are
+described in *Note Code Scanner Options::.
+
+`--array[=1|0]'
+     Implement `yytext' as an array instead of the default pointer.
+     This will usually lead to a slower scanner.
+
+`--backup-optimize[=1|0]'
+     If value of this option is specified as 1, then the generated
+     scanner optimized for backing up.  This may slow down the scanning
+     of normal patterns somewhat, but is likely to speedup the scanning
+     of patterns which require the scanner to backup.  This option
+     should be used only if the scanner's patterns require a lot of
+     backing up, or if the scanner makes heavy use of `REJECT'.  By
+     default, backup-optimization is off.  *Note Efficiency::.
+
+`--default-action echo|error|fatal|ignore'
+     This option controls the action of the generated scanner if it
+     encounters a input character which does not match any action.  The
+     effects of the different option values is described below:
+
+    `echo'
+          The unmatched character is echoed to `yyout'.  This is the
+          default.
+
+    `error'
+          An error message is output to `yyerr' and scanning continues.
+
+    `fatal'
+          An error message is output to `yyerr' and the program is
+          terminated.
+
+    `ignore'
+          The unmatched character is simply ignored and scanning
+          continues.
+
+`--equiv-classes[=1|0]'
+`--ecs[=1|0]'
+`-E[1|0]'
+     It is often the case that the behavior of the generated scanner is
+     identical for certain classes of input characters.  When this
+     option is specified, Zlex partitions the input characters into
+     equivalence classes such that the behavior of the generated
+     scanner is guaranteed to be identical for all the characters in an
+     equivalence class.  This option usually leads to large space
+     savings while paying only a small time cost and is on by default.
+
+`--prefix PREFIX'
+`-P PREFIX'
+     Use prefix as the prefix of certain global names in the generated
+     scanner (the default prefix is `yy').  *Note Prefix Option::.
+
+`--reject[=1|0]'
+     Support REJECT actions in the generated scanner.  If `--reject=0'
+     is specified, then any `REJECT' action in the source file will
+     result in a compile-time errors when the generated scanner is
+     compiled.  The default is to support `REJECT' actions.
+
+`--yylineno[=1|0]'
+     Maintain the current line number within the input in the global
+     variable `yylineno' (*note Current Line Number::.).  The default
+     action is to not support `yylineno'.  Using `yylineno' may lead to
+     a somewhat larger scanner but will not slow down the matching of
+     patterns which do not contain newlines.  It is the programmer's
+     responsibility to suitably update `yylineno' after scanner actions
+     like `yyless' or `unput' (*note Modifying Input::.).  yylineno is
+     maintained on a per buffer basis and is automatically saved and
+     restored on a buffer switch.
+
+
+File: zlex.info,  Node: Code Scanner Options,  Next: Table Scanner Options,  Prev: Runtime Algorithm Options,  Up: Options
+
+Code Scanner Options
+--------------------
+
+   Zlex supports the generation of code-scanners which do not use an
+explicit scanner state or scan tables.  Instead these scanners use the
+program counter to implicitly maintain the scanner state.  The current
+implementation is disappointing: the generated scanners are fairly
+large but are not appreciably faster.
+
+   Some limitatitions are imposed by the current implementation on code
+scanners:
+
+   * Code scanners cannot be built for any source file which contains a
+     right context pattern (*note Right Context::.) in which *both* the
+     regular expression and the context match strings of indeterminate
+     length.
+
+   * Code scanners cannot be built with backing up optimized using
+     `--backup-optimize=1'.
+
+   When Zlex builds a code scanner it analyzes each state before
+deciding what kind of code to build for a state.  The kinds of code
+built for a state are:
+
+Linear Code
+     The code for the state is organized as a linear sequence of tests
+     on the current input character to find the next state.
+
+Binary Code
+     The code for the state is organized as a binary search on the
+     current input character to find the next state.
+
+Switch Code
+     The code for the state is organized as a switch on the current
+     input character to find the next state.
+
+   The options for generating code scanners allow the programmer to
+control the parameters of the algorithm Zlex uses for choosing between
+the above code alternatives:
+
+`--code-scan[=1|0]'
+     This options generates a scanner with the DFA encoded in code
+     instead of the default encoding within scanner tables.
+
+`--bin-code-param N'
+     A binary search is used for a state only when the number of input
+     ranges (a "range" is a sequence of consecutive input characters
+     which have the same successor state) is less than or equal to `N'.
+     Otherwise switch code is used.  The default value of `N' is 16.
+
+`--lin-code-param N'
+     A linear search is used for a state only when the number of
+     successor states is less than or equal to `N'.  Otherwise binary
+     search or switch code is used.  The default value of `N' is 4.
+
+`--transition-compress[=1|0]'
+     This option compresses transitions from non-switch states in the
+     scanner.  If the code for a successor state of a non-switch state
+     has not already been output, then the code for the successor is
+     directly inserted within the code for the predecessor state,
+     rather than a transition to separate code for the successor.
+
+   If both `--bin-code-param' and `--lin-code-param' are specified as
+0, then only switch code is produced for all state transitions.
+
+   In addition, if the compiler supports labels as first class objects
+and provided a method to access the addresses of code labels, switches
+are directly coded as a branch through a jump table.  For example, `gcc'
+allows taking the address of a LABEL using `&&LABEL'.  *Note Labels as
+Values: (gcc)Labels as Values.  Specifically, the following macros can
+be used to support this:
+
+`YY_LABEL_VARS'
+     If this macro is defined, then the compiler allows access to the
+     address of a label.
+
+`YY_LABEL_TYPEDEF(TYPE)'
+     This macro should expand to a `typedef' used to define the TYPE
+     used to represent the address of a code label.  For `gcc', the
+     default definition is:
+
+          #ifndef YY_LABEL_TYPEDEF /* How compiler declares vars containing labels. */
+          #define YY_LABEL_TYPEDEF(type)	typedef void *type
+          #endif
+
+`YY_LABEL_ADDR(LABEL)'
+     This macro should expand to the address of LABEL.  For `gcc', the
+     default definition is:
+
+          #ifndef YY_LABEL_ADDR	/* How compiler takes the address of a label. */
+          #define YY_LABEL_ADDR(label)	&&label
+          #endif
+
+
+File: zlex.info,  Node: Table Scanner Options,  Next: Miscellaneous Options,  Prev: Code Scanner Options,  Up: Options
+
+Table Scanner Options
+---------------------
+
+   Zlex supports 3 options which control the details of the table
+compression algorithm used and 3 options which control the type of
+table entries.  This leads to a total of 9 different kinds of table
+accesses.
+
+   The options are the following:
+
+`--compress COMPRESSION_ALGORITHM'
+     This option controls the table compression algorithm used.  The
+     permissible values for COMPRESSION_ALGORITHM are shown below
+     ordered from the least compressed and fastest, to the most
+     compressed and slowest:
+
+    `none'
+          No table compression is used.
+
+    `comb'
+          A comb-compression algorithm is used to compress the tables.
+
+    `iterative'
+          A iterative comb-compression algorithm is used to compress
+          the tables.
+
+`--table ENTRY_TYPE'
+     This option controls the type of table entries.  The permissible
+     values for ENTRY_TYPE are shown below ordered from the most memory
+     intensive but fastest, to the least memory intensive and slowest:
+
+    `address'
+          Each Table entry contain pre-computed addresses.  This avoids
+          computing the addresses at runtime.
+
+    `difference'
+          Each table entry contain the difference between the first
+          entry for the current state in the table and the first entry
+          of the successor state in the table.
+
+    `state'
+          Each table entry directly contains the number of the
+          successor state.
+
+`--col-waste-percent PERCENT'
+     When `--compress=no' and `--table=state', use a 2-dimensional
+     table with the # of columns a power of 2 if the percentage of
+     wasted columns is <= PERCENT. The default value is 50%.
+
+`--align[=1|0]'
+`-a[1|0]'
+     By default, Zlex generated scanners do not explicitly specify the
+     types for various integral quantities.  Instead, Zlex sets up the
+     generated scanner so that when it is compiled, the compiler
+     automatically chooses the smallest integral type which can
+     accomodate all possible values in the range of the quantity.  This
+     approach has the advantage that generated scanners are
+     conservative in their use of memory, as well as allowing a Zlex
+     scanner to be generated on one machine, while being compiled and
+     executed on another machine.  Unfortunately, such an approach can
+     cause performance problems on some architectures which may perform
+     suboptimally on smaller integral types.  This option allows the
+     programmer to force the types for all integral quantities to be
+     `int'.
+
+
+File: zlex.info,  Node: Miscellaneous Options,  Next: Options List,  Prev: Table Scanner Options,  Up: Options
+
+Miscellaneous Options
+---------------------
+
+   This section describes miscellaneous Zlex options including options
+to print out generated scanner statistics and options to turn on
+runtime tracing in the generated scanner.
+
+`--debug[=1|0]'
+`-d[1|0]'
+     Turn on debugging in the generated scanner.  A similar effect can
+     be obtained by defining `YYDEBUG' or `YY_ZL_DEBUG' when compiling
+     the scanner (*note Debugging::.).
+
+`--help'
+`-h'
+     Print out a help message giving a brief description of all the
+     options, as well as a description of Zlex's current environment.
+
+`--lex-compat'
+`-l'
+     Maximize lex compatibility (equivalent to `--array' `--yylineno'
+     `--reject').  Also if no LEX-FILEs are specified on the
+     command-line, then read the zlex source file from the standard
+     input.
+
+`--line-dir'
+     Output `#line' directives to the generated scanner (default).
+
+`--output FILENAME'
+`-o FILENAME'
+     The generated scaner is written to FILENAME.  By default, the name
+     of the generated scanner is `lex.yy.c'.
+
+`--to-stdout[=1|0]'
+`-t[1|0]'
+     Write the generated scanner to stdout, as opposed to the default
+     action of writing it to a file `lex.yy.c'.
+
+`--trace[=TRACE_FILE]'
+     Run Zlex in trace mode, generating extensive output. This option
+     is used mainly for maintaining Zlex.  To use this option it is
+     necessary that the C preprocessor symbol `DO_TRACE' is defined
+     when Zlex is built.  If TRACE_FILE is omitted, then the trace is
+     produced in a file whose name is the basename of the first source
+     file with its extension `.l' (if any) removed and extension `.trc'
+     added.
+
+`--verbose[=1|0]'
+`-v[1|0]'
+     Generate somewhat verbose statistics describing DFA on stdout. No
+     statistics are generated by default.
+
+`--version'
+`-V'
+     Print the currrent version number of Zlex and exit.
+
+`--whitespace'
+`-w'
+     Allow whitespace within lex patterns (*note Whitespace Within
+     Patterns::.).
+
+
+File: zlex.info,  Node: Options List,  Prev: Miscellaneous Options,  Up: Options
+
+Alphabetical Listing of all Options
+-----------------------------------
+
+   This section contains a short description of all options, sorted by
+long option name.  Each option contains a reference to the section
+where it is discussed in more detail.
+
+`--16-bit'
+     Generate a unicode-ready scanner which handles 16-bit characters.
+     *Note Runtime Input Options::.
+
+`--7-bit'
+`-7'
+     Generate a scanner which handles only 7-bit characters.  *Note
+     Runtime Input Options::.
+
+`--8-bit'
+`-8'
+     Generate a scanner which handles 8-bit characters (default).
+     *Note Runtime Input Options::.
+
+`--align[=1|0]'
+`-a[1|0]'
+     Generate a scanner which does not use short integer tables
+     (default: `0').  *Note Table Scanner Options::.
+
+`--array[=1|0]'
+     Implement yytext as an array (default: `0').  *Note Runtime
+     Algorithm Options::.
+
+`--backup-optimize[=1|0]'
+     Optimize the scanner for patterns which require it to backup
+     (default: `0').  *Note Runtime Algorithm Options::.
+
+`-c'
+     Deprecated option included for POSIX compliance.
+
+`--bin-code-param N'
+     Binary search in code-scanner if # input ranges <= N (default:
+     `16').  *Note Code Scanner Options::.
+
+`--code-scan[=1|0]'
+     Generated scanner encodes DFA in code instead of tables (default:
+     `0').  *Note Code Scanner Options::.
+
+`--compress TYPE'
+`-C TYPE'
+     Use table compression of TYPE `no', `comb' or `iterative'
+     (default: `comb').  *Note Table Scanner Options::.
+
+`--col-waste-percent PERCENT'
+     When -compress=none & -table=state, use a 2-dimensional table with
+     the # of columns a power of 2 if the percentage of wasted columns
+     is <= PERCENT (`0' <= PERCENT and PERCENT <= 100) (default: `50').
+     *Note Table Scanner Options::.
+
+`--debug[=1|0]'
+`-d[1|0]'
+     Turn on debugging in generated scanner (default: `0').  *Note
+     Miscellaneous Options::.
+
+`--default-action ACT'
+`-s ACT'
+     Set default action for unmatched character to ACT `echo', `error',
+     `fatal' or `ignore' (default: `echo').  *Note Runtime Algorithm
+     Options::.
+
+`--ecs[=1|0]'
+`-E[1|0]'
+`--equiv-classes[=1|0]'
+     Partition input characters into equivalence classes (default: `1').
+     *Note Runtime Algorithm Options::.
+
+`--help'
+`-h'
+     Print summary of options and exit.  *Note Miscellaneous Options::.
+
+`--ignore-case[=1|0]'
+`-i[1|0]'
+`--caseless[=1|0]'
+`--case-insensitive[=1|0]'
+     Generate a case insensitive scanner (default: `0').  *Note Runtime
+     Input Options::.
+
+`--lex-compat'
+`-l'
+     Lex compatibility (equivalent to -array -yylineno -reject).  *Note
+     Miscellaneous Options::.
+
+`--lin-code-param N'
+     Linear search in code-scanner if # successors <= N (default: `4').
+     *Note Code Scanner Options::.
+
+`--line-dir[=1|0]'
+     Output #line directives to generated scanner (default: `1').
+     *Note Miscellaneous Options::.
+
+`-n'
+     Deprecated option included for POSIX compliance.
+
+`--output FILENAME'
+`-o FILENAME'
+     Generate scanner in file FILENAME (default: `lex.yy.c').  *Note
+     Miscellaneous Options::.
+
+`--prefix PREFIX'
+`-P PREFIX'
+     Use PREFIX as prefix of certain global names in generated scanner
+     (default: `yy').  *Note Runtime Algorithm Options::.
+
+`--sentinel CHAR-CODE'
+`-S CHAR-CODE'
+     Use character with decimal code CHAR-CODE as sentinel (default:
+     `0').  *Note Runtime Input Options::.
+
+`--reject[=1|0]'
+     Allow REJECT actions in generated scanner (default: `1').  *Note
+     Runtime Algorithm Options::.
+
+`--stdio[=1|0]'
+     Use standard I/O for all scanner input (default: `0').  *Note
+     Runtime Input Options::.
+
+`--table TYPE'
+`-T TYPE'
+     Use table entries of TYPE `address', `difference' or `state'
+     (default: `state').  *Note Table Scanner Options::.
+
+`--to-stdout[=1|0]'
+`-t[1|0]'
+     Write generated scanner to stdout (default: `0').  *Note
+     Miscellaneous Options::.
+
+`--trace[=TRACE_FILE]'
+`-T[TRACE_FILE]'
+     Run zlex in trace mode, generating extensive output in file
+     TRACE_FILE which defaults to stdout.  *Note Miscellaneous
+     Options::.
+
+`--transition-compress[=1|0]'
+     Compress transitions for non-switch states in code scanner
+     (default: `0').  *Note Code Scanner Options::.
+
+`--verbose[=1|0]'
+`-v[1|0]'
+     Generate somewhat verbose statistics describing DFA (default: `0').
+     *Note Miscellaneous Options::.
+
+`--version'
+`-V'
+     Print version number and exit.  *Note Miscellaneous Options::.
+
+`--whitespace[=1|0]'
+`-w[1|0]'
+     Allow whitespace within lex patterns (default: `0').  *Note
+     Miscellaneous Options::.
+
+`--yylineno[=1|0]'
+     Maintain count of line number in global variable yylineno
+     (default: `0').  *Note Runtime Algorithm Options::.
+
+
+File: zlex.info,  Node: Data Search List,  Prev: Options,  Up: Invoking Zlex
+
+Data Search List
+================
+
+   When Zlex is run, it looks for certain data files (a skeleton file
+`zlexskl.c' and an options file `zlex.opt' (*note Option Sources::.))
+in certain standard directories (the skeleton file *must* exist, but
+the option file need not exist).  The search list specifying these
+standard directories is fixed when Zlex is installed; it can be printed
+out using Zlex's the `--help' option (*note Options List::.).
+
+   The search list consists of a list of colon-separated directory
+names (the directory names may or may not have terminating slashes) or
+environment variables (starting with a `$').  If a directory name
+starts with a `$', then the first (only the first) `$' must be
+repeated.  An empty component in the search list specifies the current
+directory.  Typically the search list contains the current directory.
+Also typically, the environment variable `ZLEX_SEARCH_PATH' is present
+in the search list -- this causes Zlex to check if the variable is set
+in the environment.  If it is, then Zlex expects it to specify a search
+list which it recursively searches.
+
+   Typically, the search list compiled into Zlex looks something like
+the following:
+
+     $ZLEX_SEARCH_PATH:.:$HOME:/usr/local/share/zlex-VERSION
+
+   Since the search list will typically contain an environment variable
+like `ZLEX_SEARCH_PATH' it is possible to change the set of standard
+directories searched by Zlex even after installation by specifying a
+value for the variable.  For example, if with the above search list,
+`ZLEX_SEARCH_PATH' is set to `/usr/lib:/usr/opt/lib', then the
+effective search list becomes:
+
+     /usr/lib:/usr/opt/lib:.:$HOME:/usr/local/share/zlex-VERSION
+
+
+File: zlex.info,  Node: Efficiency,  Next: Distributing Zlex Scanners,  Prev: Invoking Zlex,  Up: Top
+
+Efficiency
+**********
+
+   To produce a high performance scanner, the Zlex programmer needs to
+understand the performance tradeoffs between different Zlex features.
+
+* Menu:
+
+* Patterns versus Actions::     Patterns preferred.
+* Maximizing Token Length::     Match as much as possible at a time.
+* Backtracking::                Avoid backtracking.
+* Generalized Right Context Efficiency::  Avoid possible quadratic
+                                complexity.
+
+
+File: zlex.info,  Node: Patterns versus Actions,  Next: Maximizing Token Length,  Prev: Efficiency,  Up: Efficiency
+
+Patterns versus Actions
+=======================
+
+   The primary consideration used when designing Zlex was to maximize
+the performance in the basic task of a scanner: recognizing tokens.  The
+performance of special actions was a secondary consideration, except
+that the presence of such actions was not allowed to impact the
+performance of those parts of the scanner which did not depend on them.
+
+   These design decisions make it desirable for the Zlex programmer to
+use patterns rather than actions whenever possible.  Many of the
+actions involve a function call with its consequent overhead.  For
+example, it is preferable to process comments using start states (*note
+Start States Example::.), rather than processing them using `input'
+(*note Direct Input::.).
+
+
+File: zlex.info,  Node: Maximizing Token Length,  Next: Backtracking,  Prev: Patterns versus Actions,  Up: Efficiency
+
+Maximizing Token Length
+=======================
+
+   There is some overhead involved in setting up for scanning a token
+and completing a token.  To minimize this overhead, it is preferable to
+maximize the token length.  For example, when scanning through a comment
+(*note Start States Example::.), it is preferable to process the
+comment a line at a time, rather than a single character at a time.
+

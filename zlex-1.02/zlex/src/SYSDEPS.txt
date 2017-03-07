@@ -1,0 +1,69 @@
+#System header files included directly or indirectly.
+#Produced using script syshdrs using the following command
+#	IFLAGS=-I../libz DFLAGS=-DDO_TRACE syshdrs chrclass.c codescan.c outdfa.c comptab.c dfa.c eqclass.c error.c main.c outvec.c patterns.c
+
+<ansi_compat.h>
+<assert.h>
+<ctype.h>
+<limits.h>
+<stdarg.h>
+<stdio.h>
+<stdlib.h>
+<syslimits.h>
+<va-mips.h>
+
+#Symbols undefined when system libraries are excluded.
+#Produced using script sysfns with command:
+#	sysfns chrclass.o codescan.o outdfa.o comptab.o dfa.o eqclass.o error.o main.o outvec.o parse.o patterns.o scan.o -L../libzlex -L../libz -lzlex -lz
+
+
+atoi
+calloc
+clearerr
+exit
+fclose
+fgets
+fopen
+fprintf
+fputc
+fputs
+free
+fseek
+ftell
+fwrite
+getenv
+isalnum
+isalpha
+iscntrl
+isdigit
+isgraph
+islower
+isprint
+ispunct
+isspace
+isupper
+isxdigit
+malloc
+memcmp
+memcpy
+perror
+printf
+qsort
+rand
+read
+realloc
+rewind
+sprintf
+sscanf
+strchr
+strcmp
+strcpy
+strlen
+strncmp
+strncpy
+strstr
+strtol
+tmpfile
+tolower
+toupper
+

@@ -1,0 +1,20 @@
+This directory contains performance tests for zlex.  They are not run
+during the usual installation, as they take a while.  They are useful
+during zlex maintenance and development.
+
+To run the performance tests, simply type `make' in this directory.
+
+<CPU>.log contains a log for CPU.
+
+The shell-script doperf does almost everything.  It uses a few non-portable
+commands: 
+
+uname -a: To find out which system its running on.
+
+/bin/time (or other path): We assume that after stripping away all chars,
+the first field is the user-time and the 2nd field is the system time.  If 
+that is not the case, the output needs to be massaged into that form.
+
+size: We assume that the first 3 fields of the second line of the output
+give the sizes of text, data and bss.
+

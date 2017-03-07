@@ -1,0 +1,129 @@
+#Automatically generated dependencies.
+arcutx.o: arcutx.c area.h ccport.h memalloc.h
+ardel.o: ardel.c area.h ccport.h memalloc.h
+ardelx.o: ardelx.c area.h ccport.h memalloc.h
+arfreeze.o: arfreeze.c area.h ccport.h memalloc.h
+argrow.o: argrow.c area.h ccport.h errorz.h memalloc.h
+argrowx.o: argrowx.c area.h ccport.h errorz.h memalloc.h
+armem.o: armem.c area.h ccport.h memalloc.h
+arreset.o: arreset.c area.h ccport.h memalloc.h
+bsadd.o: bsadd.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsassign.o: bsassign.c bsetp.h area.h ccport.h bset.h memalloc.h
+bscomp.o: bscomp.c bsetp.h area.h ccport.h bset.h memalloc.h
+bscopy.o: bscopy.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsdel.o: bsdel.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsdiff.o: bsdiff.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsempty.o: bsempty.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsfprint.o: bsfprint.c bsetp.h area.h ccport.h bset.h memalloc.h
+bshshsum.o: bshshsum.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsinbset.o: bsinbset.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsinit.o: bsinit.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsintrsc.o: bsintrsc.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsmake.o: bsmake.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsnew.o: bsnew.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsnext.o: bsnext.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsprint.o: bsprint.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsrange.o: bsrange.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsrm.o: bsrm.c bsetp.h area.h ccport.h bset.h memalloc.h
+bssize.o: bssize.c bsetp.h area.h ccport.h bset.h memalloc.h
+bssubset.o: bssubset.c bsetp.h area.h ccport.h bset.h memalloc.h
+bstest.o: bstest.c bset.h ccport.h
+bsunary.o: bsunary.c bsetp.h area.h ccport.h bset.h memalloc.h
+bsunion.o: bsunion.c bsetp.h area.h ccport.h bset.h memalloc.h
+error.o: error.c error.h ccport.h errorz.h
+errorz.o: errorz.c autobuf.h memalloc.h ccport.h errorz.h
+freelist.o: freelist.c freelist.h ccport.h memalloc.h
+idsfail.o: idsfail.c idsp.h ids.h ccport.h strspace.h textid.h
+idsget.o: idsget.c idsp.h ids.h ccport.h strspace.h textid.h
+idsinit.o: idsinit.c idsp.h ids.h ccport.h strspace.h textid.h
+idsintrn.o: idsintrn.c idsp.h ids.h ccport.h strspace.h textid.h
+idslen.o: idslen.c idsp.h ids.h ccport.h strspace.h textid.h
+idsstrng.o: idsstrng.c idsp.h ids.h ccport.h strspace.h textid.h
+isadd.o: isadd.c isetp.h ccport.h freelist.h iset.h
+isassign.o: isassign.c isetp.h ccport.h freelist.h iset.h
+ischown.o: ischown.c isetp.h ccport.h freelist.h iset.h
+iscomp.o: iscomp.c isetp.h ccport.h freelist.h iset.h
+iscopy.o: iscopy.c isetp.h ccport.h freelist.h iset.h
+isdel.o: isdel.c isetp.h ccport.h freelist.h iset.h
+isdiff.o: isdiff.c isetp.h ccport.h freelist.h iset.h
+isdebug.o: isdebug.c isetp.h ccport.h freelist.h iset.h
+isempty.o: isempty.c isetp.h ccport.h freelist.h iset.h
+isfprint.o: isfprint.c isetp.h ccport.h freelist.h iset.h
+ishshsum.o: ishshsum.c isetp.h ccport.h freelist.h iset.h
+isiniset.o: isiniset.c isetp.h ccport.h freelist.h iset.h
+isinit.o: isinit.c isetp.h ccport.h freelist.h iset.h
+isintrsc.o: isintrsc.c isetp.h ccport.h freelist.h iset.h
+ismake.o: ismake.c isetp.h ccport.h freelist.h iset.h
+isnew.o: isnew.c isetp.h ccport.h freelist.h iset.h
+isnext.o: isnext.c isetp.h ccport.h freelist.h iset.h
+isprint.o: isprint.c isetp.h ccport.h freelist.h iset.h
+isrange.o: isrange.c isetp.h ccport.h freelist.h iset.h
+isrm.o: isrm.c isetp.h ccport.h freelist.h iset.h
+issize.o: issize.c isetp.h ccport.h freelist.h iset.h
+issubset.o: issubset.c isetp.h ccport.h freelist.h iset.h
+istest.o: istest.c iset.h ccport.h
+isunary.o: isunary.c isetp.h ccport.h freelist.h iset.h
+isunion.o: isunion.c isetp.h ccport.h freelist.h iset.h
+libzerr.o: libzerr.c errorz.h ccport.h
+memcheck.o: memcheck.c errorz.h ccport.h memalloc.h
+memdebug.o: memdebug.c area.h ccport.h errorz.h memalloc.h
+memtest.o: memtest.c memalloc.h ccport.h
+po01fn.o: po01fn.c optp.h parseopt.h ccport.h
+po2info.o: po2info.c optp.h parseopt.h ccport.h memalloc.h zutil.h
+pochklng.o: pochklng.c optp.h parseopt.h ccport.h
+pochrfn.o: pochrfn.c optp.h parseopt.h ccport.h
+pochrfn0.o: pochrfn0.c optp.h parseopt.h ccport.h
+pochrfn1.o: pochrfn1.c optp.h parseopt.h ccport.h
+poerr.o: poerr.c optp.h parseopt.h ccport.h
+pohelp.o: pohelp.c optp.h parseopt.h ccport.h
+pohlpfmt.o: pohlpfmt.c optp.h parseopt.h ccport.h memalloc.h zutil.h
+pointfn0.o: pointfn0.c optp.h parseopt.h ccport.h
+pointfn1.o: pointfn1.c optp.h parseopt.h ccport.h
+polngfn0.o: polngfn0.c optp.h parseopt.h ccport.h
+polngfn1.o: polngfn1.c optp.h parseopt.h ccport.h
+pooptdef.o: pooptdef.c optp.h parseopt.h ccport.h memalloc.h
+poparse.o: poparse.c optp.h parseopt.h ccport.h
+poshift.o: poshift.c optp.h parseopt.h ccport.h
+poshrfn0.o: poshrfn0.c optp.h parseopt.h ccport.h
+poshrfn1.o: poshrfn1.c optp.h parseopt.h ccport.h
+postrarg.o: postrarg.c optp.h parseopt.h ccport.h memalloc.h
+postrfn.o: postrfn.c optp.h parseopt.h ccport.h
+postvfn.o: postvfn.c optp.h parseopt.h ccport.h
+potest.o: potest.c memalloc.h ccport.h parseopt.h potstchk.c \
+ potstopt.c
+potstchk.o: potstchk.c
+potstinf.o: potstinf.c parseopt.h ccport.h potstop0.c potstchk.c
+potstop0.o: potstop0.c potstchk.c
+potstmk.o: potstmk.c parseopt.h ccport.h potstop0.c potstchk.c
+ssadd.o: ssadd.c sspacep.h memalloc.h ccport.h strspace.h
+sscat.o: sscat.c sspacep.h memalloc.h ccport.h strspace.h
+ssdel.o: ssdel.c sspacep.h memalloc.h ccport.h strspace.h
+ssinit.o: ssinit.c sspacep.h memalloc.h ccport.h strspace.h
+ssmore.o: ssmore.c sspacep.h memalloc.h ccport.h strspace.h
+sspop.o: sspop.c sspacep.h memalloc.h ccport.h strspace.h
+tiadd.o: tiadd.c textidp.h area.h ccport.h memalloc.h textid.h
+tidel.o: tidel.c area.h ccport.h textidp.h memalloc.h textid.h
+tigetid.o: tigetid.c textidp.h area.h ccport.h memalloc.h textid.h \
+ strspace.h
+tiidlen.o: tiidlen.c textidp.h area.h ccport.h memalloc.h textid.h
+tiidtext.o: tiidtext.c textidp.h area.h ccport.h memalloc.h textid.h
+tiinit.o: tiinit.c area.h ccport.h textidp.h memalloc.h textid.h
+tipop.o: tipop.c textidp.h area.h ccport.h memalloc.h textid.h
+titest.o: titest.c errorz.h ccport.h textidp.h area.h memalloc.h \
+ textid.h strspace.h
+titxtlen.o: titxtlen.c textidp.h area.h ccport.h memalloc.h textid.h
+utcesc.o: utcesc.c zutil.h ccport.h
+utflfind.o: utflfind.c autobuf.h memalloc.h ccport.h osport.h zutil.h
+utlnglen.o: utlnglen.c zutil.h ccport.h
+utopen.o: utopen.c error.h ccport.h errorz.h zutil.h
+utlg2.o: utlg2.c zutil.h ccport.h
+utread.o: utread.c memalloc.h ccport.h zutil.h
+utstrlo.o: utstrlo.c memalloc.h ccport.h zutil.h
+utstrlon.o: utstrlon.c memalloc.h ccport.h zutil.h
+utstrnst.o: utstrnst.c zutil.h ccport.h
+utstrup.o: utstrup.c memalloc.h ccport.h zutil.h
+utstrupn.o: utstrupn.c memalloc.h ccport.h zutil.h
+utsuffix.o: utsuffix.c memalloc.h ccport.h zutil.h
+utfltest.o: utfltest.c zutil.h ccport.h osport.h
+vfprintf.o: vfprintf.c ccport.h
+potstopt.o: potstopt.c

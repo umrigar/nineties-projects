@@ -1,0 +1,143 @@
+/*
+
+File:	 opttab0.c
+Purpose: Unformatted Option table.
+
+Copyright (C) 1995 Zerksis D. Umrigar
+
+See the file LICENSE for copying and distribution conditions.
+THERE IS ABSOLUTELY NO WARRANTY FOR THIS PROGRAM.
+
+*/
+
+
+#include "parseopt.h"
+
+#include "optcheck.c"
+
+OptInfo optTab[]= {
+  /* LongOpt Name, ShortOpt Name, Argument Type, User ID, CheckP, ValP,	
+   * OptFn, Doc								
+   */									
+  OPT_ENTRY("16-bit", '\0', NO_OPT_FLAG, CHAR_SET_SIZE_16_OPT, NULL,	
+	    (VOIDP) &options.charSetSize, charSetSizeFn,		
+    "\tGenerate a unicode-ready scanner which handles 16-bit characters"),
+  OPT_ENTRY("7-bit", '7', NO_OPT_FLAG, CHAR_SET_SIZE_7_OPT, NULL,		
+	    (VOIDP) &options.charSetSize, charSetSizeFn,		
+    "\tGenerate a scanner which handles only 7-bit characters"),	
+  OPT_ENTRY("8-bit", '8', NO_OPT_FLAG, CHAR_SET_SIZE_8_OPT, NULL,		
+	    (VOIDP) &options.charSetSize, charSetSizeFn,		
+    "\tGenerate a scanner which handles 8-bit characters\t"),		
+  OPT_ENTRY("align", 'a', OPTIONAL_OPT_FLAG, ALIGN_OPT, NULL,		
+	    (VOIDP) &options.align, yesNoOptFn,				
+    "1|0\tGenerate a scanner which does not use short integer tables\t0"),	
+  OPT_ENTRY("array", '\0', OPTIONAL_OPT_FLAG, ARRAY_OPT, NULL,		
+	    (VOIDP) &options.doArray, yesNoOptFn,			
+    "1|0\tImplement yytext as an array\t0"),				
+  OPT_ENTRY("backup-optimize", '\0', OPTIONAL_OPT_FLAG,			
+	    BACKUP_OPTIMIZE_OPT, NULL, (VOIDP) &options.backupOptimize,	
+	    yesNoOptFn,							
+    "1|0\tOptimize the scanner for patterns which require it to backup\t0"),
+  OPT_ENTRY(NULL, 'c', NO_OPT_FLAG, POSIX_COMPLIANCE_OPT, NULL,		
+	    (VOIDP) &options.dummy, charOptFn1,				
+    "\tDeprecated option included for POSIX compliance"),		
+  OPT_ENTRY("bin-code-param", '\0', REQUIRED_OPT_FLAG, 			
+	    BIN_CODE_PARAM_OPT, NULL, 					
+	    (VOIDP) &options.binCodeParam, intOptFn1,			
+    "N\tBinary search in code-scanner if # input ranges <= %A\t16"),	
+  OPT_ENTRY("code-scan", '\0', OPTIONAL_OPT_FLAG, CODE_SCAN_OPT, NULL,	
+	    (VOIDP) &options.doCode, yesNoOptFn,			
+    "1|0\tGenerated scanner encodes DFA in code instead of tables\t0"),	
+  OPT_ENTRY("compress", 'C', REQUIRED_OPT_FLAG, 				
+	    COMPRESS_OPT, compressOpts, 				
+	    (VOIDP) &options.compress, stringValOptFn,			
+    "Type\tUse table compression of %A %S\tcomb"), 	
+  OPT_ENTRY("col-waste-percent", '\0', REQUIRED_OPT_FLAG, 			
+	    COL_WASTE_OPT,  						
+	    colWasteOpts, (VOIDP) &options.colWastePercent, intOptFn1,	
+    "PERCENT\tWhen --compress=none & --table=state, use a 2-dimensional "
+    "table with the # of columns a power of 2 if the percentage "
+    "of wasted columns is <= %A (%L <= %A and %A <= 100)\t50"),
+  OPT_ENTRY("debug", 'd', OPTIONAL_OPT_FLAG, DEBUG_ON_OPT, NULL,		
+	    (VOIDP) &options.doDebug, yesNoOptFn,			
+    "1|0\tTurn on debugging in generated scanner\t0"),			
+  OPT_ENTRY("default-action", 's', REQUIRED_OPT_FLAG, 			
+	    DEFAULT_ACT_OPT, defaultOpts,				
+	    (VOIDP) &options.defaultAct, stringValOptFn,		
+    "ACT\tSet default action for unmatched character to %A %S\techo"),
+  OPT_ENTRY("ecs", 'E', SYNONYM_OPT_FLAG, 0, NULL,				
+	    NULL, NULL, NULL),						
+  OPT_ENTRY("equiv-classes", '\0', OPTIONAL_OPT_FLAG, 			
+	    EQ_CLASSES_OPT, NULL,					
+	    (VOIDP) &options.equivClasses, yesNoOptFn,			
+    "1|0\tPartition input characters into equivalence classes\t1"),	
+  OPT_ENTRY("help", 'h', NO_OPT_FLAG, HELP_OPT, NULL, NULL, helpFn,		
+    "\tPrint summary of options and exit"),				
+  OPT_ENTRY("ignore-case", 'i', SYNONYM_OPT_FLAG, 0, NULL,			
+	    NULL, NULL, NULL),						
+  OPT_ENTRY("caseless", '\0', SYNONYM_OPT_FLAG, 0, NULL,			
+	    NULL, NULL, NULL),						
+  OPT_ENTRY("case-insensitive", '\0', OPTIONAL_OPT_FLAG, 			
+	    IGNORE_CASE_OPT, NULL, 					
+	    (VOIDP) &options.ignoreCase, yesNoOptFn,			
+    "1|0\tGenerate a case insensitive scanner\t0"),			
+  OPT_ENTRY("lex-compat", 'l', NO_OPT_FLAG, LEX_COMPAT_OPT, NULL,		
+	    NULL, lexCompatFn,						
+    "\tLex compatibility (equivalent to --array --yylineno --reject)"),	
+  OPT_ENTRY("lin-code-param", '\0', REQUIRED_OPT_FLAG, 			
+	    LIN_CODE_PARAM_OPT, NULL, 					
+	    (VOIDP) &options.linCodeParam, intOptFn1,			
+    "N\tLinear search in code-scanner if # successors <= %A\t4"),	
+  OPT_ENTRY("line-dir", '\0', OPTIONAL_OPT_FLAG, LINE_DIR_OPT, NULL,	
+	    (VOIDP) &options.lineDir, yesNoOptFn,			
+    "1|0\tOutput #line directives to generated scanner\t1"),		
+  OPT_ENTRY(NULL, 'n', NO_OPT_FLAG, POSIX_COMPLIANCE_OPT, NULL,		
+	    (VOIDP) &options.dummy, charOptFn1,				
+    "\tDeprecated option included for POSIX compliance"),		
+  OPT_ENTRY("output", 'o', INTERN_OPT_FLAG|REQUIRED_OPT_FLAG, 		
+            OUTPUT_OPT, NULL, 						
+	    (VOIDP) &options.outFileName, stringOptFn,			
+    "FILENAME\tGenerate scanner in file %A\tlex.yy.c"),		
+  OPT_ENTRY("prefix", 'P', INTERN_OPT_FLAG|REQUIRED_OPT_FLAG, 		
+	    PREFIX_OPT, NULL,  						
+	    (VOIDP) &options.prefix, stringOptFn,			
+    "PREFIX\tUse %A as prefix of certain global names in
+generated scanner\tyy"),						
+  OPT_ENTRY("sentinel", 'S', REQUIRED_OPT_FLAG, SENTINEL_OPT, NULL,		
+	    (VOIDP) &options.sentinelChar, intOptFn0,			
+"CHAR-CODE\tUse character with decimal code %A as sentinel\t0"),
+  OPT_ENTRY("reject", '\0', OPTIONAL_OPT_FLAG, REJECT_OPT, NULL,		
+	    (VOIDP) &options.doReject, yesNoOptFn,			
+    "1|0\tAllow REJECT actions in generated scanner\t1"),		
+  OPT_ENTRY("stdio", '\0', OPTIONAL_OPT_FLAG, STDIO_OPT, NULL,		
+	    (VOIDP) &options.doStdio, yesNoOptFn,			
+    "1|0\tUse standard I/O for all scanner input\t0"),			
+  OPT_ENTRY("table", 'T', REQUIRED_OPT_FLAG, TABLE_OPT, tableOpts,		
+	    (VOIDP) &options.tableEntry, stringValOptFn,		
+"Type\tUse table entries of %A %S\tstate"),
+  OPT_ENTRY("to-stdout", 't', OPTIONAL_OPT_FLAG, TO_STDOUT_OPT, NULL,	
+	    (VOIDP) &options.toStdOut, yesNoOptFn,			
+    "1|0\tWrite generated scanner to stdout\t0"),			
+  OPT_ENTRY("trace", 'T', INTERN_OPT_FLAG|OPTIONAL_OPT_FLAG, 		
+	    TRACE_OPT, NULL, 						
+	    (VOIDP) &options.traceFileName, stringOptFn,		
+    "TRACE_FILE\tRun zlex in trace mode, generating extensive output in "
+    "file %A which defaults to stdout"),				
+  OPT_ENTRY("transition-compress", '\0', OPTIONAL_OPT_FLAG, 
+	    TRANSITION_COMPRESS_OPT, NULL,		
+	    (VOIDP) &options.transitionCompress, yesNoOptFn,			
+    "1|0\tCompress transitions for non-switch states in code scanner\t0"),	
+  OPT_ENTRY("verbose", 'v', OPTIONAL_OPT_FLAG, VERBOSE_OPT, NULL,		
+	    (VOIDP) &options.isVerbose, yesNoOptFn,			
+    "1|0\tGenerate somewhat verbose statistics describing DFA\t0"),	
+  OPT_ENTRY("version", 'V', NO_OPT_FLAG, VERSION_OPT, 			
+	    NULL, NULL, versionFn, 					
+    "\tPrint version number and exit"),					
+  OPT_ENTRY("whitespace", 'w', OPTIONAL_OPT_FLAG, WHITESPACE_OPT, NULL, 	
+	    &options.wsInPatterns, yesNoOptFn,				
+    "1|0\tAllow whitespace within lex patterns\t0"),			
+  OPT_ENTRY("yylineno", '\0', OPTIONAL_OPT_FLAG, YYLINENO_OPT, NULL, 	
+	    &options.doYYLineNo, yesNoOptFn,				
+    "1|0\tMaintain count of line number in global variable yylineno\t0")
+};
+

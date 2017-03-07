@@ -1,0 +1,74 @@
+@item --build-display
+Display parameters used to build zyacc and exit.
+@xref{build-display}.
+
+@item --debug[=1|0]
+@itemx -t[1|0]
+Allow tracing of generated parser (default: @code{0}).
+@xref{debug}.
+
+@item --defines[=1|0]
+@itemx -d[1|0]
+Output a .h definitions file (default: @code{0}).
+@xref{defines}.
+
+@item --file-prefix @var{prefix}
+@itemx -b @var{prefix}
+Specify prefix to be used for all output files (default: @code{yy}).
+@xref{file-prefix}.
+
+@item --grammar[=1|0]
+@itemx -g[1|0]
+Output a reference grammar file to <stdout> and exit 
+(default: @code{0}).
+@xref{grammar}.
+
+@item --help
+@itemx -h
+Print summary of options and exit.
+@xref{help}.
+
+@item --html[=1|0]
+@itemx -H[1|0]
+Write html parser description in .html file (default: @code{0}).
+@xref{html}.
+
+@item --lines[=1|0]
+Output #line directives in generated parser file (default: @code{1}).
+@xref{lines}.
+
+@item --longer-rule-prefer[=1|0]
+When resolving a reduce-reduce conflict prefer the longer rule 
+(default: @code{0}).
+@xref{longer-rule-prefer}.
+
+@item --output-file @var{outfile}
+@itemx -o @var{outfile}
+Specify the name outFile for the parser file.
+@xref{output-file}.
+
+@item --name-prefix @var{prefix}
+@itemx -p @var{prefix}
+Specify prefix to be used for all external symbols 
+(default: @code{yy}).
+@xref{name-prefix}.
+
+@item --term-suffix @var{suffix}
+Specify suffix string to be appended to all external terminal names 
+@xref{term-suffix}.
+
+@item --verbose[=1|0]
+@itemx -v[1|0]
+Write verbose parser description in .output file (default: @code{0}).
+@xref{verbose}.
+
+@item --version
+@itemx -V
+Print version number and exit.
+@xref{version}.
+
+@item --yacc[=1|0]
+@itemx -y[1|0]
+Name output files like YACC (default: @code{0}).
+@xref{yacc}.
+

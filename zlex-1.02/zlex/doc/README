@@ -1,0 +1,10 @@
+This directory contains the documentation for zlex.  The main documentation
+source is zlex.texi.  From this single source three different formats are
+derived:
+
+zlex.info:	Suitable for viewing in emacs or any standalone info-viewer.
+zlex.html:	Can be viewed using any WWW browser like Mosaic or Netscape.
+zlex.ps:	Print on your favorite postscript printer.
+
+The zlex.html was derived automatically using the texi2html script written 
+by Lionel Cons (Lionel.Cons@cern.ch) from CERN.  

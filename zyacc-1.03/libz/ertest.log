@@ -1,0 +1,10 @@
+This should be unadorned except for a `\n' terminator.
+Error test file:1091: This should contain `file:line: ' prefix.
+Error test program:Error test file:1091: warning: This should contain `program:file:line: ' prefix with warning.
+ertest              :        74: Prefixed with `__FILE__:__LINE__: '                 some
+Attempted to open non-existent file `$@#.@@'.
+system error
+Special format FMT(983).
+# of errors= 2
+We die now ... g'bye...
+fatal termination.

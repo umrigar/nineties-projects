@@ -1,0 +1,249 @@
+#!/bin/sh
+
+MAKE=make
+
+ZLEX_DIR=..
+PRG_UNDER_TEST=$ZLEX_DIR/zlex
+LIBZLEX_DIR=../../libzlex
+
+tmpDir=/tmp
+fPrefix="$tmpDir/dotests"
+failFile=${fPrefix}F.$$
+tstdir=.tst
+
+rm -f $failFile
+
+#Set up script to cleanup temporary files if interrupted.
+trap 'rm -f ${fPrefix}*.$$ ; exit 1' 1 2 15
+
+#Set up temporary files containing option combinations.
+#We don't put into variables, as shell command lines can overflow.
+
+#LEX OPTIONS
+LFLAGS1=${fPrefix}L1.$$
+cat >$LFLAGS1 <<!
+--code --back=0
+--code --back=0 --bin=0 --lin-c=0
+--code --back=0 --bin=32 --lin-c=8
+--back=0 --comp=no --tab=state --equiv=0
+--back=0 --comp=no --tab=state --equiv=1
+--back=0 --comp=no --tab=address --equiv=0
+--back=0 --comp=no --tab=address --equiv=1
+--back=0 --comp=no --tab=diff --equiv=0
+--back=0 --comp=no --tab=diff --equiv=1
+--back=0 --comp=comb --tab=state --equiv=0
+--back=0 --comp=comb --tab=state --equiv=1
+--back=0 --comp=comb --tab=address --equiv=0
+--back=0 --comp=comb --tab=address --equiv=1
+--back=0 --comp=comb --tab=diff --equiv=0
+--back=0 --comp=comb --tab=diff --equiv=1
+--back=0 --comp=iter --tab=state --equiv=0
+--back=0 --comp=iter --tab=state --equiv=1
+--back=0 --comp=iter --tab=address --equiv=0 
+--back=0 --comp=iter --tab=address --equiv=1 
+--back=0 --comp=iter --tab=diff --equiv=0
+--back=0 --comp=iter --tab=diff --equiv=1
+--back=1 --comp=no --tab=state --equiv=0
+--back=1 --comp=no --tab=state --equiv=1
+--back=1 --comp=no --tab=address --equiv=0
+--back=1 --comp=no --tab=address --equiv=1
+--back=1 --comp=no --tab=diff --equiv=0
+--back=1 --comp=no --tab=diff --equiv=1
+--back=1 --comp=comb --tab=state --equiv=0
+--back=1 --comp=comb --tab=state --equiv=1
+--back=1 --comp=comb --tab=address --equiv=0
+--back=1 --comp=comb --tab=address --equiv=1
+--back=1 --comp=comb --tab=diff --equiv=0
+--back=1 --comp=comb --tab=diff --equiv=1
+--back=1 --comp=iter --tab=state --equiv=0
+--back=1 --comp=iter --tab=state --equiv=1
+--back=1 --comp=iter --tab=address --equiv=0
+--back=1 --comp=iter --tab=address --equiv=1
+--back=1 --comp=iter --tab=diff --equiv=0
+--back=1 --comp=iter --tab=diff --equiv=1
+--array
+!
+
+LFLAGS2=${fPrefix}L2.$$
+cat >$LFLAGS2 <<!
+-i --code --back=0
+-i --code --back=0 --bin=0 --lin-c=0
+-i --code --back=0 --bin=32 --lin-c=8
+-i --back=0 --comp=no --tab=state
+-i --back=0 --comp=no --tab=address
+-i --back=0 --comp=no --tab=diff
+-i --back=0 --comp=comb --tab=state
+-i --back=0 --comp=comb --tab=address
+-i --back=0 --comp=comb --tab=diff
+-i --back=0 --comp=iter --tab=state
+-i --back=0 --comp=iter --tab=address
+-i --back=0 --comp=iter --tab=diff
+-i --back=1 --comp=no --tab=state
+-i --back=1 --comp=no --tab=address
+-i --back=1 --comp=no --tab=diff
+-i --back=1 --comp=comb --tab=state
+-i --back=1 --comp=comb --tab=address
+-i --back=1 --comp=comb --tab=diff
+-i --back=1 --comp=iter --tab=state
+-i --back=1 --comp=iter --tab=address
+-i --back=1 --comp=iter --tab=diff
+-i --back=1 --comp=iter --tab=diff --equiv=0
+-i --array
+-i
+!
+
+LFLAGS3=${fPrefix}L3.$$
+cat >$LFLAGS3 <<!
+--back=0 --comp=no --tab=state --equiv=0
+--back=0 --comp=no --tab=state --equiv=1
+--back=0 --comp=no --tab=address --equiv=0
+--back=0 --comp=no --tab=address --equiv=1
+--back=0 --comp=no --tab=diff --equiv=0
+--back=0 --comp=no --tab=diff --equiv=1
+--back=0 --comp=comb --tab=state --equiv=0
+--back=0 --comp=comb --tab=state --equiv=1
+--back=0 --comp=comb --tab=address --equiv=0
+--back=0 --comp=comb --tab=address --equiv=1
+--back=0 --comp=comb --tab=diff --equiv=0
+--back=0 --comp=comb --tab=diff --equiv=1
+--back=0 --comp=iter --tab=state --equiv=0
+--back=0 --comp=iter --tab=state --equiv=1
+--back=0 --comp=iter --tab=address --equiv=0 
+--back=0 --comp=iter --tab=address --equiv=1 
+--back=0 --comp=iter --tab=diff --equiv=0
+--back=0 --comp=iter --tab=diff --equiv=1
+--back=1 --comp=no --tab=state
+--back=1 --comp=no --tab=address
+--back=1 --comp=no --tab=diff
+--back=1 --comp=comb --tab=state
+--back=1 --comp=comb --tab=address
+--back=1 --comp=comb --tab=diff
+--back=1 --comp=iter --tab=state
+--back=1 --comp=iter --tab=address
+--back=1 --comp=iter --tab=diff
+--back=1 --comp=iter --tab=diff --equiv=0
+--back=1 --array 
+!
+
+LFLAGS4=${fPrefix}L4.$$
+cat >$LFLAGS4 <<!
+--code --back=0
+--back=0
+--back=1
+!
+
+LFLAGS5=${fPrefix}L5.$$
+cat >$LFLAGS5 <<!
+--code --back=0
+!
+
+#To run all tests with limited options set QUICK_TEST in environment.
+test "$QUICK_TEST" != "" && LFLAGS1=$LFLAGS4 LFLAGS2=$LFLAGS4 LFLAGS3=$LFLAGS4
+
+#To run all tests only with code-scanners set CODE_TEST in environment.
+test "$CODE_TEST" != "" && LFLAGS1=$LFLAGS5 LFLAGS2=$LFLAGS5 LFLAGS3=$LFLAGS5
+
+
+#CC OPTIONS
+CFLAGS1=${fPrefix}C1.$$
+cat >$CFLAGS1 <<!
+-g
+!
+
+CFLAGS2=${fPrefix}C2.$$
+cat >$CFLAGS2 <<!
+-g -DYYDEBUG
+!
+
+#Do tests only for tests specified on command-lines.
+names=$*
+
+#Ensure that $1 is blank.
+set - ""
+
+test ! -d .tst && mkdir .tst
+
+#Main test loop.
+while read line
+do
+  eval set - $line
+  test=$1 lflagsFile=$2 cflagsFile=$3
+  if ( test -n "$test" && \
+    ( test -z "$names" ||  echo $names | fgrep $test >/dev/null ) )
+  then
+    lflagN=0
+    while read lflags
+    do
+      cflagN=0
+      lflagN=`expr $lflagN + 1`
+      while read cflags
+      do
+	cflagN=`expr $cflagN + 1`
+	testFile=${test}_${lflagN}_${cflagN}.tst
+	#Look for test whose combination with flags is bad.
+	test $test = context1 && echo $lflags | grep code && continue
+	if test -z \
+	   "`find $tstdir -name $testFile -newer $PRG_UNDER_TEST -print`"
+	then
+          echo TESTING $test: LFLAGS=\'$lflags\' CFLAGS=\'$cflags\'
+	  rm -f $test $test.c
+	  if ( $MAKE ZLEXFLAGS="$lflags" CFLAGS="$cflags" $test && \
+	       ( ./$test <$test.in >${fPrefix}1.$$ 2>${fPrefix}2.$$ \
+                 || true ) && \
+               cat ${fPrefix}1.$$ ${fPrefix}2.$$ >${fPrefix}3.$$ && \
+	       rm -f ${fPrefix}1.$$ ${fPrefix}2.$$ && \
+	       cmp $test.log ${fPrefix}3.$$ )
+	  then 
+	    echo OK
+	    rm ${fPrefix}3.$$
+	    touch $tstdir/$testFile
+          else
+	    echo FAILED
+	    echo "$test: LFLAGS=$lflags CFLAGS=$cflags" >> $failFile
+	    test -r ${fPrefix}3.$$ && mv ${fPrefix}3.$$ $test.ERR 
+	  fi
+	fi
+      done <$cflagsFile
+    done <$lflagsFile
+  fi
+done <<!
+#			TEST DATABASE
+#TEST		LFLAGS		CFLAGS
+16bit		$LFLAGS1	$CFLAGS1
+8bit		$LFLAGS1	$CFLAGS1
+backup		$LFLAGS1	$CFLAGS1
+cecho		$LFLAGS1	$CFLAGS2
+chrcount	$LFLAGS1	$CFLAGS1
+context1	$LFLAGS3	$CFLAGS1
+finito		$LFLAGS1	$CFLAGS1
+flush		$LFLAGS1	$CFLAGS1
+huge		$LFLAGS1	$CFLAGS1
+include		$LFLAGS1	$CFLAGS1
+interact	$LFLAGS1	$CFLAGS1
+intratok	$LFLAGS2	$CFLAGS1
+lessmore	$LFLAGS1	$CFLAGS1
+linecol		$LFLAGS1	$CFLAGS1
+memscan		$LFLAGS1	$CFLAGS1
+reject1		$LFLAGS1	$CFLAGS1
+rejintra	$LFLAGS1	$CFLAGS1
+rejunput	$LFLAGS1	$CFLAGS1
+sentinel	$LFLAGS1	$CFLAGS1
+ssstk		$LFLAGS1	$CFLAGS1
+startalt	$LFLAGS1	$CFLAGS1
+unput		$LFLAGS1	$CFLAGS1
+useract		$LFLAGS1	$CFLAGS1
+wrap		$LFLAGS1	$CFLAGS1
+yylineno	$LFLAGS1	$CFLAGS1 
+!
+
+if test -r $failFile
+then
+echo "Following tests failed."
+echo "diff *.ERR file with *.log file if test failed on comparison."
+cat $failFile
+else
+echo All tests successful.
+fi
+
+rm -f ${fPrefix}*.$$
+exit 0

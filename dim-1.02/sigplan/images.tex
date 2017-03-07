@@ -1,0 +1,145 @@
+\batchmode
+\documentstyle[twocolumn]{article}
+\makeatletter
+
+\pagestyle{empty}
+\footskip 2in 
+
+\hoffset= -0.3in
+\voffset= -1.0in
+\setlength{\textwidth}{6.5in}\setlength{\textheight}{9in}
+\setlength{\oddsidemargin}{0.3in}\setlength{\evensidemargin}{0.3in}
+\setlength{\parindent}{0pt}\setlength{\parskip}{1.5ex}
+
+
+
+
+
+
+
+\title{Fully Static Dimensional Analysis with C\raise 0.2ex \hbox{++}\ }
+\author{
+Zerksis D. Umrigar\\ 
+447 Plaza Dr., 5-57, Vestal NY 13850\\ 
+(607) 729-5919\\ 
+Email: umrigar@cs.binghamton.edu
+}
+\date{}
+
+\newcommand {\cpp}{C\raise 0.2ex \hbox{++}}
+
+\newcommand {\gpp}{G\raise 0.2ex \hbox{++}}
+
+\newcommand {\meter}{\hbox{Meter}}
+
+\newcommand {\kg}{\hbox{Kg}}
+
+\newcommand {\second}{\hbox{Sec}}
+
+\makeatother
+\newenvironment{tex2html_wrap}{}{}
+\newwrite\lthtmlwrite
+\def\lthtmltypeout#1{{\let\protect\string\immediate\write\lthtmlwrite{#1}}}%
+\newbox\sizebox
+\begin{document}
+\pagestyle{empty}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+{\newpage
+\clearpage
+\samepage \begin{figure}{\footnotesize
+\begin{verbatim}01 #include <iostream.h>
+02 
+03 #include <math.h>
+04 
+05 #define N_DIM 3
+06 #define DIM_VAL_TYPE double
+07 //#define DIM_NO_CHECK
+08 
+09 #include "Dim.h"
+10 
+11 //Name each dimensional axis.
+12 #define MASS_DIM     0
+13 #define LENGTH_DIM   1
+14 #define TIME_DIM     2
+15 
+16 //Declare units.
+17 UNIT(Gm, MASS_DIM, 1.0, "gm");
+18 UNIT(Cm, LENGTH_DIM, 1.0, "cm");
+19 UNIT(Feet, LENGTH_DIM, 2.54*12, "feet");
+20 UNIT(Sec, TIME_DIM, 1.0, "sec");
+21 
+22 typedef DIM( 1,  0,  0) Mass;
+23 typedef DIM( 0,  1,  0) Length;
+24 typedef DIM( 0,  0,  1) Time;
+25 typedef DIM( 0,  1, -2) Acceleration;
+26 typedef DIM( 1,  0, -1) Friction;
+27 typedef DIM( 0,  1, -1) Velocity;
+28 typedef DIM( 0,  0,  0) Number;\end{verbatim}
+}
+
+
+\label{Fig:Dec}
+\end{figure}
+}
+
+{\newpage
+\clearpage
+\samepage \setbox\sizebox=\hbox{$\ldots$}\lthtmltypeout{latex2htmlSize :tex2html_wrap_inline290: \the\ht\sizebox::\the\dp\sizebox.}\box\sizebox
+}
+
+{\newpage
+\clearpage
+\samepage \begin{figure}{\footnotesize
+\begin{verbatim}01 static Length height(Length x) {
+02   return 0.5 * x;
+03 }
+04 
+05 int main() {
+06   const Acceleration g= 980.7 * Cm/(Sec*Sec);
+07   const Mass blockMass= 1000 * Gm;
+08   const Length deltaX= 0.01 * Cm;
+09   const Friction friction= 20 * Gm/Sec;
+10   const Number a= 1.0;
+11   Length x, y;       //Initialized to 0.
+12   const Time deltaT= 0.1*Sec;
+13   Velocity v;
+14   Time maxTime;
+15 
+16   cout << "Enter initial velocity (cm/sec): " 
+17        << flush;
+18   cin >> Cm/Sec >> v;
+19   cout << "Enter time limit (sec): " << flush;
+20   cin >> Sec >> maxTime;
+21 
+22   for (Time t= 0*Sec; t < maxTime; t+= deltaT) {
+23     Number slope= (height(x + deltaX) - y)/deltaX;
+24     Number cosAngle= 
+25       1.0/sqrt(1 + +(slope * slope));
+26     x+= v * deltaT * cosAngle;
+27     y= height(x);
+28     v+= deltaT * (g * slope * cosAngle - 
+29                   v * friction / blockMass);
+30     cout << "At T= " << Sec_ << t << " ";
+31     cout << "X= " << Feet_ << x << "; ";
+32     cout << " Y= " << Feet_ << y << "; ";
+33     cout << " and V= " << Feet_/Sec_ << v << "; ";
+34     cout << '\n';
+35   }
+36 
+37   return 0;
+38 }\end{verbatim}
+}
+
+
+\label{Fig:Code}
+\end{figure}
+}
+
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+
+\end{document}

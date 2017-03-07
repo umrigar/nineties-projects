@@ -1,0 +1,79 @@
+<HTML><HEAD>
+<TITLE>Shift-Reduce Parser Applet: Output Windows</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Shift-Reduce Parser Applet: Output Windows</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/27 19:15:18 umrigar"
+</FONT>
+<P>The shift-reduce parser displays its output in three windows:
+
+<DL>
+
+<LI><DT><A NAME="tree"><B>Parse Forest Window</B></A><DD>
+
+The top window displays the parse forest as it is being constructed.  Nodes
+which are still on the <A HREF="srintro.html#parse-stack">parse stack</A>
+are shown in green (these nodes are always root nodes and appear across the
+top of the window --- tracing this line of green nodes gives the contents of
+the parse stack).  When a node is removed from the parse stack, it's color
+is changed to red.  As the parser is stepped, the window will always display
+the current node of interest which is highlighted in yellow.
+
+<LI><DT><A NAME="srtable"><B>Shift-Reduce Parse Table Window</B></A><DD>
+
+This shows the <A HREF="srintro.html#action">action</A> and <A
+HREF="srintro.html#goto">goto</A> tables.  The rows correspond to 
+the states; the initial columns indexed by terminals correspond to 
+the action table; the subsequent columns indexed by nonterminal correspond
+to the goto table.  The table entries are represented as follows:
+
+<DL>
+
+<LI><DT><B>Shift <VAR>n</VAR></B><DD>
+
+A shift on a terminal symbol to state number <VAR>n</VAR> is represented as
+<CODE>s</CODE><VAR>n</VAR>.
+
+<LI><DT><B>Reduce <VAR>n</VAR></B><DD>
+
+A reduction by rule number <VAR>n</VAR> is represented as
+<CODE>r</CODE><VAR>n</VAR>.
+
+<LI><DT><B>Goto <VAR>n</VAR></B><DD>
+
+A goto on a nonterminal symbol to state number <VAR>n</VAR> is represented as
+<CODE>g</CODE><VAR>n</VAR>.
+
+
+</DL>
+
+The currently active entry in the parse table is highlighted.
+
+<LI><DT><A NAME="trace"><B>Trace Window</B></A><DD>
+
+This window shows the trace history in the format used in classical compiler
+texts.  Each trace line consists of the stack (in green) followed by the
+input (in black) which is yet to be processed.  The current lookahead token
+is always the first token in the unexpended input.  Each stack entry is of
+the form <VAR>State</VAR><CODE>/</CODE><VAR>Sym</VAR> where <VAR>State</VAR>
+is the state number and <VAR>Sym</VAR> is the grammar symbol which accesses
+that state.  The stack contents correspond to the green nodes in the parse
+tree.
+
+</DL>
+
+<P> Each window displays a brief description of itself for a short period
+after the mouse pointer enters it.
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+</BODY>
+
+</HTML>

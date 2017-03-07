@@ -1,0 +1,55 @@
+#Automatically generated dependencies.
+chrclass.o: chrclass.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h comptab.h files.h options.h \
+ outprms.h outvec.h scan.h ../../libz/area.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/freelist.h ../../libz/ids.h \
+ ../../libz/memalloc.h
+codescan.o: codescan.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h codescan.h dfa.h files.h \
+ options.h patterns.h scan.h sklnames.h ../../libz/area.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/memalloc.h
+comptab.o: comptab.c comptab.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/memalloc.h ../../libz/error.h \
+ ../../libz/errorz.h
+datetime.o: datetime.c datetime.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+dfa.o: dfa.c chrclass.h port.h ../../libz/ccport.h ../../libz/osport.h \
+ ../../libz/iset.h codescan.h dfa.h files.h options.h outdfa.h \
+ outvec.h patterns.h scan.h sklnames.h ../../libz/area.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/memalloc.h
+main.o: main.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h codescan.h datetime.h dfa.h \
+ files.h main.h options.h outdfa.h outfns.h patterns.h scan.h zparse.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/ids.h \
+ ../../libz/memalloc.h ../../libz/zutil.h
+mkoptinf.o: mkoptinf.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c optcheck.c
+mkopttab.o: mkopttab.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c optcheck.c
+optcheck.o: optcheck.c
+opttab0.o: opttab0.c ../../libz/parseopt.h ../../libz/ccport.h \
+ optcheck.c
+options.o: options.c main.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h options.h ../../libz/error.c ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h \
+ ../../libz/parseopt.h ../../libz/zutil.h optcheck.c opttab.c
+outdfa.o: outdfa.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h codescan.h comptab.h dfa.h \
+ files.h options.h outdfa.h outvec.h patterns.h sklnames.h outprms.h \
+ ../../libz/memalloc.h ../../libz/zutil.h
+outvec.o: outvec.c outvec.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+patterns.o: patterns.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h dfa.h files.h main.h options.h \
+ outvec.h patterns.h scan.h sklnames.h ../../libz/area.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/ids.h \
+ ../../libz/memalloc.h
+opttab.o: opttab.c
+parse.o: parse.c chrclass.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/iset.h options.h patterns.h scan.h \
+ zparse.h ../../libz/area.h ../../libz/error.h ../../libz/errorz.h
+scan.o: scan.c files.h port.h ../../libz/ccport.h ../../libz/osport.h \
+ scan.h ../../libz/area.h ../../libz/error.h ../../libz/errorz.h \
+ ../../libz/ids.h ../../libz/memalloc.h ../../libz/strspace.h \
+ ../../libz/textid.h ../../libz/zutil.h options.h patterns.h \
+ chrclass.h ../../libz/iset.h parse.h

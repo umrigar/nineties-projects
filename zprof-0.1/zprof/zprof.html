@@ -1,0 +1,294 @@
+<HTML>
+<BODY>
+<PRE>
+
+</PRE>
+<H2>NAME</H2><PRE>
+       zprof, zcounts - transform ANSI-C programs to enable basic
+       block profiling.
+
+
+
+
+</PRE>
+<H2>SYNOPSIS</H2><PRE>
+       <STRONG>zprof</STRONG>
+           [<STRONG>--cond</STRONG>|<STRONG>-c</STRONG>]
+           [<STRONG>--help</STRONG>|<STRONG>-h</STRONG>]
+           [<STRONG>--prefix</STRONG>=<EM>PREFIX</EM>|<STRONG>-p</STRONG><EM>PREFIX</EM>]
+           [<STRONG>--preprocess</STRONG>|<STRONG>-P</STRONG>]
+           [<STRONG>--silent</STRONG>|<STRONG>-s</STRONG>]
+           [<STRONG>--version</STRONG>|<STRONG>-v</STRONG>]
+           [<STRONG>--typedef</STRONG>=<EM>ID</EM>|<STRONG>-t</STRONG><EM>ID</EM>]
+       [<EM>file</EM>.c...]
+
+       <STRONG>zcounts</STRONG>
+
+
+
+
+</PRE>
+<H2>DESCRIPTION</H2><PRE>
+       <STRONG>zprof</STRONG> is a preprocessor which transforms a ANSI-C  program
+       to  enable  basic  block  profiling.  When the transformed
+       program is compiled and executed, it records the number of
+       times each of its basic blocks is executed.
+
+
+
+       Each  source  file  <EM>file</EM><STRONG>.c</STRONG> is transformed to <EM>file</EM><STRONG>_BB.c</STRONG> (to
+       change the output name, see  the  <STRONG>--prefix</STRONG>  option).   The
+       transformed  program  needs  to  be  linked with the <STRONG>zprof</STRONG>
+       library <STRONG>libzprof.a</STRONG>.  When the transformed program is  exe-
+       cuted, it appends the execution counts of its basic blocks
+       to the file <STRONG>zprof.out</STRONG>.  The <STRONG>zcounts</STRONG> script uses the gener-
+       ated <STRONG>zprof.out</STRONG> file to produce an annotated version of the
+       original files (with names of  the  form  <EM>file</EM><STRONG>.c.bb</STRONG>)  with
+       each line preceeded by its execution count.  The <STRONG>zprof.out</STRONG>
+       file can also be analyzed using  standard  utilities  (see
+       the <STRONG>EXAMPLES</STRONG> section).
+
+
+       If  no  source  files are specified, <STRONG>zprof</STRONG> simply prints a
+       summary of its options and exits.
+
+
+
+</PRE>
+<H2>OPTIONS</H2><PRE>
+       <STRONG>Zprof</STRONG> supports both traditional single-letter options  and
+       mnemonic  long  option names.  Long option names are indi-
+       cated using --  instead  of  -.   Abbreviations  for  long
+       option names are allowed as long as they are unique.  When
+       a long option like <STRONG>--prefix</STRONG> takes an argument, connect the
+       option name and the argument with = or put the argument in
+       the next word.  Similarly, when a  short  option  like  <STRONG>-p</STRONG>
+       takes  an  argument,  put  the  argument value immediately
+       after the option in the same word, or put the argument  in
+       the  next  word.  Boolean argument values may be specified
+       as <STRONG>0</STRONG> or <STRONG>1</STRONG>, <STRONG>yes</STRONG> or <STRONG>no</STRONG>, <STRONG>on</STRONG> or <STRONG>off</STRONG>.
+
+
+       <STRONG>--cond</STRONG>
+       <STRONG>-c</STRONG>     Profile  subexpressions  of  all   ?:   conditional
+              expressions (default: <STRONG>off</STRONG>).
+
+       <STRONG>--help</STRONG>
+       <STRONG>-h</STRONG>     Print summary of options and exit.
+
+       <STRONG>--prefix</STRONG>=<EM>PREFIX</EM>
+       <STRONG>-p</STRONG><EM>PREFIX</EM>
+
+              Use  <EM>PREFIX</EM>  as  prefix  of  all generated names in
+              instrumented file and for forming the name  of  the
+              output files (default: <STRONG>_BB</STRONG>).
+
+
+       <STRONG>--preprocess</STRONG>
+       <STRONG>-P</STRONG>     Run  the  preprocessor  (given by environmental var
+              <STRONG>CPP</STRONG>)  on  the  input  file  before  <STRONG>zprof</STRONG>  sees  it
+              (default: <STRONG>on</STRONG>).
+
+       <STRONG>--silent</STRONG>
+       <STRONG>-s</STRONG>     Do not generate error messages (default: <STRONG>off</STRONG>).
+
+       <STRONG>--version</STRONG>
+       <STRONG>-v</STRONG>     Print version information and exit.
+
+       <STRONG>--typedef</STRONG>=<EM>ID</EM>
+       <STRONG>-t</STRONG><EM>ID</EM>   Declare identifier <EM>ID</EM> to be a typedef in the global
+              scope.
+
+
+
+</PRE>
+<H2>ENVIRONMENT</H2><PRE>
+       If preprocessing is not turned off using  <STRONG>--preprocess</STRONG>=<STRONG>no</STRONG>,
+       then  the  command used to run the C-preprocessor is taken
+       from the  environmental  variable  <STRONG>CPP</STRONG>.   If  <STRONG>CPP</STRONG>  is  not
+       defined,  then the name of a C compiler is sought in envi-
+       ronmental variable <STRONG>CC</STRONG>, and each source file <EM>file</EM><STRONG>.c</STRONG> is pre-
+       processed using the command:
+
+                <STRONG>$CC</STRONG> -E <EM>file</EM><STRONG>.c</STRONG>
+
+       If  <STRONG>CC</STRONG> is also not defined, then the C-preprocessor is run
+       using
+
+                cc -E <EM>file</EM><STRONG>.c</STRONG>
+
+
+
+
+</PRE>
+<H2>EXAMPLES</H2><PRE>
+       Consider  the  simple  prime  number  program  from   file
+       <STRONG>primes.c</STRONG> shown below:
+
+           static int
+           prime(int n)
+           {
+             int i;
+             for (i= 2; i &lt; n; i++) {
+               if (n % i == 0) {
+                 return 0;
+               }
+             }
+             return 1;
+           }
+
+           int
+           main()
+           {
+             const int n= 1000;
+             int i;
+             for (i= 2; i &lt;= n; i++) {
+               if (prime(i)) {
+                 printf("%d0, i);
+               }
+             }
+             return 0;
+           }
+
+       This can be profiled as follows:
+           $ zprof primes.c
+           $ cc primes_BB.c -lzprof -o primes_bb
+           $ rm -f zprof.out
+           $ ./primes_bb &gt;/dev/null
+           $ zcounts
+
+       The  first line transforms <STRONG>primes.c</STRONG> into <STRONG>primes_BB.c</STRONG> which
+       has additional code for accumulating profile counts.   The
+       second  line  compiles  the transformed file and links the
+       object file with the <STRONG>zprof</STRONG> library to  get  an  executable
+       <STRONG>primes_bb</STRONG>.   The  third  line  ensures  that  there  is no
+       <STRONG>zprof.out</STRONG> file present in the current  directory,  as  the
+       execution  counts  from  the next step are appended to it.
+       The fourth line runs <STRONG>primes_bb</STRONG>, producing a <STRONG>zprof.out</STRONG> file
+       containing  the execution statistics.  The final line uses
+       the statistics to produce an annotated version <STRONG>primes.c.bb</STRONG>
+       shown below:
+
+                    static int
+                    prime(int n)
+                    {
+                      int i;
+           999        for (i= 2; i &lt; n; i++) {
+           78022        if (n % i == 0) {
+           831            return 0;
+                        }
+                      }
+           168        return 1;
+                    }
+
+                    int
+                    main()
+                    {
+                      const int n= 1000;
+                      int i;
+           1          for (i= 2; i &lt;= n; i++) {
+           999          if (prime(i)) {
+           168            printf("%d0, i);
+                        }
+                      }
+           1          return 0;
+                    }
+
+
+       In  order  to correctly parse C, it is necessary to recog-
+       nize <STRONG>typedef</STRONG>s.  Since <STRONG>typedef</STRONG>s are often defined in header
+       files,  it is necessary to parse all included header files
+       --- this is typically done by running  the  C-preprocessor
+       first.   Unfortunately,  on  some  systems like Linux, the
+       system header files use non-ANSI extensions, which  causes
+       problems for <STRONG>zprof</STRONG> which expects ANSI-C.  It is still pos-
+       sible to use <STRONG>zprof</STRONG> on such systems by using the  C-prepro-
+       cessor  to  remove  the non-ANSI extensions.  For example,
+       the following works  for  profiling  some  programs  under
+       Linux.
+
+           $ CPP="gcc -E -D'__attribute(n)__=' -D__const=const" \
+             <STRONG>zprof</STRONG> ...
+
+       The  options  <STRONG>--preprocess=0</STRONG>,  <STRONG>--silent</STRONG>  and <STRONG>--typedef</STRONG> may
+       also be useful in such situations  where  a  header  which
+       cannot otherwise be parsed defines only a few <STRONG>typedef</STRONG>s.
+
+
+
+
+</PRE>
+<H2>FILES</H2><PRE>
+       The  format  of  the  generated <STRONG>zprof.out</STRONG> file consists of
+       lines of the form:
+
+                <EM>filename</EM>:<EM>linenum</EM>: <EM>count</EM>
+
+       specifying that line number <EM>linenum</EM> in file  <EM>filename</EM>  was
+       executed  <EM>count</EM> times.  If there are multiple basic blocks
+       associated with a particular source  line,  then  multiple
+       lines  will be produced for the same <EM>filename</EM> and <EM>linenum</EM>.
+
+
+       The above format is amenable to easy processing by several
+       tools:
+
+
+       +      The  file  can easily be sorted in descending order
+              of counts:
+
+                  sort -t: -nr -2 zprof.out
+
+
+       +      Emacs compilation-mode can be used to interactively
+              browse this file.  <STRONG>M-x</STRONG> <STRONG>compile</STRONG> can be used to start
+              compilation and  the  compilation  command  can  be
+              specified  simply  as  <STRONG>cat</STRONG> <STRONG>zprof.out</STRONG>.  Then the <STRONG>M-`</STRONG>
+              command can be used repeatedly to position the cur-
+              sor  at  each  source line with its execution count
+              shown in the compilation buffer.
+
+
+
+
+</PRE>
+<H2>AUTHOR</H2><PRE>
+              Copyright (C) 1997  Zerksis D. Umrigar
+
+
+       This program is free software;  you  can  redistribute  it
+       and/or modify it under the terms of the GNU General Public
+       License as published  by  the  Free  Software  Foundation;
+       either  version  2 of the License, or (at your option) any
+       later version.
+
+
+
+
+</PRE>
+<H2>SEE ALSO</H2><PRE>
+       <STRONG>prof</STRONG>(1) <STRONG>monitor</STRONG>(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

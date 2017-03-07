@@ -1,0 +1,19 @@
+Line 1
+Entering S1
+Line 2
+Entering S2
+Line 3
+Line 4
+Returning to S1
+Line 5
+Entering S3
+Line 6
+Entering S4
+Returning to S3
+Line 7
+Returning to S1
+Line 8
+Returning to INITIAL
+Entering S3
+Returning to INITIAL
+Attempt to read empty start-state stack.

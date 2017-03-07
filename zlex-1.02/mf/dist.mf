@@ -1,0 +1,7 @@
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+

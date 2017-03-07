@@ -1,0 +1,22 @@
+#Test input for potest.
+ nonOptArg1 nonOptArg2 --intFlag0
+ nonOptArg1 nonOptArg2 -0
+ nonOptArg1 --intFlag0 nonOptArg2 --intFlag1
+ --intVal 234 nonOptArg1 nonOptArg2 --intFlag1
+ -V 234 nonOptArg1 --intFlag1 nonOptArg2 
+ --charFlag nonOptArg1 nonOptArg2 --intFlag1
+ - -c nonOptArg -vB
+ --charVal=X
+ --stringFlag=STRING_VALUE -v
+ -s STRING_VAL nonOptArg
+ -s --intFlag0		#--intFlag0 is option value.
+ nonOptArg -01c -	#Multiple short options in a single word.
+ --rangeVal=-2 --primeVal=3 --name=marge
+ --stringVal		#Missing option value.
+ --badOpt
+ -B
+ --name=mar		#Ambiguous option value.
+ --prime=13		#Bad option value.
+ --name=mark		#Bad option value.
+ --range=6		#Option value out of range.
+ --range -3		#Option value out of range.

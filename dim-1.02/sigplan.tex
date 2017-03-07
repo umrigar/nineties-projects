@@ -1,0 +1,515 @@
+\documentstyle[twocolumn]{article}
+
+\pagestyle{empty}
+\footskip 2in %Eliminate page 1 being numbered due to LaTeX bug. YUCK!
+
+
+\hoffset= -0.3in
+\voffset= -1.0in
+\setlength{\textwidth}{6.5in}\setlength{\textheight}{9in}
+\setlength{\oddsidemargin}{0.3in}\setlength{\evensidemargin}{0.3in}
+\setlength{\parindent}{0pt}\setlength{\parskip}{1.5ex}
+
+\newcommand{\cpp}{C\raise 0.2ex \hbox{++}}
+\newcommand{\gpp}{G\raise 0.2ex \hbox{++}}
+\newcommand{\meter}{\hbox{Meter}}
+\newcommand{\kg}{\hbox{Kg}}
+\newcommand{\second}{\hbox{Sec}}
+
+\title{Fully Static Dimensional Analysis with \cpp\ }
+\author{
+Zerksis D. Umrigar\\
+447 Plaza Dr., 5-57, Vestal NY 13850\\
+(607) 729-5919\\
+Email: umrigar@cs.binghamton.edu
+}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+
+Dimensional analysis is widely used by those involved in the
+physical sciences as a quick check on the dimensional sanity of
+formulas.  Many programming errors can be prevented by performing
+similar checks automatically.  Previous attempts at such
+dimensional analysis of computer programs either entailed some
+run-time overhead \cite{cmelik:88} \cite{hilfinger:88}, or
+required the modification of an existing programming language to
+add such a capability \cite{gehani:77} \cite{house:83}.  This
+paper describes how an existing language \cpp\
+\cite{stroustrup:91} can be used to write programs which can be
+guaranteed to be dimensionally correct {\bf before} run-time.
+Unfortunately, the method depends on a language construct which
+violates the language definition.  The paper argues that the rule
+forbidding the construct be removed from the language definition,
+or that the forbidden construct be allowed as an extension by most
+compilers.  In fact, a popular \cpp\ compiler does accept this
+construct.  This compiler was used to implement a general package
+for dimensional analysis.  The capabilities of the package are
+briefly illustrated by means of an example.  Ultimately, the
+method should have negligible run-time costs.
+
+\end{abstract}
+
+\section{Introduction}
+
+There are two aspects to the dimensional analysis of computer
+programs:
+
+\begin{enumerate}
+
+\item Verifying the dimensional integrity of expressions.  This
+prevents nonsense like adding mass to time.
+
+\item Provide automatic scaling between quantities.  For example,
+if a quantity in inches is added to a quantity in centimeters, one
+of the quantities needs to be scaled appropriately before the
+addition can be performed.
+
+\end{enumerate}
+
+The proposed method provides (1).  It circumvents the need for
+(2), by representing all quantities internally using only a single
+reference unit (specified by the programmer) for each
+dimension.\footnote{In this paper, we distinguish between the
+terms ``dimension'' and ``unit''.  Informally, a {\em dimension}
+corresponds to the quantity which is measured, whereas a {\em
+unit} is a standard measure of the quantity, relative to which all
+other measurements are done.  For example, a {\em gram} is a unit
+for the {\em mass} dimension.}
+
+The method allows static checking of the dimensional consistency
+of expressions involving the usual arithmetic and relational
+operators with negligible run-time overhead (in theory).  It is
+also possible to specify dimensioned literals using arbitrary
+units, as well as do I/O of dimensioned quantities with full
+static checking.  The term {\em static checking} means that the
+checking is done before run-time: usually at compile-time, but
+sometimes at link-time.
+
+The sequel assumes that the reader has some familiarity with \cpp.
+
+\section{The Basic Idea} 
+
+\label{Sec:Basic} 
+
+The method makes extensive use of \cpp\ templates to track the
+dimensions of quantities at compile-time.  The basic idea is
+straight-forward and is illustrated by three simple \cpp\ program
+fragments.  The first fragment declares a class {\tt Dim} which
+represents dimensioned quantities in a dimensional space
+characterized by the three dimensions {\em mass}, {\em length} and
+{\em time}.
+{\small
+\begin{verbatim}
+template<int M, int L, int T> class Dim {
+  double val;                   //Actual value.
+public:
+  Dim(double v= 0) { val= v; }  //Constructor. 
+  double value() { return val; }//Accessor.  
+}; 
+\end{verbatim} }
+When the {\tt Dim} class is used for a particular dimension, the
+template arguments {\tt M}, {\tt L} and {\tt T} provided should
+correspond to the exponents of mass, length and time in that
+dimension.  Using this class it is easy to enforce dimensional
+consistency. For example, to enforce the restriction that only
+quantities having identical dimensions can be added together, we
+can overload the {\tt +} operator to work on {\tt Dim}s as
+follows: 
+{\small 
+\begin{verbatim} 
+template<int M, int L, int T>
+Dim<M, L, T> operator+(Dim<M, L, T> &d1,
+                       Dim<M, L, T> &d2) {
+  return Dim<M, L, T>(d1.value() + d2.value());
+}
+\end{verbatim}
+}
+Since {\tt operator+} is defined only for {\tt Dim}s with the same
+template arguments (corresponding to the same dimensional exponents),
+the \cpp\ compiler will enforce the restriction that only
+quantities having identical dimensions can be added together.
+
+Multiplying two dimensioned quantities together produces a
+dimensioned quantity whose dimensional exponents are the sum of
+the dimensional exponents of the operands.  Again, using template
+arguments for the dimensional exponents, we can overload the {\tt
+*} operator to work on {\tt Dim}s as follows:
+{\small
+\begin{verbatim}
+template<int M1, int L1, int T1, 
+         int M2, int L2, int T2>
+Dim<M1 + M2, L1 + L2, T1 + T2> 
+  operator*(Dim<M1, L1, T1> &d1, 
+            Dim<M2, L2, T2> &d2) {
+  return Dim<M1 + M2, L1 + L2, T1 + T2>
+           (d1.value() * d2.value());
+}
+\end{verbatim}
+}
+
+The above examples summarize the essential ideas behind the
+proposed method.  The rest is mere syntactic sugar (though
+essential to developing a usable system).
+
+\section{But is it \cpp?}
+
+Unfortunately, the two function templates used in the last section
+are not allowed by the \cpp\ Annotated Reference Manual (ARM)
+\cite{ellis:90}.  On pg. 347 of the ARM there is a categorical
+rule: \begin{quote} All {\em template-arg\/}s for a function
+template must be {\tt type-argument}s.  \end{quote} We violate
+this rule, since our template arguments are {\tt int}s.  We can
+avoid the problem for the {\tt operator+} function by simply
+redefining {\tt operator+} as a member function of the {\tt Dim}
+class.  However, in the absence of nested template declarations
+(the ARM forbids them), we cannot declare {\tt operator*} to be a
+member function as there does not appear to be any way to bind the
+template arguments of the second operand.  We are left with no
+choice but to use a function template to define {\tt operator*}.
+This makes our programs violate the language definition and
+unacceptable to at least one existing compiler (Borland's BCC
+4.0).  Fortunately, another existing compiler (the Free Software
+Foundation's \gpp\ \cite{stallman:93}) accepts such function
+templates.
+
+The justification presented by the ARM for the problematic rule is
+that template arguments ``must be deduced from actual arguments in
+calls of the template function.''  The rule appears to be too
+strong for its justification; in fact the weaker rule on
+pg. 346 of the ARM \begin{quote} Every {\em template-arg}
+specified in the {\em temp\-late-arg-list} must be used in the
+argument types of a function template.  \end{quote} appears to be
+sufficient, and eliminates our problem.
+
+Another problem with forbidding function templates with non-type
+template arguments, is that it appears impossible to define a
+non-inline function which is a friend of a class which uses
+non-type template arguments.  Also, since there are no
+restrictions on the use of non-type template arguments within
+member functions, permitting their use in function templates
+should not add greatly to the complexity of a compiler.  Hence,
+even if it is not possible to allow such function templates in the
+language definition, compiler writers could permit their use as a
+language extension.
+
+
+\section{An Example} 
+
+\label{Sec:Example}
+
+Using \gpp, it was possible to implement a general dimensional
+analysis package {\tt Dim.h} which incorporates the ideas
+discussed in section~\ref{Sec:Basic}.  Some of the capabilities of
+this package are illustrated by the following program which
+uses \cpp\ to simulate a block sliding down a surface.  The
+program is based on similar examples presented in
+\cite{cmelik:88} and \cite{hilfinger:88}.
+
+\begin{figure}
+
+{\footnotesize
+\begin{verbatim}
+01 #include <iostream.h>
+02 
+03 #include <math.h>
+04 
+05 #define N_DIM 3
+06 #define DIM_VAL_TYPE double
+07 //#define DIM_NO_CHECK
+08 
+09 #include "Dim.h"
+10 
+11 //Name each dimensional axis.
+12 #define MASS_DIM     0
+13 #define LENGTH_DIM   1
+14 #define TIME_DIM     2
+15 
+16 //Declare units.
+17 UNIT(Gm, MASS_DIM, 1.0, "gm");
+18 UNIT(Cm, LENGTH_DIM, 1.0, "cm");
+19 UNIT(Feet, LENGTH_DIM, 2.54*12, "feet");
+20 UNIT(Sec, TIME_DIM, 1.0, "sec");
+21 
+22 typedef DIM( 1,  0,  0) Mass;
+23 typedef DIM( 0,  1,  0) Length;
+24 typedef DIM( 0,  0,  1) Time;
+25 typedef DIM( 0,  1, -2) Acceleration;
+26 typedef DIM( 1,  0, -1) Friction;
+27 typedef DIM( 0,  1, -1) Velocity;
+28 typedef DIM( 0,  0,  0) Number;
+\end{verbatim}
+}
+
+\caption{Program Declarations}
+\label{Fig:Dec}
+\end{figure}
+
+Figure \ref{Fig:Dec} shows the declarations in the program.  Lines
+5 and 6 give definitions used by the package: {\tt N\_DIM} is the
+number of dimensions, and {\tt DIM\_VAL\_TYPE} describes the
+default underlying type for dimensioned quantities.  The package
+is included on line 9, and defines several macros which are used
+subsequently. On lines 17--20 we use one of those macros to
+declare units along each dimensional axis with conversion factors
+(to the chosen reference units) and print-names.  From the given
+conversion factors, we can deduce that {\tt Gm} is the chosen
+reference unit along {\tt MASS\_DIM}, {\tt Cm} along {\tt LENGTH\_DIM}
+and {\tt Sec} along {\tt TIME\_DIM}.  Using {\tt UNIT(}{\em
+Name}{\tt,} $\ldots$ {\tt )} also creates a scaling object called
+{\em Name} and a units object called {\em Name}\_.  Specifically,
+the given declarations create scaling objects {\tt Gm}, {\tt Cm},
+{\tt Feet} and {\tt Sec} and unit objects {\tt Gm\_}, {\tt Cm\_},
+{\tt Feet\_} and {\tt Sec\_}.  The use of these objects will be
+described later.  Finally we {\tt typedef} mnemonic names for
+several dimensioned types.
+
+Figure \ref{Fig:Code} shows the program code.  We first define an
+auxiliary function {\tt height()}.  Note that the multiplication
+of a dimensioned length by the scalar {\tt 0.5} is accepted by the
+system.  In the main program which follows, we first declare
+dimensioned constants and variables on lines 6--14.  Note that the
+scaling objects {\tt Gm}, {\tt Cm} and {\tt Sec} created by the
+{\tt UNIT} macro are used to create dimensioned literals in a very
+natural way.  The compiler will signal an error if the dimension
+of the initializing expression conflicts with the dimension of the
+variable being declared.
+
+On lines 16--20 we output prompts and input dimensioned
+quantities.  Scaling objects are used in a manner similar to
+manipulators \cite{stroustrup:91} to allow dimensional validation
+of the input statements at compile time.  These input manipulators
+also serve to scale the input values from the specified units to
+their chosen reference units.
+
+\begin{figure}
+
+{\footnotesize
+\begin{verbatim}
+01 static Length height(Length x) {
+02   return 0.5 * x;
+03 }
+04 
+05 int main() {
+06   const Acceleration g= 980.7 * Cm/(Sec*Sec);
+07   const Mass blockMass= 1000 * Gm;
+08   const Length deltaX= 0.01 * Cm;
+09   const Friction friction= 20 * Gm/Sec;
+10   const Number a= 1.0;
+11   Length x, y;       //Initialized to 0.
+12   const Time deltaT= 0.1*Sec;
+13   Velocity v;
+14   Time maxTime;
+15 
+16   cout << "Enter initial velocity (cm/sec): " 
+17        << flush;
+18   cin >> Cm/Sec >> v;
+19   cout << "Enter time limit (sec): " << flush;
+20   cin >> Sec >> maxTime;
+21 
+22   for (Time t= 0*Sec; t < maxTime; t+= deltaT) {
+23     Number slope= (height(x + deltaX) - y)/deltaX;
+24     Number cosAngle= 
+25       1.0/sqrt(1 + +(slope * slope));
+26     x+= v * deltaT * cosAngle;
+27     y= height(x);
+28     v+= deltaT * (g * slope * cosAngle - 
+29                   v * friction / blockMass);
+30     cout << "At T= " << Sec_ << t << " ";
+31     cout << "X= " << Feet_ << x << "; ";
+32     cout << " Y= " << Feet_ << y << "; ";
+33     cout << " and V= " << Feet_/Sec_ << v << "; ";
+34     cout << '\n';
+35   }
+36 
+37   return 0;
+38 }
+\end{verbatim}
+}
+
+\caption{Program Code}
+\label{Fig:Code}
+\end{figure}
+
+Lines 22--29 illustrate the very natural expressions possible due
+to operator overloading.  If any of the expressions is
+dimensionally inconsistent, a compile-time error occurs.  Line 25
+uses the unary {\tt +} operator to extract the actual value of a
+(dimensionless) {\tt DIM} expression (as in \cite{hilfinger:88}).
+Lines 30--34 illustrate the use of the unit objects (created by
+the {\tt UNIT} macro) as output manipulators to output the
+print-names of the units for a quantity along with its magnitude.
+The unit objects in the output statements also perform automatic
+scaling of the length dimension from its internal representation
+in {\tt Cm} to its output in {\tt Feet}.  Once again, a
+compile-time error results if the dimension of the constructed
+unit object does not match the dimension of the quantity being
+output.
+
+The implementation and capabilities of the {\tt Dim.h} package
+will be more fully described elsewhere.  For now, we simply list
+some of its capabilities:
+
+\begin{itemize}
+
+\item Allows up to 10 dimensions.
+
+\item Partial support for using arbitrary underlying types for
+dimensioned quantities.\footnote{Full support is not provided
+because of an internal bug in \gpp.}  Hence it is possible to have
+dimensioned {\tt struct}s (which may be convenient for
+representing a vector using polar coordinates).
+
+\item Dimensional checking (and any consequent overhead) can be
+turned off completely by defining a single preprocessor symbol
+(see the comment on line 7 in Figure \ref{Fig:Dec}).  With this
+option, most template classes and the entire {\tt DIM} class
+disappear.  Operations on dimensioned quantities operate directly
+on the underlying type.
+
+\item The use of arbitrary rationals as dimensional exponents.
+Dimensional expressions are allowed to be raised to {\bf constant}
+rational powers, albeit with a relatively clumsy
+syntax.\footnote{It has not been possible to debug this feature
+fully, as \gpp\ does not currently implement template argument
+expressions involving {\tt *} and {\tt /}.}
+
+\end{itemize}
+
+\section{Analysis of the Method}
+The advantages of the proposed method are as follows:
+\begin{itemize}
+\item Full analysis of dimensional correctness {\bf before} run-time. 
+
+\item No run-time space overhead for dimensional data, unlike the
+method proposed in \cite{cmelik:88}.  Space is used for storing
+conversion factors and print-names, but similar amounts of space
+would be used by any method which converted between units or
+printed them out.
+
+\item Once compiler technology for processing inline template
+functions is sufficiently developed, there should not be any
+substantial time or code-space overhead.  This follows from the
+statement on pg. 342 of the ARM that the \cpp\ template mechanism
+``allows close to optimal run-time performance through macro
+expansion of definitions and inlining of function calls.''
+
+\item The method almost fits into an existing language and is
+accepted by an existing compiler.  This is in contrast to methods
+like those in \cite{gehani:77} or \cite{house:83} which require
+changes to existing languages.
+
+\item Higher programmer productivity, since programmers need not
+spend their time tracking down dimensional errors at run-time.
+
+\end{itemize}
+
+Some of the disadvantages of the method, along with possible
+solutions are:
+
+\begin{itemize}
+
+\item All quantities having a particular dimension use the same
+internal unit. Hence the programmer does not have sufficient
+control over the precision of dimensional quantities, which may
+lead to an accumulation of floating point error.  This may be the
+most serious disadvantage of the method.  It may be possible to
+extend the method to allow multiple reference units along each
+dimension.  In the interim, a possible workaround would be for the
+programmer to assign the same quantity to multiple dimensions
+having internal units of different precision, and manually program
+operations involving these dimensions.
+
+\item The binary arithmetic operations require that their operands
+be dimensioned quantities with {\em identical} underlying types.
+This can be inconvenient when dimensioned quantities contain
+multiple underlying types. For example, addition of a dimensioned
+{\tt int} to a dimensioned {\tt double} is not supported.
+
+\item No direct support for derived units.  However, it is always
+possible for the programmer to include definitions like:
+{\small
+\begin{verbatim}
+#define Newton	(Kg*Meter/(Sec*Sec))
+#define Newton_	(Kg_*Meter_/(Sec_*Sec_))
+\end{verbatim}
+}
+and to provide output functions to handle such derived units.
+
+\item The set of dimensions required by the program must be known
+at compile-time.
+
+\item It is not possible to represent relationships between units
+having different origins (like that between the Celsius and
+Fahrenheit temperature scales).  This should not be a problem as
+such situations are relatively uncommon.
+
+\item An increase in compilation time (by over a factor of 3 for
+the example in section \ref{Sec:Example}).   However, it is still much
+easier for a compiler rather than a human to find errors.
+
+\item In some \cpp\ environments, a few dimensional errors may not
+be detected until link-time when definitions are generated for
+template functions.  This may be rather inconvenient.
+
+\item Errors are not reported in terms of dimensional violations,
+but in terms of missing function definitions.  The error messages
+often contain instantiated template arguments and even mangled
+function names.  It may be hard for a programmer to relate an
+error message to a dimensional error.  Tools could be developed
+to convert concrete error messages to more abstract
+dimensional error messages.
+
+\item Some \cpp\ environments expect help from the programmer in
+determining which template instantiations are required.  The
+package provides the programmer with a macro to declare instances
+of all the (hidden and visible) template classes used by it, but
+the programmer still needs to determine which instances need to be
+declared. 
+
+\item The code produced by the one compiler (\gpp) known to accept
+the package is currently of poor quality with no inline expansion
+of template functions. Hopefully, this problem should disappear
+over time, for the reasons mentioned above.  In the interim, a
+program should first be compiled with full dimensional checking.
+Once it is free of dimensional errors, it can be recompiled with
+dimensional checking turned off (as discussed in the previous
+section).  However, this recompilation is rather inconvenient and
+some programmers may sometimes choose to omit the first
+compilation step.
+
+\end{itemize}
+
+\section{Conclusions}
+
+It should be realized that it is possible to perform compile-time
+dimensional analysis in any language which has name-equivalence of
+structures.  The programmer needs to define a unique structure for
+each dimension which may be required by the program at run-time,
+and also define functions implementing all the required operations
+over all the dimensions.  This approach suffers from poor syntax,
+run-time overhead due to function-call overhead and inordinate
+tedium for the programmer.  \cpp\ provides a happy combination of
+operator overloading (which provides readable syntax), inline
+functions (which eliminate function-call overhead) and templates
+(which replace the programmer's tedium with that of the compiler)
+It is the coming together of these features which makes static
+dimensional analysis practical.
+
+\section*{Note} 
+The dimensional analysis package mentioned above runs under \gpp\
+version 2.5.8.  It can be obtained gratis by those who are
+interested, by sending an email request to the author.
+
+\section*{Acknowledgments}
+The essential ideas behind this paper were conceived while the
+author was with the computer science department at the State
+University of New York at Binghamton.
+
+
+\bibliography{dim}
+\bibliographystyle{alpha}
+
+\end{document}

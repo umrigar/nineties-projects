@@ -1,0 +1,46 @@
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:22 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:25 `PTR' deallocated.
+memtest.c:25 `PTR' allocated.
+memtest.c:28 `PTR' deallocated.
+memtest.c:28 `PTR' deallocated.
+memtest.c:28 `PTR' deallocated.
+memtest.c:28 `PTR' deallocated.
+memtest.c:28 `PTR' deallocated.
+***** CURRENT ALLOCATIONS:
+memtest.c:25 `PTR' present.
+memtest.c:25 `PTR' present.
+memtest.c:25 `PTR' present.
+memtest.c:25 `PTR' present.
+memtest.c:25 `PTR' present.
+memtest.c:33 `PTR' deallocated.
+memtest.c:33 *** Memory deallocation error for `PTR'.
+memtest.c:33 memDebug: Memory deallocation error for `PTR'.
+Check memdebug.log for details.
+fatal termination.

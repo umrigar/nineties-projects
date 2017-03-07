@@ -1,0 +1,66 @@
+{ /* Mix for flow-chart language.  Pg. 87 of Jones, Gomard & Sestoft. */
+  read [sugaredProgram, division, vs0];
+  program:= desugar(sugaredProgram);
+  pp0:= initial_pp(program); xpp:= cons_xpp(pp0, vs0); 
+  code:= init_code(read_filter(program, division));
+  pendingPPs:= pending_pps(program, division);
+  liveVars:= get_live_vars(program, division, pendingPPs);
+  marked:= ~[]; pending:= add_new_xpp(xpp, ~[], marked, liveVars);
+  while pending \= ~[] do {
+    xpp:= hd(pending); pending:= tl(pending);
+    marked:= cons(xpp, marked);
+    pp:= arg(1, xpp); vs:= arg(2, xpp);
+    possiblePPs:= pendingPPs; pp1:= ~[];
+    while (possiblePPs \= ~[]) do { 
+      pp1:= hd(possiblePPs); possiblePPs:= tl(possiblePPs);
+      if (pp == pp1) then goto XX
+    };
+    XX: bb:= get_basic_block(pp1, program);
+    code:= extend_code(code, xlabel(xpp));
+    while bb \= ~[] do {
+      command:= hd(bb); 
+      case command of {
+        ~(_:= _): {
+	   bb:= tl(bb);
+	   x:= assgn_lhs(command); exp:= assgn_rhs(command);
+	   if is_static(x, division) 
+             then { vs:= store_update(vs, x, eval(exp, vs)) }
+	     else { code:= extend_code(code, cons_assgn(x, reduce(exp, vs))) }
+        };
+	~label(_): {
+	   bb:= tl(bb)
+	};
+	~(goto _): {	%Compress transition.
+	   bb:= get_basic_block(goto_label(command), program)
+     	};
+        ~(if _): {
+	   exp:= if_test(command);
+	   thenLabel:= then_label(command); elseLabel:= else_label(command); 
+	   if is_static(exp, division) 
+	     then {
+	       if eval(exp, vs)
+	         then { bb:= get_basic_block(thenLabel, program) }
+		 else { bb:= get_basic_block(elseLabel, program) }
+             }
+             else {
+	       bb:= ~[];
+	       then_xpp:= cons_xpp(thenLabel, vs);
+	       else_xpp:= cons_xpp(elseLabel, vs);
+	       pending:= add_new_xpp(else_xpp, pending, marked, liveVars);
+	       pending:= add_new_xpp(then_xpp, pending, marked, liveVars);
+	       code:= extend_code(code, 
+				  cons_if(reduce(exp, vs), then_xpp, else_xpp))
+             }
+        };
+        ~(return _): {
+	  bb:= ~[];
+	  code:= extend_code(code, cons_return(reduce(return_exp(command), vs)))
+	};
+	default: {
+	  return ~error
+  	}
+      } /* case command of */
+    }	/* while bb \= ~[] do */
+  };	/* while pending \= ~[] do */
+  return complete_code(code)
+}.

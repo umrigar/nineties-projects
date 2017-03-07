@@ -1,0 +1,29 @@
+AUG 97 Version 1.02
+No major code changes; merely repackaged for WWW distribution.
+Commented out definition of PI in period.cc.
+Corrected some incorrect comments in Dim.hm4
+Edited README.
+Added Makefile, index.html.
+
+
+JUNE 95 Version 1.01.
+Changed the name of the file Dim.h.m4 to Dim.hm4 to facilitate transit
+through the MSDos world.
+
+To go from gcc 2.6.0 to 2.6.3, I changed constants in the examples from ints to
+doubles, since 2.6.3 enforces the restriction that template functions must
+match exactly.  
+
+Changed some const'ness declarations for powers in Dim.hm4.  This resulted
+in dim-1.01.
+
+Added this CHANGES file, edited the README.
+
+SEPTEMBER 94 Version 1.0.
+To go from gcc 2.5.8 to 2.6.0, I changed some of the const'ness of declarations
+in Dim.h.m4 as 2.6.0 seems to do more const'ness checking than 2.5.8.
+The resulting dim-1.0 was the first public release.
+
+MARCH 94.
+Package completed and ran under gcc 2.5.8.
+

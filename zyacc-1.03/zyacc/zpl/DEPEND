@@ -1,0 +1,5 @@
+#Automatically generated dependencies.
+plops.o: plops.c plops.h ../../libz/ccport.h scan.h ../../libz/area.h
+scan.o: scan.c scan.h ../../libz/ccport.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/strspace.h ../../libz/textid.h parse.h
+scanlib.o: scanlib.c

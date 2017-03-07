@@ -1,0 +1,134 @@
+use FileHandle;
+
+my $formatTable= {
+  'DOC' => [
+     "<doc>\n",
+     \&formatTable1,
+     "</doc>\n",
+  ],
+  'PARA' => [
+    "<para>\n", \&formatTable1, "</para>\n", 
+  ],
+  'QUOTE' => [
+    "<quote>\n", \&formatTable1, "</quote>\n",
+  ],
+  'CODE' => [
+    "<code>", \&xmlText1, "</code>",
+  ],
+  'BOLD' => [
+    "<bold>", \&xmlText1, "</bold>",
+  ],
+  'ITALIC' => [
+    "<emph>", \&xmlText1, "</emph>",
+  ],
+  'DISPLAY_MATH' => [
+    "<displayMath>", \&xmlText1, "</displayMath>",
+  ],
+  'INLINE_MATH' => [
+    "<inlineMath>", \&xmlText1, "</inlineMath>",
+  ],
+  'LINK' => [
+    "<link href=\"\$1\">", \&xmlText2, "</link>",
+  ],
+  'DEF' => [
+    "</def name=\"\$1\">",
+  ],
+  'PASSTHRU' => [
+    "<passthru>\$1</passthru>",
+  ],
+  'TEXT' => [
+    \&xmlText1,
+  ],
+  'HEAD0' => [
+    '<h0>', \&formatTable1, "</h0>\n", \&formatTable2,
+  ],
+  'HEAD1' => [
+    '<h1>', \&formatTable1, "</h1>\n", \&formatTable2,
+  ],
+  'HEAD2' => [
+    '<h2>', \&formatTable1, "</h2>\n", \&formatTable2,
+  ],
+  'HEAD3' => [
+    '<h3>', \&formatTable1, "</h3>\n", \&formatTable2,
+  ],
+  'HEAD4' => [
+    '<h4>', \&formatTable1, "</h4>\n", \&formatTable2,
+  ],
+  'HEAD5' => [
+    '<h5>', \&formatTable1, "</h5>\n", \&formatTable2,
+  ],
+  'ITEMIZED_LIST' => [
+    "<itemizedList>\n",  \&formatTable2, "</itemizedList>\n",
+  ],
+  'ITEMIZED_ITEM' => [
+    "<itemizedItem>\n", \&formatTable1, \&formatTable3, "</itemizedItem>\n"
+  ],
+  'ORDERED_LIST' => [
+    "<orderedList type=\"\$1\">\n",  \&formatTable2, "</orderedList>\n",
+  ],
+  'ORDERED_ITEM' => [
+    "<orderedItem>\n", \&formatTable1, \&formatTable3, "</orderedItem>\n"
+  ],
+  'DESC_LIST' => [
+    "<descriptionList>\n",  \&formatTable1, "</descriptionList>\n",
+  ],
+  'DESC_ITEM' => [
+    "<descriptionItem>",
+    "<descriptionTerm>\n", \&formatTable2, "<descriptionTerm>",
+    "descriptionDefinition>\n", \&formatTable1, "</descriptionDefinition>\n",
+    "</descriptionItem>\n",
+    \&formatTable3,
+  ],
+  'OBEY' => [
+    "<obey>\n", \&formatTable1, "</obey>\n",
+  ],
+  'VERBATIM' => [
+    "<verbatim>\n", \&xmlText1, "</verbatim>\n",
+  ],
+  'TABLE' => [
+    "<table>\n", \&formatTable1, "</table>\n",
+  ],
+  'TABLE_HEADING' => [
+    "<tableHeading>\n", \&formatTable1, "</tableHeading>\n",
+  ],
+  'TABLE_ROW' => [
+    "<tableRow>\n", \&formatTable1, "</tableRow>\n",
+  ],
+  'TABLE_HEADER' => [
+    "<tableHeader align=\"\$2\">\n", \&formatTable1, "</tableHeader>\n",
+  ],
+  'TABLE_DATA' => [
+    "<tableData align=\"\$2\">\n", \&formatTable1, "</tableData>\n",
+  ],
+
+};
+      
+sub xmlText($$)
+{
+  my($fileHandle, $text)= @_;
+  $text=~ s/\&/\&amp;/g;
+  $text=~ s/\</\&lt;/g;
+  $text=~ s/\>/\&gt;/g;
+  print $fileHandle $text;
+} 
+
+sub xmlText1($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  xmlText($outFile, $currentParse->[1]);
+}
+
+sub xmlText2($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  xmlText($outFile, $currentParse->[2]);
+}
+
+
+sub doFormat($$)
+{
+  my($inFile, $parse)= @_;
+  my $fh= new FileHandle ">-";
+  formatTable($fh, $formatTable, $parse, $parse);
+}
+

@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Bugs and Deficiencies</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_11.html">previous</A>, <A HREF="zyacc_13.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<H1><A NAME="SEC125" HREF="zyacc_toc.html#SEC125">Bugs and Deficiencies</A></H1>
+<P>
+Internal versions of the Zyacc parser generator have been used by me since
+1995.  It has been used by about 45 students in compiler construction
+courses.  There have been some major rewrites.
+<P>
+<H2><A NAME="SEC126" HREF="zyacc_toc.html#SEC126">Suspicions</A></H2>
+Normally, when a program has been completed, one has a reasonable idea where
+bugs might still lurk.  On that basis, for what they are worth, I present my
+current suspicions:
+<P>
+<DL COMPACT>
+<DT>The Parser Generator
+<DD>I feel fairly good about the code which actually generates parsers.  Under
+normal error-free operation, the weakest areas may be the code which does
+the LALR computation and the graph coloring for packing inherited
+attributes (since most states of most parsers can get by with SLR lookahead
+and most programs I've written didn't make very heavy use of inherited
+attributes, the code has just not been exercised enough).  
+
+The bugs most likely to manifest themselves will probably be
+<CODE>assert</CODE>ion failures <STRONG>caused by an erroneous Zyacc source file</STRONG>.
+In that case, you can simply correct the error in the Zyacc source file and
+continue on with reasonable confidence (after submitting a bug report, of
+course).
+
+<DT>The Runtime System
+<DD>The runtime system has been fairly stable for a while.  The weakest area may
+be error processing.
+
+</DL>
+<P>
+<H2><A NAME="SEC127" HREF="zyacc_toc.html#SEC127">Bug Reports</A></H2>
+<P>
+First you will need to be sure that you have found a Zyacc bug:
+<P>
+<UL>
+
+<LI>
+If when running Zyacc, it bombs with a assertion failure or a core dump, you
+can be sure that you have uncovered a bug.  However, even though you have
+uncovered a Zyacc bug, the problem may have been caused by an error in your
+source file; you can fix the error and continue working.
+
+<LI>
+If when running a Zyacc generated parser, it bombs or does not do what you
+intended it to do, it is much more difficult to be sure whether the problem
+is within the Zyacc runtime system or in your code.  If it bombs within the
+main parser function, make sure that it is not within your actions.
+
+</UL>
+<P>
+If you are sure that you have uncovered a bug, try to distil it down to a
+test program which is as short as possible while still exhibiting the bug.
+Record a log which exhibits the bug.  Make sure that you mention the version
+of Zyacc you are using in your bug report.
+<P>
+Bug reports can be mailed to:
+<P>
+<PRE>
+zdu@acm.org
+</PRE>
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_11.html">previous</A>, <A HREF="zyacc_13.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,1246 @@
+This is Info file zyacc.info, produced by Makeinfo-1.64 from the input
+file zyacc.texi.
+
+
+File: zyacc.info,  Node: Recursion,  Next: Semantics,  Prev: Rules,  Up: Grammar File
+
+Recursive Rules
+===============
+
+   A rule is called "recursive" when its RESULT nonterminal appears
+also on its right hand side.  Nearly all Zyacc grammars need to use
+recursion, because that is the only way to define a sequence of any
+number of somethings.  Consider this recursive definition of a
+comma-separated sequence of one or more expressions:
+
+     expseq1
+       : exp
+       | expseq1 ',' exp
+       ;
+
+Since the recursive use of `expseq1' is the leftmost symbol in the
+right hand side, we call this "left recursion".  By contrast, here the
+same construct is defined using "right recursion":
+
+     expseq1
+       : exp
+       | exp ',' expseq1
+       ;
+
+Any kind of sequence can be defined using either left recursion or
+right recursion, but you should always use left recursion, because it
+can parse a sequence of any number of elements with bounded stack
+space.  Right recursion uses up space on the Zyacc stack in proportion
+to the number of elements in the sequence, because all the elements
+must be shifted onto the stack before the rule can be applied even
+once.  *Note The Zyacc Parser Algorithm: Algorithm, for further
+explanation of this.
+
+   "Indirect" or "mutual" recursion occurs when the result of the rule
+does not appear directly on its right hand side, but does appear in
+rules for other nonterminals which do appear on its right hand side.
+
+   For example:
+
+     expr
+       : primary
+       | primary '+' primary
+       ;
+     
+     primary
+       :  constant
+       | '(' expr ')'
+       ;
+
+defines two mutually-recursive nonterminals, since each refers to the
+other.
+
+
+File: zyacc.info,  Node: Semantics,  Next: Declarations,  Prev: Recursion,  Up: Grammar File
+
+Defining Language Semantics
+===========================
+
+   The grammar rules for a language determine only the syntax.  The
+semantics are determined by the semantic values associated with various
+tokens and groupings, and by the actions taken when various groupings
+are recognized.
+
+   For example, the calculator calculates properly because the value
+associated with each expression is the proper number; it adds properly
+because the action for the grouping `X + Y' is to add the numbers
+associated with X and Y.
+
+* Menu:
+
+* Value Type::                  Specifying one data type for all semantic values.
+* Multiple Types::              Specifying several alternative data types.
+* Actions::                     An action is the semantic definition of a grammar rule.
+* Action Types::                Specifying data types for actions to operate on.
+* Mid-Rule Actions::            Most actions go at the end of a rule.
+                      This says when, why and how to use the exceptional
+                        action in the middle of a rule.
+* Named Attributes::            Attributes can be named.
+* Inherited Attributes::        Attributes allow context information.
+* Semantic Tests::              Parsing decisions can depend on semantics.
+
+
+File: zyacc.info,  Node: Value Type,  Next: Multiple Types,  Prev: Semantics,  Up: Semantics
+
+Data Types of Semantic Values
+-----------------------------
+
+   In a simple program it may be sufficient to use the same data type
+for the semantic values of all language constructs.  This was true in
+the RPN and infix calculator examples (*note Reverse Polish Notation
+Calculator: RPN Calc.).
+
+   Zyacc's default is to use type `int' for all semantic values.  To
+specify some other type, define `YYSTYPE' as a macro, like this:
+
+     #define YYSTYPE double
+
+This macro definition must go in the C declarations section of the
+grammar file (*note Outline of a Zyacc Grammar: Grammar Outline.).
+
+   Only types mentioned in a explicit `%union' declaration and types
+used for named attributes (*note Named Attributes::.) for *terminal*
+symbols form part of `YYSTYPE'.  Hence if you use named attributes for
+nonterminals, then those associated types do not form part of
+`YYSTYPE'.  Since `YYSTYPE' is often used by a front-end component like
+a scanner, and the types used for nonterminals are more back-end
+oriented, the fact that the nonterminal types are not part of
+`YYSTYPE', avoids an egregious coupling between front and back ends.
+
+
+File: zyacc.info,  Node: Multiple Types,  Next: Actions,  Prev: Value Type,  Up: Semantics
+
+More Than One Value Type
+------------------------
+
+   In most programs, you will need different data types for different
+kinds of tokens and groupings.  For example, a numeric constant may
+need type `int' or `long', while a string constant needs type `char *',
+and an identifier might need a pointer to an entry in the symbol table.
+
+   To use more than one data type for semantic values in one parser,
+Zyacc requires you to do two things:
+
+   * Specify the entire collection of possible data types, with the
+     `%union' Zyacc declaration (*note The Collection of Value Types:
+     Union Decl.).
+
+   * Choose one of those types for each symbol (terminal or nonterminal)
+     for which semantic values are used.  This is done for tokens with
+     the `%token' Zyacc declaration (*note Token Type Names: Token
+     Decl.) and for groupings with the `%type' Zyacc declaration (*note
+     Nonterminal Symbols: Type Decl.).
+
+
+File: zyacc.info,  Node: Actions,  Next: Action Types,  Prev: Multiple Types,  Up: Semantics
+
+Actions
+-------
+
+   An action accompanies a syntactic rule and contains C code to be
+executed each time an instance of that rule is recognized.  The task of
+most actions is to compute a semantic value for the grouping built by
+the rule from the semantic values associated with tokens or smaller
+groupings.
+
+   An action consists of C statements surrounded by braces, much like a
+compound statement in C.  It can be placed at any position in the rule;
+it is executed at that position.  Most rules have just one action at
+the end of the rule, following all the components.  Actions in the
+middle of a rule are tricky and used only for special purposes (*note
+Actions in Mid-Rule: Mid-Rule Actions.).
+
+   The C code in an action can refer to the semantic values of the
+components matched by the rule with the construct `$N', which stands for
+the value of the Nth component.  The semantic value for the grouping
+being constructed is `$$'.  (Zyacc translates both of these constructs
+into array element references when it copies the actions into the parser
+file.)
+
+   Here is a typical example:
+
+     exp
+       : exp '+' exp { $$ = $1 + $3; }
+       ;
+
+This rule constructs an `exp' from two smaller `exp' groupings
+connected by a plus-sign token.  In the action, `$1' and `$3' refer to
+the semantic values of the two component `exp' groupings, which are the
+first and third symbols on the right hand side of the rule.  The sum is
+stored into `$$' so that it becomes the semantic value of the
+addition-expression just recognized by the rule.  If there were a
+useful semantic value associated with the `+' token, it could be
+referred to as `$2'.
+
+   If you don't specify an action for a rule, Zyacc supplies a default:
+`$$ = $1'.  Thus, the value of the first symbol in the rule becomes the
+value of the whole rule.  Of course, the default rule is valid only if
+the two data types match.  There is no meaningful default action for an
+empty rule; every empty rule must have an explicit action unless the
+rule's value does not matter.
+
+   `$N' with N zero or negative is allowed for reference to tokens and
+groupings on the stack *before* those that match the current rule.
+This is a very risky practice, and to use it reliably you must be
+certain of the context in which the rule is applied.  Here is a case in
+which you can use this reliably:
+
+     foo
+       : expr bar '+' expr  { ... }
+       | expr bar '-' expr  { ... }
+       ;
+     
+     bar
+       : /* empty */
+         { previous_expr = $0; }
+       ;
+
+   As long as `bar' is used only in the fashion shown here, `$0' always
+refers to the `expr' which precedes `bar' in the definition of `foo'.
+
+
+File: zyacc.info,  Node: Action Types,  Next: Mid-Rule Actions,  Prev: Actions,  Up: Semantics
+
+Data Types of Values in Actions
+-------------------------------
+
+   If you have chosen a single data type for semantic values, the `$$'
+and `$N' constructs always have that data type.
+
+   If you have used `%union' to specify a variety of data types, then
+you must declare a choice among these types for each terminal or
+nonterminal symbol that can have a semantic value.  Then each time you
+use `$$' or `$N', its data type is determined by which symbol it refers
+to in the rule.  In this example,
+
+     exp
+       : exp '+' exp { $$ = $1 + $3; }
+       ;
+
+`$1' and `$3' refer to instances of `exp', so they all have the data
+type declared for the nonterminal symbol `exp'.  If `$2' were used, it
+would have the data type declared for the terminal symbol `'+'',
+whatever that might be.
+
+   Alternatively, you can specify the data type when you refer to the
+value, by inserting `<TYPE>' after the `$' at the beginning of the
+reference.  For example, if you have defined types as shown here:
+
+     %union {
+       int itype;
+       double dtype;
+     }
+
+then you can write `$<itype>1' to refer to the first subunit of the
+rule as an integer, or `$<dtype>1' to refer to it as a double.
+
+
+File: zyacc.info,  Node: Mid-Rule Actions,  Next: Named Attributes,  Prev: Action Types,  Up: Semantics
+
+Actions in Mid-Rule
+-------------------
+
+   Occasionally it is useful to put an action in the middle of a rule.
+These actions are written just like usual end-of-rule actions, but they
+are executed before the parser even recognizes the following components.
+
+   A mid-rule action may refer to the components preceding it using
+`$N', but it may not refer to subsequent components because it is run
+before they are parsed.
+
+   The mid-rule action itself counts as one of the components of the
+rule.  This makes a difference when there is another action later in
+the same rule (and usually there is another at the end): you have to
+count the actions along with the symbols when working out which number
+N to use in `$N'.
+
+   The mid-rule action can also have a semantic value.  The action can
+set its value with an assignment to `$$', and actions later in the rule
+can refer to the value using `$N'.  Since there is no symbol to name
+the action, there is no way to declare a data type for the value in
+advance, so you must use the `$<...>' construct to specify a data type
+each time you refer to this value.
+
+   There is no way to set the value of the entire rule with a mid-rule
+action, because assignments to `$$' do not have that effect.  The only
+way to set the value for the entire rule is with an ordinary action at
+the end of the rule.
+
+   Here is an example from a hypothetical compiler, handling a `let'
+statement that looks like `let (VARIABLE) STATEMENT' and serves to
+create a variable named VARIABLE temporarily for the duration of
+STATEMENT.  To parse this construct, we must put VARIABLE into the
+symbol table while STATEMENT is parsed, then remove it afterward.  Here
+is how it is done:
+
+     stmt
+       : LET '(' var ')'
+           { $<context>$ = push_context (); declare_variable ($3); }
+         stmt
+           { $$ = $6; pop_context ($<context>5); }
+
+As soon as `let (VARIABLE)' has been recognized, the first action is
+run.  It saves a copy of the current semantic context (the list of
+accessible variables) as its semantic value, using alternative
+`context' in the data-type union.  Then it calls `declare_variable' to
+add the new variable to that list.  Once the first action is finished,
+the embedded statement `stmt' can be parsed.  Note that the mid-rule
+action is component number 5, so the `stmt' is component number 6.
+
+   After the embedded statement is parsed, its semantic value becomes
+the value of the entire `let'-statement.  Then the semantic value from
+the earlier action is used to restore the prior list of variables.  This
+removes the temporary `let'-variable from the list so that it won't
+appear to exist while the rest of the program is parsed.
+
+   Taking action before a rule is completely recognized often leads to
+conflicts since the parser must commit to a parse in order to execute
+the action.  For example, the following two rules, without mid-rule
+actions, can coexist in a working parser because the parser can shift
+the open-brace token and look at what follows before deciding whether
+there is a declaration or not:
+
+     compound
+       : '{' declarations statements '}'
+       | '{' statements '}'
+       ;
+
+But when we add a mid-rule action as follows, the rules become
+nonfunctional:
+
+     compound
+       :   { prepare_for_local_variables (); }
+         '{' declarations statements '}'
+       | '{' statements '}'
+       ;
+
+Now the parser is forced to decide whether to run the mid-rule action
+when it has read no farther than the open-brace.  In other words, it
+must commit to using one rule or the other, without sufficient
+information to do it correctly.  (The open-brace token is what is called
+the "look-ahead" token at this time, since the parser is still deciding
+what to do about it.  *Note Look-Ahead Tokens: Look-Ahead.)
+
+   You might think that you could correct the problem by putting
+identical actions into the two rules, like this:
+
+     compound
+       :   { prepare_for_local_variables (); }
+         '{' declarations statements '}'
+       |   { prepare_for_local_variables (); }
+         '{' statements '}'
+       ;
+
+But this does not help, because Zyacc does not realize that the two
+actions are identical.  (Zyacc never tries to understand the C code in
+an action.)
+
+   If the grammar is such that a declaration can be distinguished from a
+statement by the first token (which is true in C), then one solution
+which does work is to put the action after the open-brace, like this:
+
+     compound
+       : '{'
+           { prepare_for_local_variables (); }
+          declarations statements '}'
+       | '{' statements '}'
+       ;
+
+Now the first token of the following declaration or statement, which
+would in any case tell Zyacc which rule to use, can still do so.
+
+   Another solution is to bury the action inside a nonterminal symbol
+which serves as a subroutine:
+
+     subroutine
+       : /* empty */
+           { prepare_for_local_variables (); }
+       ;
+     
+     compound
+       : subroutine '{' declarations statements '}'
+       | subroutine '{' statements '}'
+       ;
+
+Now Zyacc can execute the action in the rule for `subroutine' without
+deciding which rule for `compound' it will eventually use.  Note that
+the action is now at the end of its rule.  Any mid-rule action can be
+converted to an end-of-rule action in this way, and this is what Zyacc
+actually does to implement mid-rule actions.
+
+
+File: zyacc.info,  Node: Named Attributes,  Next: Inherited Attributes,  Prev: Mid-Rule Actions,  Up: Semantics
+
+Named Attributes
+----------------
+
+   In addition to the `$I' numbered attribute notation discussed
+previously, Zyacc allows the attributes of grammar symbols to be
+referred to using named attributes.  The first character in a attribute
+name must be '$' and the remaining characters can consist of
+alphanumerics or the underscore character '_'.  The syntax for using
+named attributes is similar to that for function parameters in C.
+
+   Declarations for named attributes result in automatic additions of
+fields to the `%union' declaration (*note Multiple Types::.).  In fact,
+there is no need for a `%union' declaration if the grammar contains
+only named attributes without any numbered attributes being used at all.
+
+   An example of the use of named attributes in contained in the
+`nmcalc' program discussed in the tutorial section (*note MfCalc with
+Sugared Syntax::.).
+
+* Menu:
+
+* Named Terminal Attributes::   How to declare named attributes for terminals.
+* Named Nonterminal Attributes::  How to declare named attributes for
+                        nonterminals.
+
+
+File: zyacc.info,  Node: Named Terminal Attributes,  Next: Named Nonterminal Attributes,  Prev: Named Attributes,  Up: Named Attributes
+
+Named Terminal Attributes
+.........................
+
+   The named attributes for terminal symbols must be declared in a
+parenthesized list following the `<TYPE>' tag in a `%token', `%left',
+`%right' or `%nonassoc' declaration.  Here are some examples of
+terminal attribute declarations:
+     %token  <id>(const char *$id, unsigned $lineNum) ID_TOK
+     %left   <addOp>(unsigned $lineNum)               '+' '-'
+
+The first example declares that the terminal `ID_TOK' has its semantic
+attributes packaged together with type tag `<id>'.  Each such `<id>'
+package contains two attributes: an attribute named `$id' of type
+`const char *' and an attribute named `$lineNum' of type `unsigned'.
+Similarly, the second example declares that the tokens `'+'' and `'-''
+are left-associative with their attributes packaged together in
+packages of type tag `<addOp>'.  Each such package contains a single
+`unsigned' attribute named `$lineNum'.
+
+   Each occurrence of `<TYPE>(TYPE1 $A1, ..., TYPEM $AM)' results in
+the field `struct {TYPE1 A1; ...; TYPEM AM;} TYPE;' being added to the
+`%union' declaration (*note Multiple Types::.).  For instance, the
+above two examples would add the following fields to the `%union':
+     struct { const char *id; unsigned lineNum; } id;
+     struct { unsigned lineNum; } addOp;
+
+The above fields would be used within the scanner to ensure that the
+correct semantic value is passed via `yylval' (*note Token Values::.).
+For the above examples, appropriate assignments may be
+       yylval.id.id= ...; yylval.id.lineNum= ...;
+       ...
+       yylval.addOp.lineNum= ...;
+
+
+File: zyacc.info,  Node: Named Nonterminal Attributes,  Prev: Named Terminal Attributes,  Up: Named Attributes
+
+Named Nonterminal Attributes
+............................
+
+   When a nonterminal is used on the left-hand side of a rule, its
+semantic attributes should be declared within a parenthesized list
+following that nonterminal.  For example, a comma-separated list of
+identifiers (represented by `ID_TOK's) may have two attributes
+consisting of a list of the identifiers and the length of the list
+respectively:
+     idList(List *$idList, unsigned $len)
+       : ID_TOK($id)
+             { $idList= appendToList(NULL, $id); $len= 1; }
+       | idList($idList1, $len1) ID_TOK($id)
+             { $idList= appendToList($idList1, $id); $len= $len1 + 1; }
+
+where `appendToList()' appends its second argument to the list
+represented by its first argument.
+
+   If the same nonterminal is used on the left-hand side of several
+rules, then though the attributes may have different names, their types
+must be identical, modulo spelling of whitespace.  Hence the above
+rules could be written as:
+     idList(List *$idList, unsigned $len)
+       : ID_TOK($id)
+             { $idList= appendToList(NULL, $id); $len= 1; }
+       ;
+     idList(List    *$idList2, unsigned    $len2)
+       : idList($idList1, $len1) ID_TOK($id)
+             { $idList2= appendToList($idList1, $id); $len2= $len1 + 1; }
+       ;
+
+However
+     idList(List *$idList, unsigned $len)
+       : ID_TOK($id)
+             { $idList= appendToList(NULL, $id); $len= 1; }
+       ;
+     idList(List*$idList2, unsigned $len2)
+       : idList($idList1, $len1) ID_TOK($id)
+             { $idList2= appendToList($idList1, $id); $len2= $len1 + 1; }
+       ;
+   would be illegal as the second declaration has no whitespace after
+the `List*'.
+
+   The types using named attributes for nonterminal symbols are not
+added to the `YYSTYPE' declaration, but are merely maintained
+internally within the generated parser.  This has the advantage that
+the scanner need not know about types used only for nonterminal
+attributes.
+
+
+File: zyacc.info,  Node: Inherited Attributes,  Next: Semantic Tests,  Prev: Named Attributes,  Up: Semantics
+
+Inherited Attributes
+--------------------
+
+   The numeric `$I' variables in a generic yacc are a form of
+synthesized attributes -- they allow a grammatical construct to pass
+information up to its surrounding context.  Inherited attributes allow a
+construct to inherit information from its surrounding context.
+Unfortunately, yacc supports inherited attributes only in a very limited
+and dangerous way: the programmer uses `$I' variables with `I <= 0'
+(*note Actions::.).
+
+   Hence using yacc is like using a programming language where
+procedures are not allowed to have input parameters.  The only method
+of passing information into such procedures is by using global
+variables -- the exact method used by many yacc programs.
+
+* Menu:
+
+* Inherited Attributes Notation::  Declaring inherited attributes.
+* Attribute Flow Restrictions::  Restrictions on information flow due to
+                        left-to-right parsing.
+* Attribute Conflicts::         When an inherited attribute gets multiple definitions.
+
+
+File: zyacc.info,  Node: Inherited Attributes Notation,  Next: Attribute Flow Restrictions,  Prev: Inherited Attributes,  Up: Inherited Attributes
+
+Inherited Attributes Notation
+.............................
+
+   Zyacc supports a form of inherited attributes which can be evaluated
+during LR parsing -- grammars with such attributes are called
+LR-attributed grammars.  LR-attributed grammars are a subset of the
+L-attributed grammars (where all attributes can be evaluated in a single
+left-to-right pass).  On the other hand, they are a superset of the
+S-attributed grammars (those supported by yacc) which permit only
+synthesized attributes.
+
+   An inherited attribute is declared by starting the declaration with
+the `%in' keyword as in:
+     idList(%in int $type, unsigned $len)
+       : idList($type, $len1)
+         ID_TOK($id)
+         { addIDToSymTab($id, $type); $len= $len1 + 1; }
+       | /* empty */
+         { $len= 0; }
+       ;
+
+where `$type' is an inherited attribute defining the type for all the
+identifiers (`ID_TOK's) in a list of identifiers (`idList'), `$len' is
+a synthesized attribute giving the number of identifiers in the list
+and `addIDToSymTab(ID, TYPE)' adds identifier ID with type TYPE to the
+symbol table.
+
+   This rule could represent a list of identifiers within a declaration,
+with their type being inherited from the context established by the
+declaration.  That type is represented by the inherited attribute $type.
+The synthesized attribute $len computes the number of identifiers in the
+list.  $type is passed down unchanged through the recursive nonterminal
+IDList, being used to install the type of an identifier into the symbol
+table at every stage of the recursion.  $len is initialized to 0 for the
+empty identifier list and then incremented for every identifier in the
+list.  This pattern of attribute passing is similar to the pattern of
+parameter passing in any applicative programming language.
+
+   A synthesized attribute is declared by starting a declaration with
+the `%out' keyword.  An attribute declaration must have a `%in' or
+`%out' keyword only if the declaration is the first declaration for a
+left-hand side nonterminal and the previous rule was not terminated by
+a `;'.  If a declaration does not have a `%in' or `%out' keyword, then
+the omitted keyword defaults to `%out'.
+
+   Terminal symbols can only have synthesized attributes.
+
+
+File: zyacc.info,  Node: Attribute Flow Restrictions,  Next: Attribute Conflicts,  Prev: Inherited Attributes Notation,  Up: Inherited Attributes
+
+Attribute Flow Restrictions
+...........................
+
+   Since the attributes in a Zyacc grammar are intended to be evaluated
+completely during a left-to-right parse, there are certain restrictions
+on the information flow among the attributes.  To understand these
+restrictions, one first needs to understand which attribute occurrences
+*define* attribute values and which attribute occurrences *apply* a
+value.
+
+   The *defining attribute positions* in a rule are the positions on
+the left-hand side whose attributes have been declared %in and the
+positions on the right-hand side whose attributes have been declared
+%out.  The values of the corresponding attributes are computed outside
+the rule.
+
+   The *applied attribute positions* in a rule are the positions on the
+left-hand side whose attributes have been declared %out and the
+positions on the right-hand side whose attributes have been declared
+%in.  The values of the corresponding attributes are computed within the
+rule.
+
+   We now describe some (fairly natural) restrictions on the pattern of
+attributes in a rule.
+
+   * On the left-hand side of a rule, we are only allowed to have
+     distinct attribute declarations for the attributes of the rule
+     nonterminal.
+
+   * On the right-hand side of a rule, we are allowed to have attribute
+     expressions (any C-expression involving some (or possibly no) named
+     attributes subject to the following restrictions.
+
+       1. An attribute expression occurring in a %out attribute
+          position of a right-hand side grammar symbol (a defining
+          position) can only consist of a single attribute variable.
+          Furthermore, this must be the first occurrence of that
+          attribute variable on the right-hand side.
+
+       2. An attribute expression occurring in a %in attribute position
+          of a right-hand side grammar symbol (a applied position) can
+          only contain attribute variables which have occurred earlier
+          in defining positions of the rule (earlier %out positions in
+          the right-hand side or %in position on the left-hand side).
+
+       3. A particular attribute variable can only occur once in a
+          defining attribute position.
+
+       4. The final terminating action (if any) of a rule can only
+          contain attribute variables which have occurred earlier in
+          the rule.
+
+       5. If a mid-rule action (*note Mid-Rule Actions::.) contains the
+          first occurrence of an attribute variable (this would make it
+          a %out attribute for the newly created nonterminal), then
+          that attribute variable must occur as the attribute
+          expression for some later nonterminal on the right-hand side.
+
+
+   Rules 1 and 2 express the left-to-right attribute flow.  Rule 3
+ensures that all attributes are well-defined: i.e. each attribute only
+receives a single value within a rule.  Rule 4 expresses the fact that
+it would not make any sense to compute an attribute in the final
+terminating action without being able to pass the value somewhere.
+Rule 5 allows zyacc to infer a type for the %out attribute variable of
+the newly created nonterminal.
+
+   By having both attribute declarations and the above rules, there is
+some redundancy.  In fact, zyacc uses the above rules to infer the
+`%in'/`%out' specifier for an attribute and checks for consistency with
+the declaration.
+
+   The above rules preclude the possibility of ensuring that the
+attribute values computed at two defining positions are the same by
+merely using the same attribute variable at those positions.  Consider
+the rule
+     exp(%out Type $type)
+       : exp($type) operator($type) term($type)
+       ;
+
+where the single attribute of `operator' is declared `%out'.  The
+intent here is that the type of the `operator' must be identical to the
+types of its two operands.  Unfortunately, since all positions on the
+right-hand side are defining positions, the above rule violates rule 3.
+We can rewrite the above rule as
+     exp(%out Type $type)
+       : exp($type1) operator($type) term($type2)
+         { if ($type1 != $type || $type2 != $type) error(); }
+       ;
+
+or use semantic tests (*note Semantic Tests::.).
+
+
+File: zyacc.info,  Node: Attribute Conflicts,  Prev: Attribute Flow Restrictions,  Up: Inherited Attributes
+
+Attribute Conflicts
+...................
+
+   Zyacc evaluates the values of inherited attributes during parsing.
+If the value of an inherited attribute cannot be evaluated
+unambiguously, then Zyacc signals an attribute conflict.
+
+   Consider rules like the following:
+     s(%in int $a)
+       : a($a + 1) ...
+       | a($a + 2) ...
+
+When the parser is in a state where it is looking for a `s', it is
+clearly also in a state where it is looking for a `a'.  It needs to
+evaluate the inherited attribute for `a', but without knowing which
+rule is going to succeed (which may require unbounded lookahead), it
+does not know whether to evaluate it as `$a + 1' or `$a + 2'.  This
+attribute value conflict is reported as an error by zyacc.
+
+   In the limited experience obtained so far with Zyacc, attribute
+conflicts are usually not much of a problem to work around.  A common
+situation is the following:
+     s
+       : a(1) ...
+       | a(1) ...
+
+Here there is really no conflict because equal attribute values are
+being passed to both uses of `a'.  However, since Zyacc does not
+understand any C it does not know that the two values are equal and
+signals a attribute conflict.  A simple workaround is to use:
+     s
+       : a1 ...
+       | a1 ...
+       ;
+     a1
+       : a(1)
+       ;
+
+This workaround is similar to the workaround needed in yacc when a
+reduce-reduce conflict arises because identical internal actions in same
+rules are reduced in the same state (*note Reduce/Reduce::.).
+
+
+File: zyacc.info,  Node: Semantic Tests,  Prev: Inherited Attributes,  Up: Semantics
+
+Semantic Tests
+--------------
+
+   It is often necessary to make a parsing decision based on the
+semantics of what is being parsed.  Though generic yacc does not allow
+the semantics to affect the parse, Zyacc does provide a method by which
+the outcome of runtime semantic tests can affect parsing decisions.
+
+   We first present a prototypical example where semantic tests are
+useful in making a parsing decision.  We then present the details of how
+semantic tests operate.  Finally, we present another example where
+semantic tests can be used to implement dynamically defined operator
+precedences and associativity.  Another example of the use of semantic
+tests can be found in the `lazycalc' program in the tutorial section
+(*note Lazy Calc::.).
+
+* Menu:
+
+* A Prototypical Example::      A typical example where semantic tests are useful.
+* Semantic Test Details::       How semantic tests work.
+* Semantic Test Example::       Implementing dynamic operators.
+
+
+File: zyacc.info,  Node: A Prototypical Example,  Next: Semantic Test Details,  Prev: Semantic Tests,  Up: Semantic Tests
+
+A Prototypical Example
+......................
+
+   Consider a language which uses an expression like
+`IDENTIFIER(ARGUMENTS)' to express both a function call and indexing of
+a array.  Consider writing a 1-pass compiler for this language using a
+on-the-fly code-generation strategy (the parser emits the code as it
+parses).  Since different code would need to be emitted for indexing an
+array versus passing arguments to a function, the parser would need to
+distinguish between the two situations before the ARGUMENTS are parsed.
+However, since both situations are syntactically identical, the parser
+would require semantic information to disambiguate between them.
+Within the limited facilities of yacc, the programmer typically resorts
+to a time-honored lexical hack: if the scanner is about to deliver an
+identifier, it looks ahead to see if the next token is a left
+parenthesis; if so, it looks up the symbol table and deliver either a
+`FUNCTION_ID_TOK' or `ARRAY_ID_TOK' depending on the kind of the
+identifier.  In contrast, zyacc can use the following schema to solve
+this problem:
+     exp
+       : fnID '(' indexExpList ')'
+       | arrayID '(' fnArgList ')'
+       ;
+     fnID
+       : ID_TOK($id) %test(idKind($id) == FN_KIND)
+       ;
+     arrayID
+       : ID_TOK($id) %test(idKind($id) == ARRAY_KIND)
+       ;
+
+In the above we have assumed that the terminal `ID_TOK' has a single
+`%out' attribute containing the identifier, and `idKind()' which
+returns the current kind of an identifier is part of the interface to
+the symbol-table.  The symbol table lookup has been shifted into the
+parser and any required lookahead analysis is handled by the parser
+generator.
+
+   Similar syntactic ambiguities occur in many languages.  One of the
+more notorious is the `typedef' problem in C, where a `typedef'
+identifier is redefined within an inner scope (*note Semantic
+Tokens::.).  Lexical hacks for that situation are rather complex and/or
+incorrect.  It is possible that the above %test facility could provide
+a relatively clean solution.
+
+
+File: zyacc.info,  Node: Semantic Test Details,  Next: Semantic Test Example,  Prev: A Prototypical Example,  Up: Semantic Tests
+
+Semantic Test Details
+.....................
+
+   Syntactically, each occurrence of a `%test(E)' can be regarded as a
+unique empty nonterminal.
+
+   The expression E within the `%test(E)' can be any C-expression.  If
+the value of the test expression is 0, then the test fails, otherwise
+it succeeds.  If the test expression contains attribute variables, then
+those attribute variables are required to have had a previous defining
+occurrence in the rule (this restriction may be lifted in the future to
+allow the programmer to write tests like `%test(($result=
+expensiveLookup()) == SOME_VALUE)').
+
+   When the parser enters a particular state, all the applicable
+`%test's for that state are executed sequentially in the order of their
+occurrence in the source program.  If any of these `%test's succeed,
+then the parser changes state as though it had succeeded in parsing the
+nonterminal corresponding to the succeeding `%test'.  If all the
+`%test's fail, then the parser takes whatever action it would have
+taken if rules with the applicable `%test's had been deleted from that
+state.
+
+   When executing `%test's, zyacc guarantees that its lookahead
+`yychar' is well-defined.  This makes it possible to let the semantic
+actions in a `%test' refer to the lookahead.
+
+
+File: zyacc.info,  Node: Semantic Test Example,  Prev: Semantic Test Details,  Up: Semantic Tests
+
+Semantic Test Example
+.....................
+
+   The fact that the lookahead token `yychar' is well-defined whenever
+a `%test' is evaluated makes possible the following overkill for the
+classic arithmetic expression grammar:
+     1 /* Test for %tests.  Resolve operator priorities using %tests. */
+     2
+     3 %token <val>(int $v) DIGIT
+     4
+     5 %{
+     6 #include <ctype.h>
+     7 #include <stdio.h>
+     8
+     9 static unsigned char pri[128];
+     10 void yyerror();
+     11 int yylex();
+     12
+     13 enum { ADD_P= 1, MULT_P, UMINUS_P };
+     14
+     15 %}
+     16
+     17 %%
+     18 Lines
+     19   : Lines Exp($v) '\n' { printf("%d\n", $v); }
+     20   | error '\n'
+     21   | /* empty */
+     22   ;
+     23 Exp(int $v)
+     24   : Exp($v1) '+' Exp($v2) %test(pri['+'] >= pri[yychar])
+     25       { $v= $v1 + $v2; }
+     26   | Exp($v1) '-' Exp($v2) %test(pri['-'] >= pri[yychar])
+     27       { $v= $v1 - $v2; }
+     28   | Exp($v1) '*' Exp($v2) %test(pri['*'] >= pri[yychar])
+     29       { $v= $v1 * $v2; }
+     30   | Exp($v1) '/' Exp($v2) %test(pri['/'] >= pri[yychar])
+     31       { $v= $v1 / $v2; }
+     32   | '-' Exp($v1) %test(UMINUS_P >= pri[yychar])
+     33       { $v= -$v1; }
+     34   | '+' Exp($v1) %test(UMINUS_P >= pri[yychar])
+     35       { $v= $v1; }
+     36   | DIGIT($v)
+     37   | '(' Exp($v) ')'
+     38   ;
+     39
+     40 %%
+     41
+     42 int yylex() {
+     43   int c= getchar();
+     44   while (isspace(c) && c != '\n') c= getchar();
+     45   if (c == EOF) return 0;
+     46   else if isdigit(c) { yylval.val.v= c - '0'; return DIGIT; }
+     47   else return c;
+     48 }
+     49
+     50 void yyerror(const char *s) {
+     51   printf("%s\n", s);
+     52 }
+     53
+     54 int main() {
+     55   pri['+']= pri['-']= ADD_P;
+     56   pri['*']= pri['/']= MULT_P;
+     57   return yyparse();
+     58 }
+
+   The code above examines the lookahead to instruct the parser whether
+to shift or to reduce (*note Algorithm::.).  The rules for the
+operators on lines 23 through 36 decide to reduce if the operator
+involved in the rule has priority greater than or equal to the priority
+of the incoming symbol in yychar.  Otherwise the lookahead is shifted.
+
+   The usual method for parsing arithmetic expressions is to either use
+multiple levels of nonterminals like `exp', `term', `factor' to specify
+the precedence levels, or to specify static disambiguating priorities
+for the operators using yacc's %left, %right and %nonassoc declarations
+(*note Infix Calc::.).  The method in the example is similar to the
+second alternative but disambiguates dynamically using the operator
+priorities at parse time.  This makes it possible to write parsers for
+languages whose syntax can vary during parsing.  The Prolog parser
+distributed with this package uses the ideas outlined by the above
+example.
+
+
+File: zyacc.info,  Node: Declarations,  Next: Multiple Parsers,  Prev: Semantics,  Up: Grammar File
+
+Zyacc Declarations
+==================
+
+   The "Zyacc declarations" section of a Zyacc grammar defines the
+symbols used in formulating the grammar and the data types of semantic
+values.  *Note Symbols::.  Additionally, a `%look' directive is allowed
+within each grammar rule to declare the lookahead properties of the
+grammar rule (*note Specifying the Lookahead::.).
+
+   All token type names (but not single-character literal tokens such as
+`'+'' and `'*'') must be declared.  Nonterminal symbols must be
+declared if you need to specify which data type to use for the semantic
+value (*note More Than One Value Type: Multiple Types.) from a explicit
+`%union' declaration; you should not declare the types of a
+non-terminal if it uses named attributes (*note Named Attributes::.).
+
+   The first rule in the file also specifies the start symbol, by
+default.  If you want some other symbol to be the start symbol, you
+must declare it explicitly (*note Languages and Context-Free Grammars:
+Language and Grammar.).
+
+* Menu:
+
+* Token Decl::                  Declaring terminal symbols.
+* Precedence Decl::             Declaring terminals with precedence and associativity.
+* Multi-Character Lits::        Allowing multiple-character literal tokens.
+* Union Decl::                  Declaring the set of all semantic value types.
+* Type Decl::                   Declaring the choice of type for a nonterminal symbol.
+* Expect Decl::                 Suppressing warnings about shift/reduce conflicts.
+* Start Decl::                  Specifying the start symbol.
+* Multiple Start Symbols::
+* Pure Decl::                   Requesting a reentrant parser.
+* Option Decl::                 Specifying command-line options within the parser.
+* Specifying the Lookahead::
+* Decl Summary::                Table of all Zyacc declarations.
+
+
+File: zyacc.info,  Node: Token Decl,  Next: Precedence Decl,  Prev: Declarations,  Up: Declarations
+
+Token Type Names
+----------------
+
+   The basic way to declare a token type name (terminal symbol) is as
+follows:
+
+     %token NAME
+
+   Zyacc will convert this into a `#define' directive in the parser, so
+that the function `yylex' (if it is in this file) can use the name NAME
+to stand for this token type's code.
+
+   Alternatively, you can use `%left', `%right', or `%nonassoc' instead
+of `%token', if you wish to specify precedence.  *Note Operator
+Precedence: Precedence Decl.
+
+   You can explicitly specify the numeric code for a token type by
+appending an integer value in the field immediately following the token
+name:
+
+     %token NUM_TOK 300
+
+It is generally best, however, to let Zyacc choose the numeric codes for
+all token types.  Zyacc will automatically select codes that don't
+conflict with each other or with ASCII characters.
+
+   In the event that the stack type is a union, you must augment the
+`%token' or other token declaration to include the data type
+alternative delimited by angle-brackets (*note More Than One Value
+Type: Multiple Types.).
+
+   For example:
+
+     %union {              /* define stack type */
+       double val;
+       symrec *tptr;
+     }
+     %token <val> NUM_TOK      /* define token NUM_TOK and its type */
+
+
+File: zyacc.info,  Node: Precedence Decl,  Next: Multi-Character Lits,  Prev: Token Decl,  Up: Declarations
+
+Operator Precedence
+-------------------
+
+   Use the `%left', `%right' or `%nonassoc' declaration to declare a
+token and specify its precedence and associativity, all at once.  These
+are called "precedence declarations".  *Note Operator Precedence:
+Precedence, for general information on operator precedence.
+
+   The syntax of a precedence declaration is the same as that of
+`%token': either
+
+     %left SYMBOLS...
+
+or
+
+     %left <TYPE> SYMBOLS...
+
+   And indeed any of these declarations serves the purposes of
+`%token'.  Like `%token', they also allow alternate names for a token
+so that a token can be referred to using a multi-character literal name
+within the grammar file.  But in addition, they specify the
+associativity and relative precedence for all the SYMBOLS:
+
+   * The associativity of an operator OP determines how repeated uses
+     of the operator nest: whether `X OP Y OP Z' is parsed by grouping
+     X with Y first or by grouping Y with Z first.  `%left' specifies
+     left-associativity (grouping X with Y first) and `%right'
+     specifies right-associativity (grouping Y with Z first).
+     `%nonassoc' specifies no associativity, which means that `X OP Y
+     OP Z' is considered a syntax error.
+
+   * The precedence of an operator determines how it nests with other
+     operators.  All the tokens declared in a single precedence
+     declaration have equal precedence and nest together according to
+     their associativity.  When two tokens declared in different
+     precedence declarations associate, the one declared later has the
+     higher precedence and is grouped first.
+
+
+File: zyacc.info,  Node: Multi-Character Lits,  Next: Union Decl,  Prev: Precedence Decl,  Up: Declarations
+
+Multi-Character Literal Tokens
+------------------------------
+
+   Zyacc allows you to specify both a literal name for a token as well
+as an identifier (as above).  Zyacc consistently uses single quotes to
+delimit literal names (as opposed to Bison's use of single quotes for
+single character literals and double quotes for multi-character
+literals).  Within the declaration, the two alternate names for a token
+may occur in either order, separated by a `='.  This allows you to
+refer to a token internally within the grammar file using the possibly
+more readable literal name, while using the identifier name to refer to
+the token in other files.  For example, in
+     %left                  '<<=' = LSH_ASSGN  RSH_ASSGN = '>>=' 300
+     %token <lineNum>        'for' = FOR_TOK
+
+the first declaration defines two tokens.  The first token has two
+alternate names `'<<='' and `LSH_ASSGN'; since a value has not been
+specified for it, Zyacc will choose a value.  The second token has two
+alternate names `RSH_ASSGN' and `'>>=''.  Its value has been specified
+as 300.
+
+   The second declaration illustrates the fact that the alternate names
+can even be used with declarations which involve a `<TYPE>' tag.
+
+   With the above declarations the grammar can contain rules like:
+     stmt
+       : 'for' '(' exp ';' exp ';' exp ')' stmt
+       ;
+     exp
+       : exp '<<=' exp
+       | exp '>>=' exp
+       ;
+
+Whether the above is more readable than the alternative using
+`LSH_ASSGN', `RSH_ASSGN' and `FOR_TOK' is a matter of personal
+preference.
+
+
+File: zyacc.info,  Node: Union Decl,  Next: Type Decl,  Prev: Multi-Character Lits,  Up: Declarations
+
+The Collection of Value Types
+-----------------------------
+
+   The `%union' declaration specifies the entire collection of possible
+data types for semantic values.  The keyword `%union' is followed by a
+pair of braces containing the same thing that goes inside a `union' in
+C.
+
+   For example:
+
+     %union {
+       double val;
+       symrec *tptr;
+     }
+
+This says that the two alternative types are `double' and `symrec *'.
+They are given names `val' and `tptr'; these names are used in the
+`%token' and `%type' declarations to pick one of the types for a
+terminal or nonterminal symbol (*note Nonterminal Symbols: Type Decl.).
+
+   Note that, unlike making a `union' declaration in C, you do not write
+a semicolon after the closing brace.
+
+
+File: zyacc.info,  Node: Type Decl,  Next: Expect Decl,  Prev: Union Decl,  Up: Declarations
+
+Nonterminal Symbols
+-------------------
+
+When you use `%union' to specify multiple value types, you must declare
+the value type of each nonterminal symbol for which values are used.
+This is done with a `%type' declaration, like this:
+
+     %type <TYPE> NONTERMINAL...
+
+Here NONTERMINAL is the name of a nonterminal symbol, and TYPE is the
+name given in the `%union' to the alternative that you want (*note The
+Collection of Value Types: Union Decl.).  You can give any number of
+nonterminal symbols in the same `%type' declaration, if they have the
+same value type.  Use spaces to separate the symbol names.
+
+
+File: zyacc.info,  Node: Expect Decl,  Next: Start Decl,  Prev: Type Decl,  Up: Declarations
+
+Suppressing Conflict Warnings
+-----------------------------
+
+   Zyacc normally warns if there are any conflicts in the grammar
+(*note Shift/Reduce Conflicts: Shift/Reduce.), but most real grammars
+have harmless shift/reduce conflicts which are resolved in a
+predictable way and would be difficult to eliminate.  It is desirable
+to suppress the warning about these conflicts unless the number of
+conflicts changes.  You can do this with the `%expect' declaration.
+
+   The declaration looks like this:
+
+     %expect N
+
+   Here N is a decimal integer.  The declaration says there should be no
+warning if there are N shift/reduce conflicts and no reduce/reduce
+conflicts.  The usual warning is given if there are either more or fewer
+conflicts, or if there are any reduce/reduce conflicts.
+
+   In general, using `%expect' involves these steps:
+
+   * Compile your grammar without `%expect'.  Use the `-v' option to
+     get a verbose list of where the conflicts occur.  Zyacc will also
+     print the number of conflicts.
+
+   * Check each of the conflicts to make sure that Zyacc's default
+     resolution is what you really want.  If not, rewrite the grammar
+     and go back to the beginning.
+
+   * Add an `%expect' declaration, copying the number N from the number
+     which Zyacc printed.
+
+   Now Zyacc will stop annoying you about the conflicts you have
+checked, but it will warn you again if changes in the grammar result in
+additional conflicts.
+
+
+File: zyacc.info,  Node: Start Decl,  Next: Multiple Start Symbols,  Prev: Expect Decl,  Up: Declarations
+
+The Start-Symbol
+----------------
+
+   Zyacc assumes by default that the start symbol for the grammar is
+the first nonterminal specified in the grammar specification section.
+The programmer may override this restriction with the `%start'
+declaration as follows:
+
+     %start SYMBOL
+
+
+File: zyacc.info,  Node: Multiple Start Symbols,  Next: Pure Decl,  Prev: Start Decl,  Up: Declarations
+
+Multiple Start Symbols
+----------------------
+
+   Unlike other yaccs, Zyacc allows the user to declare more than one
+start nonterminal.  If the user does so, then `#define' statements are
+added to the generated parser for each start nonterminal and the
+programmer can call the generated parser function (*note Parser
+Function::.) with its first parameter set to the desired start
+nonterminal.  If a pure parser has also been requested using the
+`pure_parser' directive (*note Pure Calling::.), then the additional
+arguments for the pure parser follow the start nonterminal in the
+argument list for the parsing function.
+
+   The following example  uses this feature to parse a line as either a
+prefix, infix or suffix arithmetic expression depending on the first
+character in the line.  It accepts lines like the following:
+
+     i(1+2)*3+4
+     s12+3*4+
+     p+*+1234
+
+   The grammar uses the `%look' directive (*note Specifying the
+Lookahead::.) to ensure that the lookahead is clear after each call to
+the parsing function.  Here it is:
+
+     %start infix, prefix, suffix
+     
+     %%
+     infix
+       : iExp '\n' %look(0) { return $1; }
+       ;
+     iExp
+       : iExp '+' iTerm { $$= $1 + $3; }
+       | iTerm
+       ;
+     iTerm
+       : iTerm '*' iFactor { $$= $1 * $3; }
+       | iFactor
+       ;
+     iFactor
+       : digit
+       | '(' iExp ')' { $$= $2; }
+       ;
+     digit
+       : '0' { $$= 0; }
+       | '1' { $$= 1; }
+       | '2' { $$= 2; }
+       | '3' { $$= 3; }
+       | '4' { $$= 4; }
+       | '5' { $$= 5; }
+       | '6' { $$= 6; }
+       | '7' { $$= 7; }
+       | '8' { $$= 8; }
+       | '9' { $$= 9; }
+       ;
+     
+     prefix
+       : pExp '\n' %look(0) { return $1; }
+       ;
+     pExp
+       : '+' pExp pExp { $$= $2 + $3; }
+       | '*' pExp pExp { $$= $2 * $3; }
+       | digit
+       ;
+     
+     suffix
+       : sExp '\n' %look(0) { return $1; }
+       ;
+     sExp
+       : sExp sExp '+' { $$= $1 + $2; }
+       | sExp sExp '*' { $$= $1 * $2; }
+       | digit
+       ;
+
+   The scanner function simply returns the next non-blank input
+character.  The parser driver shown below decides on which start
+nonterminal to use depending on the first character of each input line:
+
+     int main()
+     /* Call infix grammar if line starts with 'i'; suffix grammar if line
+      * starts with a 's'; prefix grammar if line starts with a 'p'.
+      */
+     {
+       int c;
+       while ((c= getchar()) != EOF) {
+         int z= yyparse(c == 'i' ? infix : (c == 's' ? suffix : prefix));
+         printf("%d\n", z);
+       }
+       return 0;
+     }
+

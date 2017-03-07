@@ -1,0 +1,20 @@
+# of entries= 3069
+Hash size= 1024
+Load factor= 2.99707
+HASH CHAIN LENGTH	# OF CHAINS
+	0		533
+	3		143
+	6		194
+	9		126
+	12		26
+	15		2
+# of entries= 1023
+Hash size= 512
+Load factor= 1.99805
+HASH CHAIN LENGTH	# OF CHAINS
+	0		21
+	1		143
+	2		194
+	3		126
+	4		26
+	5		2

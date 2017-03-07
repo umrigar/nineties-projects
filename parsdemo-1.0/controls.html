@@ -1,0 +1,93 @@
+<HTML><HEAD>
+<TITLE>Parser Demo Applet Input Controls</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Applet Input Controls</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/27 20:06:02 umrigar"
+</FONT>
+
+<P> All the applets use a common set of input controls, located at the
+bottom row of the applet.  From left to right, they are the following:
+
+<DL>
+
+
+<LI> <DT> <A NAME="update"><B>Update/Ignore Button</B></A> <DD> 
+
+As the parser applet is running, it can update the browser frame to the left
+to show where it currently is in the grammar/state.  This can be slow,
+especially if your browser does not cache the file being displayed in that
+frame.  You can use this button to <CODE>update</CODE> the frame at each
+parser step, or to <CODE>ignore</CODE> it totally.  Once you click the
+<CODE>update</CODE> button, it changes to a <CODE>ignore</CODE> button, and
+vice-versa.
+
+
+<LI> <DT> <A NAME="input"><B>Input Field</B></A> <DD> 
+
+The applet accepts input to the parser in this text-field: by clicking
+within this field you can subsequently type in or edit this field.  Typing a
+return in this field starts the parser (it restarts it if it is currently
+running).
+
+<LI> <DT> <A NAME="step"><B>Start/Step Button</B></A> <DD>
+
+An alternate way to start the parser is by clicking the <CODE>start</CODE>
+button.  Once you click the <CODE>start</CODE> button, it changes to a
+<CODE>step</CODE> button which you can use to single-step the parser.  The
+<CODE>step</CODE> button changes back to a <CODE>start</CODE> button when
+the parse is complete (on some platforms, it flashes a couple of times to
+draw attention to itself).
+
+<LI> <DT> <A NAME="run"><B>Run/Stop Button</B></A> <DD>
+
+If you would like the parser to single-step automatically, use the
+<CODE>run</CODE> button. When the parser is in this auto-step mode, the
+<CODE>run</CODE> button changes to a <CODE>stop</CODE> button which you can
+use to stop it.
+
+<LI> <DT> <A NAME="speed"><B>Speed Scrollbar</B></A> <DD>
+
+This scrollbar controls the delay between the steps of the above auto-step.
+Moving it to the right makes the parser go faster.
+
+</DL>
+
+<PRE>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+
+</BODY>
+
+</HTML>

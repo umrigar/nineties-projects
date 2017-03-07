@@ -1,0 +1,58 @@
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.o .c .y .l
+
+.c.o:
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $<
+
+.c:
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $< $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+
+
+#The following targets use ZYACC_PATH and ZYACC_SKEL_DIR.  If ZYACC_PATH is
+#defined, it must end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+
+ZYACCFLAGS=	-d -v
+
+.y.c:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+
+.y.o:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+	
+.y:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+#The following targets use ZLEX_PATH and ZLEX_SEARCH_PATH.  If ZLEX_PATH is
+#defined, it must end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+.l.c:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+
+.l.o:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.l:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+

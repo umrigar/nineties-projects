@@ -1,0 +1,2501 @@
+m4_divert(-1)
+This file should be processed by GNU M4 with the -P option to produce
+the actual c skeleton file.
+	gm4 -P zlexskl.cm4 >zlexskl.c
+#------------------------- M4 Definitions ------------------------------	
+m4_changequote([{, }])
+m4_changecom
+m4_define([{_type}],
+[{
+/* typedef $1 to represent values in 0, ..., $2. */
+#if ($2 <= YY_UCHAR_MAX)
+typedef YYUChar $1;
+#elif ($2 <= YY_USHRT_MAX)
+typedef YYUShrt $1;
+#elif ($2 <= YY_UINT_MAX)
+typedef YYUInt $1;
+#elif ($2 <= YY_ULONG_MAX)
+typedef YYULong $1;
+#else
+  #error Type $1 cannot be represented.
+#endif
+}])
+m4_define(_targetVal,
+[{
+/* Define max. value $1 if $1 undef. */
+#ifndef $1
+#ifdef $2	
+#define $1 $2		/* From <limits.h> */
+#else
+#define $1 $3		/* A "reasonable" value. */
+#endif
+#endif
+}]
+)
+m4_define([{_outFnFile}], [{outfns.h}])
+m4_syscmd(echo -n >_outFnFile)
+m4_define([{_fnLine}], [{m4_syscmd(echo "$1" >>_outFnFile)}])
+_fnLine([{/*}])
+_fnLine(
+[{ * DO NOT EDIT: This file produced automatically by m4 from zlexSkl.cm4.}])
+_fnLine([{ */}])
+_fnLine([{}])
+m4_define([{_F}], [{_fnLine([{[{  }]}]$1[{[{,}]}] \\)!}])
+_fnLine([{[{#define OUT_FNS_INIT \\}]}])
+m4_define([{_finito}], [{m4_syscmd(echo >>_outFnFile)}])
+m4_m4wrap([{_finito()}])
+
+The following macro quotes all arguments: allows appending to a macro
+whose body contains commas.
+m4_define([{m4_quote}], [{[{$*}]}])
+
+The following macro allows appending to a macro definition (initially empty).
+m4_define([{m4_app}], 
+	  [{m4_define([{$1}], m4_quote(m4_defn([{$1}]))[{$2}])}])
+#------------------------------------------------------------------------
+m4_divert[{}]m4_dnl
+/* Skeleton file automatically produced by gm4 -P from zlexskl.cm4. */
+
+#define ZLEX_SCANNER 1
+
+#if 0
+#ifndef NDEBUG	
+#define NDEBUG
+#endif
+#endif
+
+#ifdef DEBUG_ZLEX 	/* Define to check run-time assertions. */
+#undef NDEBUG
+#endif
+
+#include <assert.h>
+
+/*			    C LIBRARY ROUTINES.				*/
+
+#if __STDC__
+#include <limits.h>
+#include <stdlib.h>
+#else
+#if 0 
+/* It is safest to not declare these here.  Most compilers should do the
+ * right thing after producing warnings about missing declarations.
+ */
+extern exit();
+extern int read();
+#endif /* if 0 */
+#endif /* #if __STDC__ */
+
+_targetVal(YY_CHAR_BIT, CHAR_BIT, 8)
+_targetVal(YY_UCHAR_MAX, UCHAR_MAX, 255)
+_targetVal(YY_USHRT_MAX, USHRT_MAX, 65535)
+_targetVal(YY_UINT_MAX, UINT_MAX, 65535)
+_targetVal(YY_ULONG_MAX, ULONG_MAX, 4294967295)
+
+#ifndef YY_SHRT_MAX
+#ifdef SHRT_MAX
+#define YY_SHRT_MAX	SHRT_MAX
+#else
+#define YY_SHRT_MAX	32767
+#endif
+#endif
+
+typedef unsigned short YYUShrt;
+typedef unsigned int YYUInt;
+typedef unsigned long YYULong;
+typedef short YYShrt;
+typedef int YYInt;
+
+/* 			SCANNER PARAMETERS.				*/
+
+/* Possibilities for compression. */
+#define YY_NO_COMPRESS		0
+#define YY_COMB_COMPRESS	1
+#define YY_ITERATIVE_COMPRESS	2
+
+/* Possibilities for table entries. */
+#define YY_ADDRESS_TABLE	0
+#define YY_DIFF_TABLE		1
+#define YY_STATE_TABLE		2
+
+/*
+
+#Define following parameters:
+
+#Parameters set by outDFA module.
+YY_MAX_BASE:		Max. entry in yyBase[] array.
+YY_N_COLS:		# of columns in next[] when COMPRESS == NO_COMPRESS.
+YY_N_NEXT:		# of entries in next[].
+
+#Parameters set in dfa module.
+YY_N_INITIAL_STATES:	# of initial states (2*YY_N_START_STATES if ^ patterns).
+YY_N_INTRA_STATES:	# of states with intra-tok actions and alternate states.
+YY_N_NON_FINAL_STATES:	# of non-accepting states in DFA.
+YY_N_SIG_STATES:	# of states in DFA having non-jam transitions.
+YY_N_STATES:		Total number of scanner states (includes sentinel
+                        state, but not jam state if --backup-optimize; 
+			does not include sentinel state or jam state or 
+			pseudo sentinel	states or pseudo jam states if 
+			!backup-optimize).
+YY_SENTINEL_STATE:	# of sentinel state.
+
+#Parameters set in chrclass module.
+YY_16_BIT:		1 iff scanner for 16 bit characters.
+YY_CLASS_SEG_BIT:	The bit # (0-origin, little endian) defining a char seg.
+YY_N_EQ_CLASSES:	eq. classes. (==  YY_CHAR_SET_SIZE if no eq. classes).
+YY_MAX_EQ_BASE:		Max base value if eq-compression; 0 if not.
+YY_MAX_EQ_CHECK:	Max check value if eq-compression; 0 if not.
+
+#Parameters set in main module.
+YY_ALIGN:		1 if tables should use natural int size.
+YY_ARRAY:		1 if yytext is array.
+YY_BACKUP_OPTIMIZE:	1 if scanner is being optimized for backup.
+YY_CHAR_SET_SIZE:	Size of char-set (128 or 256).
+YY_COMPRESS:		Value of YY_NO_COMPRESS, YY_COMB_COMPRESS or 
+			YY_ITERATIVE_COMPRESS.
+YY_DO_CODE		1 if directly executable scanner.
+YY_DO_DEBUG:		1 if debugging requested via cmd-line; 0 if not.
+YY_DO_REJECT:		1 if REJECT actions enabled.
+YY_DO_STDIO:		1 if <stdio.h> fread() to be used for input.
+YY_SENTINEL_CHAR:	Character used as sentinel.
+YY_DEFAULT_ACTION:	0: echo; 1: error; 2: fatal; 3: ignore.
+YY_TABLE_ENTRY:		Value of YY_ADDRESS_TABLE, YY_DIFF_TABLE or
+			YY_STATE_TABLE.
+YY_ZLEX_MAJOR_VERSION:	Major version # of zlex which generated scanner.
+YY_ZLEX_MINOR_VERSION:	Minor version # of zlex which generated scanner.
+
+#Parameters set in patterns module.
+YY_DEFAULT_ACTN:	Default action number. 
+YY_HAS_VAR_CONTEXTS:	True if there are variable-right-context patterns.
+YY_HAS_INTRA_TOK_PAT:	True if there are intra-token patterns.
+YY_LINENO_ACTN:		Number for yylineno action (0 if yylineno not used).
+YY_N_START_STATES:	# of start-states (>= 1).
+YY_NUM_RULES:		# of rules (== largest action # since 1-origin).
+YY_START_OF_LINE:	1 if source file uses `^' pattern; 0 otherwise.
+
+#Parameters set in scan module.
+YY_SRC_NAME:		Name of source file.
+
+*/
+
+/* Scanner parameters. */
+/*_F(outParams)*/
+
+
+/*			    ZLEX LIBRARY INTERFACE			*/
+
+m4_define([{LIBZLEX_DIR}], [{../libzlex}])m4_dnl
+
+m4_include(LIBZLEX_DIR/libzlex.h)
+m4_include(LIBZLEX_DIR/libzlexs.h)
+
+
+/* 	MACROS AND TYPEDEFS DEPENDING ON SCANNER PARAMETERS.		*/
+
+/* We don't use #error, since some K&R compilers choke on it. */
+
+#if YY_BACKUP_OPTIMIZE
+/* State to go to when there is no legal transition from current state. */
+#define YY_JAM_STATE (YY_N_STATES)	/* Largest state number. */
+#else
+/* This is only used as a place-holder to indicate a jam in addition to
+ * YY_N_STATES pseudo-jam states.
+ */
+#define YY_JAM_STATE		(2*YY_N_STATES + YY_N_SIG_STATES)
+#endif
+
+/* Maximum state # which may be stored in tables. */
+#define YY_MAX_STATE		YY_JAM_STATE
+
+/* If not state table, will need two extra check values. */
+#if YY_TABLE_ENTRY == YY_STATE_TABLE
+
+#define YY_X_CHECK	0
+
+#else
+
+#define YY_X_CHECK	2
+
+/* Index for default state in comb vector relative to start of state. */
+#define YY_DEF_INDEX	YY_N_EQ_CLASSES
+
+/* Index for state number in comb vector relative to start of state. */
+#define YY_STATE_INDEX	(YY_N_EQ_CLASSES + 1)
+
+#endif
+
+#if YY_ALIGN
+
+typedef YYUInt YYXState;
+typedef YYUInt YYAct;
+typedef YYUInt YYBase;
+typedef YYUInt YYCheck;
+typedef YYInt  YYDisp;
+typedef YYInt  YYDef;
+typedef YYUInt YYClass;
+typedef YYUInt YYEqBase;
+typedef YYUInt YYEqCheck;
+
+#else
+
+/* Let preprocessor figure out smallest type which can hold a state.
+ * Used for holding states in tables.
+ */
+_type(YYXState, (YY_MAX_STATE))
+
+/* Let preprocessor figure out type for YYAct. */
+_type(YYAct, YY_NUM_RULES)
+
+/* Let preprocessor figure out type for base[].	*/
+_type(YYBase, YY_MAX_BASE)
+
+/* Let preprocessor figure out type for check[]. */
+_type(YYCheck, YY_N_EQ_CLASSES + YY_X_CHECK)
+
+/* Maximum value held in a defaults arrays. */
+#if YY_COMPRESS == YY_ITERATIVE_COMPRESS
+#define YY_MAX_DEF	(2 * YY_MAX_STATE)
+#else
+#define YY_MAX_DEF	(YY_MAX_STATE)
+#endif
+/* Let preprocessor figure out type for def[] array. */
+_type(YYDef, YY_MAX_DEF)
+
+/* Let preprocessor figure out type for next displacement used when
+ * YY_TABLE_ENTRY is YY_DIFF_TABLE.  This is approximate as we 
+ * assume that a short is 2 bytes.
+ */
+#if YY_TABLE_ENTRY == YY_DIFF_TABLE
+#if YY_BACKUP_OPTIMIZE
+#define YY_DUMMY_SIZE		(YY_N_STATES - YY_N_SIG_STATES)
+#else 
+#define YY_DUMMY_SIZE							\
+  (YY_N_STATES - YY_N_SIG_STATES + YY_N_STATES + YY_N_SIG_STATES)
+#endif
+#ifndef YY_SHRT_SIZE
+#define YY_SHRT_SIZE	2
+#endif
+#if YY_COMPRESS == YY_ITERATIVE_COMPRESS
+#if (2*(YY_N_NEXT*YY_SHRT_SIZE + YY_DUMMY_SIZE) <= YY_SHRT_MAX)
+typedef YYShrt YYDisp;
+#else
+typedef YYInt YYDisp;
+#endif
+#else /* YY_COMPRESS != YY_ITERATIVE_COMPRESS */
+#if (YY_N_NEXT*YY_SHRT_SIZE + YY_DUMMY_SIZE <= YY_SHRT_MAX)
+typedef YYShrt YYDisp;
+#else
+typedef YYInt YYDisp;
+#endif
+#endif /* else YY_COMPRESS != YY_ITERATIVE_COMPRESS */
+#endif /* if YY_TABLE_ENTRY == YY_DIFF_TABLE */
+
+/* Let preprocessor figure out type for eqClass[]. */
+_type(YYClass, YY_N_EQ_CLASSES-1)
+
+/* Let preprocessor figure out type for eqBase[]. */
+_type(YYEqBase, YY_MAX_EQ_BASE)
+
+/* Let preprocessor figure out type for eqCheck[]. */
+_type(YYEqCheck, YY_MAX_EQ_CHECK)
+
+#endif /* else !YY_ALIGN */
+
+
+/* 		PUBLIC MACROS NOT REDEFINABLE BY USER.			*/
+
+/* Macro for entering a start-state. Yucky, but can't be helped because 
+ * of lex. 
+ */
+#define BEGIN 	yyData.startState= 
+#define YY_BEGIN(s)  yyData.startState= (s) 	/* Cleaner version. */
+
+#if YY_DO_REJECT
+/* Macro for rejecting current action. Can only be used within yylex(). */
+#define REJECT		YY_REJECT
+#endif
+
+#define	YY_MORE yyMore(YY_DATA_P)
+#define yymore() YY_MORE
+
+#define YY_LESS(n) yyLess(YY_DATA_P, n)
+#define yyless(n) YY_LESS(n)
+
+#define YY_TERMINATE()							\
+  do {									\
+    yyTerminate(YY_DATA_P);						\
+    return YY_EOF_OUT;							\
+  } while (0)
+#define yyterminate() YY_TERMINATE()
+
+#define YY_CHAR_NUM (yyBuf.nRead + (YY_TEXT0 - yyBuf.buf))
+
+#define YY_NEW_FILE yyrestart(YY_IN)
+
+#define YY_RESTART(f)	yyRestart(YY_DATA_P, f)
+#define yyrestart(f)	YY_RESTART(f)
+
+#define YY_GET()	yyGet(YY_DATA_P)
+#ifdef __cplusplus
+#define yy_input()	YY_GET()
+#else
+#define input()		YY_GET()
+#endif
+
+#define YY_UNPUT(ch)	yyUnput(YY_DATA_P, ch)
+#define unput(ch)	YY_UNPUT(ch)
+
+#define YY_BUFFER_STATE YYBufHandle
+
+#define YY_CREATE_BUFFER(f, s)	yyCreateBuffer(YY_DATA_P, f, s)
+#define yy_create_buffer(f, s)	YY_CREATE_BUFFER(f, s)
+#define YY_SWITCH_TO_BUFFER(b)	yySwitchToBuffer(YY_DATA_P, b)
+#define yy_switch_to_buffer(b)	(YY_SWITCH_TO_BUFFER(b))
+#define YY_DELETE_BUFFER(b)	yyDeleteBuffer(YY_DATA_P, b)
+#define yy_delete_buffer(b)	YY_DELETE_BUFFER(b)
+
+#define YY_FLUSH_BUFFER		yy_flush_buffer(YY_CURRENT_BUFFER)
+#define yy_flush_buffer(bp)	yyFlushBuffer(YY_DATA_P, bp)
+
+#define YY_STRING_BUFFER(str)		yyStringBuffer(YY_DATA_P, str)
+#define yy_scan_string(str)		YY_STRING_BUFFER(str)
+#define YY_BYTES_BUFFER(bytes, len)	yyBytesBuffer(YY_DATA_P, bytes, len)
+#define yy_scan_bytes(bytes, len)	YY_BYTES_BUFFER(bytes, len)
+#define YY_MEM_BUFFER(buf, len)		yyMemBuffer(YY_DATA_P, buf, len)
+#define yy_scan_buffer(buf, len)	YY_MEM_BUFFER(buf, len)
+
+#define YY_PUSH_STATE(s)	yyPushState(YY_DATA_P, s)
+#define yy_push_state(s)	YY_PUSH_STATE(s)
+#define YY_POP_STATE()		yyPopState(YY_DATA_P)
+#define yy_pop_state()		YY_POP_STATE()
+#define YY_TOP_STATE()		yyTopState(YY_DATA_P)
+#define yy_top_state()		YY_TOP_STATE()
+
+/* 			SECTION 1 DECLARATIONS.				*/
+
+/*_F(outDefs)*/
+
+/* 		    LIBRARY TYPES & DECLARATIONS.			*/
+
+#include <assert.h>
+#include <stdio.h>
+
+#ifndef BUFSIZ
+#define BUFSIZ	4096
+#endif
+
+#if __STDC__
+#include <stdlib.h>	/* For exit(). */
+#endif
+
+
+
+/* 		NAMES FOR EXTERN SCANNER OBJECTS.			*/
+
+/* Default prefixed names provided, if macros not defined in section 1.	*/
+/*_F(outPrefixedNames)*/
+
+
+/*    DEFAULT MACRO DEFINITIONS IF NOT BEEN DEFINED IN SECTION 1.	*/
+
+/* Prototype for yylex(). */
+#ifndef YY_DECL
+#define YY_DECL int YY_LEX(YY_VOID_ARGS)
+#endif
+
+/* Size of yytext when %array declaration used. */
+#ifndef YYLMAX		
+#define YYLMAX 8192	
+#endif
+
+#ifdef ECHO
+#define YY_ECHO ECHO
+#endif
+
+#ifndef YY_ECHO
+#define ECHO YY_ECHO
+#define YY_ECHO fwrite(YY_TEXT, YY_LENG, 1, YY_OUT)
+#endif
+
+#ifndef YY_BREAK
+#define YY_BREAK break
+#endif
+
+#ifndef YY_USER_ACTION
+#define YY_USER_ACT
+#else
+#define YY_USER_ACT							\
+  do { if (0 < yyAct && yyAct < YY_DEFAULT_ACTN) YY_USER_ACTION; } while (0)
+#endif
+
+#ifndef YY_USER_INIT
+#define YY_USER_INIT
+#endif
+
+#ifndef YY_INPUT
+#define YY_INPUT(buf, result, n)					\
+  do {									\
+    result= YY_READ(YY_IN, buf, (n));					\
+    YY_READ_ERROR(result, YY_IN);					\
+    if (result == 0) result= YY_EOF_IN; /* NOP when YY_EOF_IN == 0. */	\
+  } while (0)
+#endif
+
+/* Combine YY_DO_DEBUG, YYDEBUG and YY_ZL_DEBUG (if def'd in declarations).*/
+#if (YY_DO_DEBUG == 1)
+#undef YY_ZL_DEBUG
+#define YY_ZL_DEBUG
+#endif
+#ifdef YYDEBUG
+#undef YY_ZL_DEBUG
+#define YY_ZL_DEBUG
+#endif
+
+#ifndef YY_NULL
+#define YY_NULL 0
+#endif
+
+#ifndef YY_EOF_IN
+#define YY_EOF_IN	YY_NULL
+#endif
+
+#ifndef YY_EOF_OUT
+#define YY_EOF_OUT	YY_NULL
+#endif
+
+#if YY_START_OF_LINE
+#define YY_SET_BOL(v)	(yyBuf.lastCh= (v) ? '\n' : ' ')
+#define yy_set_bol(v)	YY_SET_BOL(v)
+#define YY_AT_BOL()	(yyBuf.lastCh == '\n')
+#endif
+
+#ifndef YY_FATAL
+#define YY_FATAL(msg)	yyZlexFatal(YY_ERR, msg)
+#endif
+
+#if YY_DO_CODE		/* Generating a scanner with code-encoded state. */
+
+#if YY_LABEL_VARS	/* Compiler allows vars to contain label addresses. */
+
+#ifndef YY_LABEL_TYPEDEF /* How compiler declares vars containing labels. */
+#ifdef __GNUC__
+#define YY_LABEL_TYPEDEF(type)	typedef void *type
+#endif
+#endif
+
+#ifndef YY_LABEL_ADDR	/* How compiler takes the address of a label. */
+#ifdef __GNUC__
+#define YY_LABEL_ADDR(label)	&&label
+#endif
+#endif
+
+#endif /* if YY_LABEL_VARS */
+
+#if YY_LABEL_VARS
+
+YY_LABEL_TYPEDEF(YYLabP);
+#define YY_SWITCH(tabName, var, def, cases)				\
+  { static YYLabP tabName[]= { cases }; goto *tabName[var]; }
+#define YY_CASE(val, label)	YY_LABEL_ADDR(label),
+#define YY_DEFAULT_CASE(val, label) YY_CASE(val, label)
+
+#else /* !YY_LABEL_VARS */
+
+#define YY_SWITCH(tabName, var, def, cases)				\
+  { switch (var) { cases default: goto def; } }
+#define YY_CASE(val, label)	case val: goto label;
+#define YY_DEFAULT_CASE(val, label)
+
+#endif /* YY_LABEL_VARS */
+
+#endif /* if YY_DO_CODE */
+
+/*			START-STATE DEFINITIONS.			*/
+
+/*_F(outSS)*/
+
+/*		PRIVATE MACROS (SHOULD NOT BE USED BY USER)		*/
+
+/* yytext which is usually in buffer. */
+#if YY_ARRAY
+#define YY_TEXT0		yytext0
+#define YY_TEXT_ARRAY_INIT	YY_TEXT
+#else
+#define YY_TEXT0		YY_TEXT
+#define YY_TEXT_ARRAY_INIT	NULL
+#endif
+
+
+#define YY_OPT_INIT \
+  (   (YY_LINENO_ACTN ? YY_LINENO_FLAG : 0) \
+    | (YY_ARRAY ? YY_ARRAY_FLAG : 0) \
+    | (YY_BACKUP_OPTIMIZE ? YY_BACKUP_OPTIMIZE_FLAG : 0) \
+  )
+
+/* If cc initializer exp can't handle ?:, then define as follows (need to
+ * add YY_BACKUP_OPTIMIZE case). 
+ */
+#if 0 
+#if YY_ARRAY
+#if YY_LINENO_ACTN
+#define YY_OPT_INIT	(YY_LINENO_FLAG|YY_ARRAY_FLAG)
+#else
+#define	YY_OPT_INIT	(YY_ARRAY_FLAG)
+#endif
+#else /* !YY_ARRAY */
+#if YY_LINENO_ACTN
+#define YY_OPT_INIT	(YY_LINENO_FLAG)
+#else
+#define YY_OPT_INIT	0
+#endif
+#endif /* else !YY_ARRAY */
+#endif /* #if 0 */
+
+#if YY_DO_STDIO
+#define YY_READ(f, b, n)	fread((b), sizeof(YYChar), (n), (f))
+#define YY_READ_ERROR(result, f)					\
+  do {									\
+    if ((result) == 0 && ferror(f)) {					\
+      YY_FATAL("Error reading input file.");				\
+    }									\
+  } while (0)
+#else
+extern int read();
+/* Don't declare fileno() as it may be a macro. */
+#define YY_READ(f, b, n)	read(fileno(f), (b), (n)*sizeof(YYChar))
+#define YY_READ_ERROR(result, f)					\
+  do {									\
+    if ((result) < 0) {							\
+      YY_FATAL("Error reading input file.");				\
+    }									\
+  } while (0)
+#endif
+
+#if (YY_DEFAULT_ACTION == 0)	/* echo */
+#define YY_DEFAULT_ACT()						\
+  do {									\
+    YY_DEFAULT_MSG(); ECHO;						\
+  } while (0)
+#elif (YY_DEFAULT_ACTION == 1)	/* error */
+#define YY_DEFAULT_ACT()						\
+  do {									\
+    YY_DEFAULT_MSG();							\
+    fprintf(YY_ERR, "scanner jammed at character `%c'.\n", YY_TEXT[0]);	\
+  } while (0)
+#elif (YY_DEFAULT_ACTION == 2)	/* fatal */
+#define YY_DEFAULT_ACT()						\
+  do {									\
+    char msg[80];							\
+    YY_DEFAULT_MSG();							\
+    sprintf(msg, "scanner jammed at character `%c'.\n", YY_TEXT[0]);	\
+    YY_FATAL(msg);							\
+  } while (0)
+#else
+#define YY_DEFAULT_ACT()	/* ignore */
+#endif
+
+
+/* Macro which decides whether we use a character directly or an eq. class. */
+#if (YY_N_EQ_CLASSES == YY_CHAR_SET_SIZE)
+#define YY_SET_EQ_CLASS(e, c) do { e= c; } while (0)
+#elif (YY_MAX_EQ_BASE > 0) 
+#define YY_SET_EQ_CLASS(e, c)						\
+  do {									\
+    YY_CONST YYUInt lo= (c) & ((1L << YY_CLASS_SEG_BIT) - 1);		\
+    YY_CONST YYUInt hi= (c) >> YY_CLASS_SEG_BIT;			\
+    YY_CONST YYUInt i= yyTab.u.s.eqBase[hi] + lo;			\
+    e= (yyTab.u.s.eqCheck[i] == lo)					\
+       ? yyTab.u.s.eqNext[i]						\
+       : yyTab.u.s.eqDefault[hi];					\
+  } while (0) 
+#else
+#define YY_SET_EQ_CLASS(e, c)						\
+  do { e= yyTab.u.s.eqClass[c]; } while (0)
+#endif
+
+/* Macro which converts from YYChar to unsigned. Evaluates argument exactly
+ * once.
+ */
+#if YY_16_BIT
+#define YY_CHAR_TO_UNSIGNED(c)		((unsigned)(c))
+#else
+#define YY_CHAR_TO_UNSIGNED(c)		((unsigned)(unsigned char)(c))
+#endif
+
+#ifdef YY_ZL_DEBUG
+
+#define YY_DEBUG_MSG(n)							\
+  yyDebugMsg(&yyData, YY_SRC_NAME, n, YY_TEXT, YY_ZLEX_DEBUG)
+#define YY_EOF_MSG() yyEOFMsg(&yyData, YY_ZLEX_DEBUG)
+#define YY_DEFAULT_MSG() yyDefaultMsg(&yyData, YY_TEXT, YY_ZLEX_DEBUG)
+
+#else
+
+#define YY_DEBUG_MSG(n)
+#define YY_EOF_MSG()
+#define YY_DEFAULT_MSG()
+
+#endif /* ifdef YY_DEBUG */
+
+#ifdef YYTRACE	/* Trace DFA transitions. */
+
+/* Since tracing will operate before the scanner has been initialized, 
+ * when YY_ERR may be NULL, we check it using the following macro.
+ */
+#define YY_XERR		((YY_ERR) ? YY_ERR : stderr)
+
+#define YY_TRACE_TRANSIT(s, c)	fprintf(YY_XERR, " %d/`%c'", (s), (c))
+#define YY_TRACE_END(s)		fprintf(YY_XERR, " %d", s)
+#define YY_TRACE_REJECT(s)	fprintf(YY_XERR, " ^%d", (s))
+#define YY_TRACE_ACT(a)		fprintf(YY_XERR, " #%d\n", (a))
+
+#else
+
+#define YY_TRACE_TRANSIT(s, c)
+#define YY_TRACE_END(s)
+#define YY_TRACE_REJECT(s)
+#define YY_TRACE_ACT(a)
+
+#endif /* ifdef YYTRACE */
+
+/* We need action numbers if YY_USER_ACTION is defined or YYTRACE is
+ * defined.  The following clumsy code sets up YY_HAS_ACTION_NUMBERS 
+ * without using the cpp `defined' operator. 
+ */
+#ifdef YYTRACE
+#define YY_HAS_ACTION_NUMBERS 1
+#else
+#ifdef YY_USER_ACTION
+#define YY_HAS_ACTION_NUMBERS 1
+#else
+#define YY_HAS_ACTION_NUMBERS 0
+#endif
+#endif
+
+#if YY_HAS_ACTION_NUMBERS
+#define YY_SET_ACT()							\
+  do { yyAct= yyState < YY_N_STATES ? yyActs[yyState] : 0; } while (0)
+#define yy_act	yyAct		/* For flex compatibility. */ 
+#else
+#define YY_SET_ACT()
+#endif
+
+/* Set up correct start-state at start of scanning. */
+#if (YY_N_START_STATES == 1 && YY_START_OF_LINE == 0)
+#define YY_START	0
+#elif (YY_N_START_STATES == 1 && YY_START_OF_LINE == 1)
+#define YY_START	(yyBuf.lastCh == '\n')
+#elif (YY_N_START_STATES > 1 && YY_START_OF_LINE == 0)
+#define YY_START	(yyData.startState)
+#else
+#define YY_START	(yyData.startState + (yyBuf.lastCh == '\n'))
+#endif
+
+/* For flex and AT&T compatibility. */
+#define YYSTATE		YY_START
+
+
+/* The following macros are used for initializing entries in the next[]
+ * table.
+ * YY_B(offset): 
+ *		A macro used for initializing the base[] vector to point
+ *		to next[offset] (using offset as an index if TABLE ==
+ *		STATE_TABLE; using an address otherwise).
+ * YY_N1(s0, s1): 
+ *		A macro which represents the transition from significant 
+ *		state s0 (which for TABLE != STATE_TABLE is represented 
+ *		by its base value in next[]) to significant state s1 (which
+ *		for TABLE != STATE_TABLE is represented by its base
+ *		value in next[]). 
+ * YY_N2(s0, s1): 
+ *		A macro which represents the transition from significant 
+ *		state s0 (which for TABLE != STATE_TABLE is represented 
+ *		by its base value in next[]) to non-significant or
+ *		pseudo-state s1.
+ * YY_S(s):	
+ *		A macro used for storing a state number when compressed 
+ *		(stored at YY_STATE_INDEX offset from the base of the state).
+ */
+#if YY_TABLE_ENTRY == YY_ADDRESS_TABLE
+#define YY_B(offset) (&yyTab.next[offset])
+#define YY_N1(s0Base, s1Base) (&yyTab.next[s1Base])
+#define YY_N2(s0Base, s1) ((YYNext *)(&yyTab.u.dummy[(s1) - YY_N_SIG_STATES]))
+#define YY_S(s)	((YY_CONST YYNext *)(s))
+#elif YY_TABLE_ENTRY == YY_DIFF_TABLE
+/* By converting pointers to char* pointers, we can avoid an index*size
+ * multiplication at runtime; also makes it possible for dummy[] to be
+ * a char vector.  Disadvantage is that values may not fit within short.
+ * The definition of YY_N2 uses array indices of 0 and makes explicit 
+ * the address arithmetic.
+ */
+#define YY_B(offset) (&yyTab.next[offset])
+#define YY_N1(s0Base, s1Base)						\
+  ((s1Base - s0Base)*((int)sizeof(YYNext)))
+#define YY_N2(s0Base, s1)						\
+  ((&yyTab.u.dummy[0] - (char*)(&yyTab.next[0]))			\
+   + ((s1) - YY_N_SIG_STATES)*((int)sizeof(char)) 			\
+   - (s0Base)*((int)sizeof(YYNext)))
+#define YY_S(s)	(s)
+#else
+#define YY_B(offset) (offset)
+#define YY_N1(s0, s1) (s1)
+#define YY_N2(s0, s1) (s1)
+#define YY_S(s)	(s)
+#endif
+
+/* Decode next state tables.  9 possibilities for tables (3 compress 
+ * options x 3 table-entry options).  Define following macros and
+ * typedefs:
+ *
+ * YYTState:	A typedef used for states within transition loops.
+ * YY_SIG_STATE_NUM(s)/YY_NON_SIG_STATE_NUM(s):  
+ *		Convert from a significant/non-significant YYTState 
+ *		to a normal numeric state.
+ * YY_NUM_STATE_TO_T_STATE(s):
+ *		Convert from  significant numeric state to a YYTState.
+ * YY_SIG_LIMIT: A YYTState must be < this to be significant.
+ * YY_D1(s0, def, isTerminal):
+ *		A macro used for initializing the default for state s0
+ *		(which for TABLE != STATE_TABLE is represented 
+ *		by its base value in next[]) to default def (which
+ *		for TABLE != STATE_TABLE is represented by its base
+ *		value in next[]).  isTerminal is 1 iff the default
+ *		is a terminal default which terminates the state
+ *		transition iteration.
+ * YY_D2(s0, def, isTerminal):
+ *		A macro used for initializing the default for state s0
+ *		(which for TABLE != STATE_TABLE is represented by its 
+ *		base value in next[]) to non-significant or pseudo-state 
+ *		default def. isTerminal is 1 iff the default is a terminal 
+ *		default which terminates the state transition iteration.
+ * YY_SET_NEXT_STATE(ss, c): Set YYTState ss to the next YYTState on
+ *		character c.
+ *
+ * In addition, there are also typedefs for YYNext structures.
+ */
+
+#if (YY_COMPRESS == YY_NO_COMPRESS && YY_TABLE_ENTRY == YY_ADDRESS_TABLE)
+typedef struct YYNext { YY_CONST struct YYNext *next; } YYNext;
+typedef YY_CONST YYNext *YYTState;
+#define YY_SIG_STATE_NUM(s)						\
+  ((YYState)(((s) - yyTab.next)/YY_N_COLS))
+#define YY_NON_SIG_STATE_NUM(s)						\
+  (YY_N_SIG_STATES + (((char*)(s)) - yyTab.u.dummy))
+#define YY_NUM_STATE_TO_T_STATE(s)	(&yyTab.next[(s)*YY_N_COLS])
+#define YY_SIG_LIMIT							\
+  (&yyTab.next[(YY_N_SIG_STATES - 1)*YY_N_COLS + 1])
+#undef YY_D1
+#undef YY_D2
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    (ss)= (ss)[c].next;							\
+  } while (0)
+
+#elif (YY_COMPRESS == YY_NO_COMPRESS && YY_TABLE_ENTRY == YY_DIFF_TABLE)
+typedef YYDisp YYNext;
+typedef YY_CONST YYNext *YYTState;
+#define YY_SIG_STATE_NUM(s)						\
+  ((YYState)(((s) - yyTab.next)/YY_N_COLS))
+#define YY_NON_SIG_STATE_NUM(s)						\
+  (YY_N_SIG_STATES + (((char*)(s)) - yyTab.u.dummy))
+#define YY_NUM_STATE_TO_T_STATE(s)	(&yyTab.next[(s)*YY_N_COLS])
+#define YY_SIG_LIMIT							\
+  (&yyTab.next[(YY_N_SIG_STATES - 1)*YY_N_COLS + 1])
+#undef YY_D1
+#undef YY_D2
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST char *cs= (char *)(ss);					\
+    cs+= (ss)[c];							\
+    (ss)= (YYTState)cs;							\
+  } while (0)
+
+#elif (YY_COMPRESS == YY_NO_COMPRESS && YY_TABLE_ENTRY == YY_STATE_TABLE)
+typedef YYXState YYNext;
+typedef YYState YYTState;
+#define YY_SIG_STATE_NUM(s)		(s)
+#define YY_NON_SIG_STATE_NUM(s)		(s)
+#define YY_NUM_STATE_TO_T_STATE(s)	(s)
+#define YY_SIG_LIMIT			(YY_N_SIG_STATES)
+#undef YY_D1
+#undef YY_D2
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    (ss)= yyTab.next[ss][c];						\
+  } while (0)
+
+#elif (YY_COMPRESS == YY_COMB_COMPRESS && YY_TABLE_ENTRY == YY_ADDRESS_TABLE)
+typedef struct YYNext { YY_CONST struct YYNext *next; YYCheck check; } YYNext;
+typedef YY_CONST YYNext *YYTState;
+#define YY_SIG_STATE_NUM(s)	((YYState)((s)[YY_STATE_INDEX].next))
+#define YY_NON_SIG_STATE_NUM(s)						\
+  (YY_N_SIG_STATES + (((char*)(s)) - yyTab.u.dummy))
+#define YY_NUM_STATE_TO_T_STATE(numState) (yyTab.u.s.base[numState])
+#define YY_SIG_LIMIT	(&yyTab.next[YY_MAX_BASE + 1])
+#define YY_D1(s0Base, defBase, isTerminal) YY_N1(s0Base, defBase)
+#define YY_D2(s0Base, def, isTerminal) YY_N2(s0Base, def)
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST YYNext *YY_CONST p= &(ss)[c];				\
+    (ss)= (p->check == (c)) ? p->next : (ss)[YY_DEF_INDEX].next;	\
+  } while (0)
+
+#elif (YY_COMPRESS == YY_COMB_COMPRESS && YY_TABLE_ENTRY == YY_DIFF_TABLE)
+typedef struct { YYDisp next; YYCheck check; } YYNext;
+typedef YY_CONST YYNext *YYTState;
+#define YY_SIG_STATE_NUM(s)	((YYState)((s)[YY_STATE_INDEX].next))
+#define YY_NON_SIG_STATE_NUM(s)						\
+  (YY_N_SIG_STATES + (((char*)(s)) - yyTab.u.dummy))
+#define YY_NUM_STATE_TO_T_STATE(numState) (yyTab.u.s.base[numState])
+#define YY_SIG_LIMIT	(&yyTab.next[YY_MAX_BASE + 1])
+#define YY_D1(s0Base, defBase, isTerminal) YY_N1(s0Base, defBase)
+#define YY_D2(s0Base, def, isTerminal) YY_N2(s0Base, def)
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST YYNext *YY_CONST p= &(ss)[c];				\
+    YY_CONST char *sc= (char *)(ss);					\
+    sc+= (p->check == (c)) ? p->next : (ss)[YY_DEF_INDEX].next;		\
+    (ss)= (YYTState)sc;							\
+  } while (0)
+
+#elif (YY_COMPRESS == YY_COMB_COMPRESS && YY_TABLE_ENTRY == YY_STATE_TABLE)
+typedef YYXState YYNext;
+typedef YYState YYTState;
+#define YY_SIG_STATE_NUM(s)		(s)
+#define YY_NON_SIG_STATE_NUM(s)		(s)
+#define YY_NUM_STATE_TO_T_STATE(s)	(s)
+#define YY_SIG_LIMIT			(YY_N_SIG_STATES)
+#define YY_D1(_s0Base, def, _isTerminal) (def)
+#undef YY_D2
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST unsigned i= yyTab.u.s.base[ss] + (c);			\
+    (ss)= (yyTab.check[i] == (c)) ? yyTab.next[i] : yyTab.def[ss];	\
+  } while (0)
+
+#elif (YY_COMPRESS == YY_ITERATIVE_COMPRESS && YY_TABLE_ENTRY == YY_ADDRESS_TABLE)
+typedef struct YYNext { YY_CONST struct YYNext *next; YYCheck check; } YYNext;
+typedef YY_CONST YYNext *YYTState;
+#define YY_SIG_STATE_NUM(s)	((YYState)((s)[YY_STATE_INDEX].next))
+#define YY_NON_SIG_STATE_NUM(s)						\
+  (YY_N_SIG_STATES + (((char*)(s)) - yyTab.u.dummy))
+#define YY_NUM_STATE_TO_T_STATE(numState)	(yyTab.u.s.base[numState])
+#define YY_SIG_LIMIT	&yyTab.next[YY_MAX_BASE + 1]
+#define YY_D1(s0Base, defBase, isTerminal)				\
+  ((YYNext*)((((defBase - s0Base)*((int)sizeof(YYNext))) << 1)		\
+   | (isTerminal)))
+#define YY_D2(s0Base, def, isTerminal)					\
+  ((YYNext*)								\
+    ((((&yyTab.u.dummy[0] - (char*)&yyTab.next[0])			\
+       + (def - YY_N_SIG_STATES) - (s0Base)*((int)sizeof(YYNext)))	\
+      << 1)								\
+     | (isTerminal)))
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST YYNext *YY_CONST p= &(ss)[c];				\
+    if (p->check == (c)) {						\
+      (ss)= p->next; break;						\
+    }									\
+    else {								\
+      char *sc= (char*)(ss);						\
+      int entry= (int)((ss)[YY_DEF_INDEX].next);			\
+      sc+= (entry & ~1)/2; (ss)= (YYNext*)sc;				\
+      if (entry & 1) break;						\
+    }									\
+  } while (1)
+
+#elif (YY_COMPRESS == YY_ITERATIVE_COMPRESS && YY_TABLE_ENTRY == YY_DIFF_TABLE)
+typedef struct { YYDisp next; YYCheck check; } YYNext;
+typedef YY_CONST YYNext *YYTState;
+#define YY_SIG_STATE_NUM(s)	((YYState)((s)[YY_STATE_INDEX].next))
+#define YY_NON_SIG_STATE_NUM(s)						\
+  (YY_N_SIG_STATES + (((char*)(s)) - yyTab.u.dummy))
+#define YY_NUM_STATE_TO_T_STATE(numState) (yyTab.u.s.base[numState])
+#define YY_SIG_LIMIT	(&yyTab.next[YY_MAX_BASE + 1])
+#define YY_D1(s0Base, defBase, isTerminal)				\
+    ((((defBase - s0Base) * ((int)sizeof(YYNext))) << 1) | (isTerminal))
+#define YY_D2(s0Base, def, isTerminal)					\
+   ((((&yyTab.u.dummy[0] - (char*)&yyTab.next[0])			\
+      + (def - YY_N_SIG_STATES) - (s0Base)*((int)sizeof(YYNext)))	\
+     << 1)								\
+    | (isTerminal))
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST YYNext *YY_CONST p= &(ss)[c];				\
+    YY_CONST char *sc= (char *)(ss);					\
+    if (p->check == (c)) {						\
+      sc+= p->next; (ss)= (YYTState)sc; break;				\
+    }									\
+    else {								\
+      int entry= (ss)[YY_DEF_INDEX].next;				\
+      sc+= (entry & ~1)/2; (ss)= (YYTState)sc;	 			\
+      if (entry & 1) break;						\
+    }									\
+  } while (1)
+
+#elif (YY_COMPRESS == YY_ITERATIVE_COMPRESS && YY_TABLE_ENTRY == YY_STATE_TABLE)
+typedef YYXState YYNext;
+typedef YYState YYTState;
+#define YY_SIG_STATE_NUM(s)		(s)
+#define YY_NON_SIG_STATE_NUM(s)		(s)
+#define YY_NUM_STATE_TO_T_STATE(s)	(s)
+#define YY_SIG_LIMIT			(YY_N_SIG_STATES)
+#define YY_D1(_s0, def, isTerminal)	(((def)<<1) | (isTerminal))
+#undef YY_D2
+#define YY_SET_NEXT_STATE(ss, c)					\
+  do {									\
+    YY_CONST unsigned i= yyTab.u.s.base[ss] + (c);			\
+    if (yyTab.check[i] == (c)) {					\
+      (ss)= yyTab.next[i]; break;					\
+    }									\
+    else {								\
+      unsigned entry= yyTab.def[ss];					\
+      (ss)= entry >> 1;							\
+      if (entry & 1) break;						\
+    }									\
+  } while (1)
+#endif
+
+
+#if (YY_START_OF_LINE == 1)
+#if !YY_DO_CODE && !YY_BACKUP_OPTIMIZE
+#define YY_SAVE_LAST()							\
+  do {									\
+    yyLastCh= yyBuf.lastCh; yyBuf.lastCh= yyCP[-1];			\
+  } while (0)
+#define YY_RESCAN_RESTORE()  do { yyBuf.lastCh= yyLastCh; } while (0)
+#else
+#define YY_SAVE_LAST()							\
+  do {									\
+    yyBuf.lastCh= yyCP[-1];						\
+  } while (0)
+#define YY_RESCAN_RESTORE()
+#endif /* if !YY_DO_CODE && !YY_BACKUP_OPTIMIZE */
+#else
+#define YY_SAVE_LAST()
+#define YY_RESCAN_RESTORE()
+#endif /* if (YY_START_OF_LINE == 1) */
+
+#if YY_ARRAY
+#define YY_COPY_TEXT_TO_ARRAY()						\
+  do {									\
+    YYChar *src= YY_TEXT0, *dest= YY_TEXT;				\
+    YYChar *end= &YY_TEXT0[YY_LENG] + 1;				\
+    while (src < end)  *dest++= *src++;					\
+  } while (0)
+#else
+#define YY_COPY_TEXT_TO_ARRAY()
+#endif
+
+#if YY_ARRAY
+#define YY_RETERMINATE_ARRAY()	YY_TEXT[YY_LENG]= '\0'
+#else
+#define YY_RETERMINATE_ARRAY()
+#endif
+
+/* The following macro is called after matching a context pattern
+ * PAT/CONTEXT where the length of PAT is known to be n.
+ */
+#define YY_SET_LENG(n) 							\
+  do {									\
+    assert(yyCP == yyBuf.cp);						\
+    assert(yyCP == yyData.saveCP);					\
+    *yyCP= yyData.saveCh;						\
+    YY_LENG= (n); yyData.saveCP= yyBuf.cp= yyCP= YY_TEXT0 + (n);	\
+    yyData.saveCh= *yyCP; *yyCP= '\0';					\
+    YY_SAVE_LAST();							\
+    YY_RETERMINATE_ARRAY();						\
+  } while (0)
+
+/* The following macro is called after matching a context pattern
+ * PAT/CONTEXT where the length of CONTEXT is known to be n.
+ */
+#define YY_DEC_LENG(n) 							\
+  do {									\
+    assert(yyBuf.cp == yyCP);						\
+    assert(yyCP == yyData.saveCP);					\
+    *yyCP= yyData.saveCh;						\
+    YY_LENG-= (n); yyData.saveCP= yyBuf.cp= yyCP-= (n);			\
+    yyData.saveCh= *yyCP; *yyCP= '\0';					\
+    YY_SAVE_LAST();							\
+    YY_RETERMINATE_ARRAY();						\
+  } while (0)
+
+#if YY_HAS_INTRA_TOK_PAT
+
+#if YY_N_INTRA_STATES == 0
+#define YY_ALT_STATE(s)		YY_JAM_STATE
+#else
+#define YY_ALT_STATE(s0)						\
+  ( ((s0) < YY_N_SIG_STATES + YY_N_INTRA_STATES)			\
+    ? yyTab.u.s.intra[(s0) - YY_N_SIG_STATES]				\
+    : YY_JAM_STATE							\
+  )
+#endif
+
+	
+#if YY_BACKUP_OPTIMIZE
+
+#define YY_BACKUP(len, string)						\
+  do {									\
+    if (0 < len && len <= YY_LENG) {					\
+      yyBuf.cp= yyReplace(YY_DATA_P, len, string, &yyIntraText);	\
+      yyRSP-= len; yyAltState= *yyRSP;					\
+    }									\
+  } while (0)
+
+#else /* !YY_BACKUP_OPTIMIZE */
+
+#define YY_BACKUP(len, string)						\
+  do {									\
+    if (0 < len && len <= YY_LENG) {					\
+      yyReplace(YY_DATA_P, len, string, &yyIntraText);			\
+      yyBuf.cp= yyIntraText; goto yyRescan;				\
+    }									\
+  } while (0)
+
+#endif /* else !YY_DO_CODE */
+#endif /* if YY_HAS_INTRA_TOK_PAT */
+
+/* 		          GLOBAL VARIABLES.				*/
+
+/* 
+ * Dummy buffer used for auto-initialization.  dummyBuf[0] will contain a
+ * SENTINEL_CHAR to force initialization via yyProcessSentinel();
+ * dummyBuf[1] will be overwritten by '\0' by the scanner to terminate
+ * YY_TEXT before it realizes this is not a normal token.  At init, cp
+ * == &dummyBuf[0] & sentinelP == &dummyBuf[0].  We'd really like to
+ * put the dummyBuf within yyData, but can't because some cc's don't
+ * allow initializing vars which have circular initialization dependencies.
+ */
+#define YY_INIT_BUF_SIZE 2
+static YYChar yyDummyBuf[YY_INIT_BUF_SIZE];
+
+/* Dummy stack used in 1st pass thru scanning loop at init. time. 	*/
+static YYState yyDummyStk[1];	
+
+FILE *YY_IN;			/* Input FILE pointer. */
+FILE *YY_OUT;			/* Output FILE pointer. */
+FILE *YY_ERR;			/* Error FILE pointer. */
+
+#if YY_ARRAY
+YYChar YY_TEXT[YYLMAX];		/* Array containing last matched lexeme. */
+#endif
+YYChar *YY_TEXT0=		/* Pointer to last matched lexeme in buffer.*/ 
+  &yyDummyBuf[0];
+int YY_LENG= 0;			/* # of chars in last token matched.	*/
+
+#ifdef YY_ZL_DEBUG
+int YY_ZLEX_DEBUG= 1;		/* Flag to turn debug messages on/off. 	*/
+#endif
+
+#if YY_LINENO_ACTN
+int YY_LINENO= 0;		/* Initialization will increment it. */
+#define YY_COL_NUM	(YY_CHAR_NUM - yyBuf.lastLinePos)
+#define YY_SET_COL_NUM(c)						\
+  do { yyBuf.lastLinePos= YY_CHAR_NUM - (c); } while (0)
+#define YY_LINENOP_INIT	(&YY_LINENO)
+#else
+#define YY_LINENOP_INIT 0
+#endif
+
+#if __STDC__
+static yy_size_t yyRead (YYChar *buf, yy_size_t nRead);
+#else
+static yy_size_t yyRead();
+#endif
+
+#if __STDC__
+int YY_WRAP(void);
+#else
+int YY_WRAP();
+#endif
+
+/* This buffer is used during initialization and to cache the current 
+ * dynamically-allocated buffer.
+ */
+static YYBuf yyBuf= {		
+  NULL,				/* yyin */
+  &yyDummyBuf[0],		/* buf */
+  &yyDummyBuf[1],		/* end */
+  YY_INIT_BUF_SIZE,		/* size */
+  0,				/* nRead */
+  0,				/* intraPos */
+  &yyDummyBuf[0],		/* cp */
+  0,				/* lastLinePos */
+  0,				/* firstNLPos */
+  0,				/* lineno */
+  '\n',				/* lastCh */
+  0,				/* hasNL */
+  0				/* eofState */
+};
+
+/* Opaque pointer to current buffer.  Read-only for user.
+ * It will ALWAYS point to a dynamically allocated  buffer, 
+ * or be NULL.
+ */
+YYBufHandle YY_CURRENT_BUFFER= NULL;
+
+static YYData yyData= {
+  &YY_IN,				/* yyinP		*/
+  &YY_OUT,				/* yyoutP		*/
+  &YY_ERR,				/* yyerrP		*/
+  &YY_TEXT0,				/* yytextP		*/
+  &YY_LENG,				/* yylengP		*/
+  YY_LINENOP_INIT,			/* yylinenoP		*/
+  (YYBufP *)&YY_CURRENT_BUFFER,		/* yyCurrentBufP	*/	
+  YY_TEXT_ARRAY_INIT,			/* textArray		*/
+  &yyBuf,				/* bufP			*/
+  yyRead,				/* read()		*/
+  YY_WRAP,				/* yywrap()		*/
+  &yyDummyBuf[0],			/* saveCP		*/
+  &yyDummyBuf[0],			/* sentinelP		*/
+  YY_SENTINEL_CHAR,			/* sentinelChar		*/
+  '\0',					/* sentinelSave		*/
+  YY_SENTINEL_CHAR,			/* saveCh		*/
+  YY_INIT_SENTINEL,			/* flags		*/
+  YY_OPT_INIT,				/* options		*/
+  0,					/* doMore		*/
+  NULL,					/* moreText		*/
+  0,					/* moreLeng		*/
+  NULL,					/* yyTextSave		*/
+  0,					/* yyTextSaveSize	*/
+  yyDummyStk,				/* stk			*/
+  1,					/* stkSize		*/
+  0,					/* startState		*/
+  NULL					/* ssStkP		*/
+};
+
+YY_VOIDP YY_CONST YY_DATA_P= (YY_VOIDP) (&yyData);
+
+
+
+
+/*			     DFA TABLES.				*/
+
+/* The following macro is used for within yyTab. */
+#if __STDC__
+/* ANSI allows initializing first element of union. */
+#define YY_UNION_STRUCT		union
+#else
+/* Do not assume that a union can be initialized. */
+#define YY_UNION_STRUCT		struct
+#endif
+
+
+/*_F(outDFATabs)*/
+
+/* Tables defining actions. */
+#if YY_HAS_ACTION_NUMBERS
+/*_F(outActionTabs)*/
+#endif /* if YY_HAS_ACTION_NUMBERS */
+
+
+/* 			SCANNER ROUTINES				*/
+
+
+static yy_size_t 
+#if __STDC__
+yyRead (YYChar *buf, yy_size_t nRead) 
+#else
+yyRead (buf, nRead)
+  YYChar *buf;
+  yy_size_t nRead;
+#endif
+{
+/* Read upto nRead chars. from YY_IN into buffer buf.  Return # of chars.
+ * read or 0 on EOF.  Print error message and abort if read error.
+ * This is a call-back routine from the library to allow it to use a
+ * user-specified INPUT().
+ */
+  int result;
+  YY_INPUT(buf, result, nRead);
+  return result;
+}
+
+#if YY_HAS_VAR_CONTEXTS
+
+#if YY_BACKUP_OPTIMIZE
+
+#define YY_VAR_CONTEXT_RESCAN(patStart, contextStart)			\
+  yyVarContextRescan(YY_TEXT0, YY_LENG, patStart, contextStart, yyRSP)
+
+#else
+
+#define YY_VAR_CONTEXT_RESCAN(patStart, contextStart)			\
+  yyVarContextRescan(YY_TEXT0, YY_LENG, patStart, contextStart, 0)
+
+#endif
+
+#if 0
+#define YY_VAR_CONTEXT_RESCAN(patStart, contextStart)			\
+  do {
+    if (yyVarContext == 0) { /* Entry after PAT/CONTEXT match. */
+      yyVarContextText= YY_TEXT0; 
+      yyVarContextSentinelP= &YY_TEXT0[YY_LENG]; 
+      *yyVarContextSentinelP= YY_SENTINEL_CHAR;
+      yyState= patStart; yyCP= YY_TEXT0; yyVarContext= 1; goto yyStateSwitch;
+    }
+    else if (yyVarContext == 1) { /* Entry after PAT rematch. */
+      yyVarContextP= yyCP;
+  } while (0)
+#endif
+
+/* Call-back routine for variable context rescan.  We need a call-back
+ * routine to access next-state tables.  text and leng specifies 
+ * pat/context.  Starting in state patStart scan text for longest 
+ * match within text.  Then try to get to an accepting state starting
+ * in state contextStart with rest of text.  If unsuccessful, shorten
+ * pat match and try again for a context match.
+ */
+
+#if __STDC__
+static YY_VOID 
+yyVarContextRescan(YYChar *text, YYUInt leng, 
+		   YYState patStart, YYState contextStart,
+		   YYState *sp)
+#else
+static YY_VOID 
+yyVarContextAdjust(text, leng, patStart, contextStart, sp)
+  YYChar *text;
+  YYUInt leng;
+  YYState patStart;
+  YYState contextStart;
+  YYState *sp;
+#endif
+{  
+  YYState *YY_CONST spBase=   
+    (sp == NULL || (yyData.stk + yyData.stkSize) - sp < leng) 
+    ? (YYState*)malloc(leng * sizeof(YYState))
+    : sp;
+  YYState *rSP= spBase;
+  YYTState tstate= YY_NUM_STATE_TO_T_STATE(patStart);
+  YYChar *yyCP= text;
+  YY_CONST YYChar *YY_CONST end= text + leng;
+  YYState s, state;
+  if (!spBase) {
+    YY_FATAL("Out of memory for context rescan.");
+  }
+  do { /* Scan for longest possible match for pattern. */
+    unsigned yyChar= YY_CHAR_TO_UNSIGNED(*yyCP++); /* Get next character. */
+    unsigned yyEqChar;
+    YY_SET_EQ_CLASS(yyEqChar, yyChar);
+    *rSP++ = YY_SIG_STATE_NUM(tstate);	/* Remember state in state-stack. */
+    assert(yyCP - text == rSP - spBase);	/* rSP, yyCP in sync. */
+    YY_SET_NEXT_STATE(tstate, yyEqChar);
+  } while (tstate < YY_SIG_LIMIT && yyCP < end);
+  state= YY_NON_SIG_STATE_NUM(tstate);
+#if 0
+  if (state != YY_JAM_STATE) { *rSP++= state; }
+#endif
+  if (state < YY_N_STATES) { *rSP++= state; }
+  do { /* Backup pattern match until context matches. */
+    YYTState ts= YY_NUM_STATE_TO_T_STATE(contextStart);
+    assert(rSP > spBase);
+    do { /* Pop states off stack, until an accepting state is found. */
+      state= *--rSP;
+    } while (state < YY_N_NON_FINAL_STATES);
+    yyCP= text + (rSP - spBase);
+    while (ts < YY_SIG_LIMIT && yyCP < end) { /* Scan for context. */
+      unsigned yyChar= YY_CHAR_TO_UNSIGNED(*yyCP++); /* Get next character. */
+      unsigned yyEqChar; 
+      YY_SET_EQ_CLASS(yyEqChar, yyChar);	
+      YY_SET_NEXT_STATE(ts, yyEqChar);
+    }
+    s= (ts < YY_SIG_LIMIT) ? YY_SIG_STATE_NUM(ts) : YY_NON_SIG_STATE_NUM(ts); 
+  } while (yyCP < end || s < YY_N_NON_FINAL_STATES);
+  leng= rSP - spBase;
+  if (spBase != sp) free(spBase);
+  YY_SET_LENG(leng);
+}
+
+#endif /* if YY_HAS_VAR_CONTEXTS */
+
+m4_divert(-1) 
+
+			MAIN SCANNER ROUTINE.				
+
+Since the code below is fairly complex and spaghetti-ish, I am trying to
+document my assumptions thoroughly.  I am developing it in a top-down
+way using M4s capabilities (sort of poor person's very clumsy literate
+programming).  The M4 macro app is used to define M4 macros: it appends
+its second argument to the definition of its first argument.  To make
+the definitions readable, I begin and end them on fresh lines: hence
+I've used dnl to try to prevent extraneous newlines in the output.
+Unfortunately it appears to be impossible to get readable indentation in
+both this file and the generated scanner file without extraneous blank
+lines being produced.
+
+yylex is structured as follows:
+
+m4_app([{_LEX_FN}], [{
+YY_DECL
+{
+  /* Declare auto vars having full function scope. */ 
+  _AUTO_DECL 
+  while (1) { /* Do forever until user action returns or EOF. */
+
+  yyRescan:   /* Come here to restart a scan. */	
+
+    /* Declare and initialize variables used for each scan. */ 
+    _SCAN_SETUP 
+    /* If --yylineno, then update yylineno from last scan. */ 
+    _UPDATE_YYLINENO 
+#if YY_DO_CODE
+    /* Directly encoded DFA. */
+/*_F(outDFACode)*/
+#else /* Table-driven scanner. */
+    /* Enter performance-critical inner-loop. */ 
+    _INNER_LOOP 
+    /* Backup to correct for overscanning or for REJECT action. */ 
+    _BACKUP 
+#endif /* if !YY_DO_CODE Table-driver scanner. */
+    /* Compute yyleng; terminate yytext. */ 
+    _SCAN_FINAL 
+    /* Perform user or fixed scanner action. */ 
+    assert(YY_INV(&yyData));
+    _ACTIONS
+    continue;	/* With outer scanning loop. */
+    /* Segments of code entered and exited using gotos. */ 
+    _GOTO_SEGMENTS 
+  } /* while (1) loop until return. */
+}m4_dnl
+}]
+)
+----------------------------------------------------------------------------
+AUTO DECLARATIONS
+
+m4_app([{_AUTO_DECL}], [{
+  register unsigned yyChar;	/* Character read. */
+#if YY_DO_CODE
+  YYChar *yyLastAcceptCP;	/* CP when last accepted when recorded. */
+  YYState yyLastAcceptState;	/* Last accepting state when recorded. */
+#endif
+#if YY_BACKUP_OPTIMIZE
+  YYState *yyStk= yyData.stk;	/* Stack base. */
+  register YYState *yyRSP;	/* Stack pointer. */
+#endif 
+  register YYState yyState;	/* Numeric scanner state. */
+  register YYTState yyTState;	/* Transition scanner state. */
+  register YYChar *yyCP;	/* Points to next scan char. */
+  YYState yyAltState;		/* Used for continuing scanning. */
+#if YY_HAS_ACTION_NUMBERS
+  unsigned yyAct;		/* Action # to be executed. */
+#endif
+#if YY_HAS_INTRA_TOK_PAT
+  YYChar *yyIntraText;		/* Save area for yytext. */
+  int yyIntraLeng;		/* Save area for yyleng. */
+  yy_size_t yyIntraPos;		/* Buffer position of point after intra pat. */
+#endif	
+#if !YY_BACKUP_OPTIMIZE && !YY_DO_CODE
+  YYChar *yyLimit;		/* Limit for second slower rescan. */
+#endif
+#if YY_DO_CODE && !YY_BACKUP_OPTIMIZE 
+  static YYChar *yyBackupSaveP= 0;/* Pointer to end of yytext to backup over. */
+  YYChar yyBackupSave;		/* Char. originally at yyBackupSaveP. */
+#endif
+#if !YY_DO_CODE && !YY_BACKUP_OPTIMIZE && YY_START_OF_LINE
+  YYChar yyLastCh;		/* Save char before yytext for rescanning. */
+#endif
+#if YY_DO_REJECT
+  YYState yyRejectState;	/* Remember current state here for reject. */
+#endif
+
+/* Local declarations made by user. */
+/*_F(outLocalDecs)*/m4_dnl
+}]
+)
+
+We first declare variables always required within the scanner (yytext, yyCP,
+and yyAct).  We then declare variables which are required only for scanners
+which use intra-token patterns.  Then we declare variables used for backing
+up to shorter lexemes for REJECT and intra-token patterns.  Note that we
+declare yyBackupSaveP static so that it is initialized only once rather than
+over every call; the code which uses it is guaranteed to reset it.  Finally,
+we include any local declarations made by the user in the zlex source file.
+
+----------------------------------------------------------------------------
+SCAN SETUP
+
+At this point we are just starting a scan at the beginning of the forever
+outer loop.  We assume that yyData.saveCh always contains the character
+originally at yyData.saveCP.  Hence we restore it when we start the scan.
+
+We remember the start of the lexeme in YY_TEXT0.  Depending on whether or
+not a %pointer or %array declaration is made for yytext, this macro may or
+may not refer to yytext directly.
+
+m4_app([{_SCAN_SETUP}], [{
+#if YY_BACKUP_OPTIMIZE
+    yyRSP= yyStk;			/* Initialize stack pointer. */ 
+#endif
+    yyCP= yyBuf.cp;			/* Cache char. ptr. */
+    yyState= YY_START;			/* Set scan state to start state. */
+    *yyData.saveCP= yyData.saveCh;	/* Replace NUL terminator. */
+    YY_TEXT0= yyCP;			/* Setup yytext. */ m4_dnl
+}]
+)
+    
+----------------------------------------------------------------------------
+SCANNER INNER LOOP
+Recall that states are numbered so that they are in the following order:
+
+a) Start states
+b) Non-accepting states with one or more transitions
+c) Accepting states with one or more transitions
+d) Accepting states with no transitions
+
+
+If --backup-optimize == 1, then a-c are followed by:
+
+e) A single sentinel state
+f) A single jam state (which is virtual, in that it is not stored anywhere).
+
+YY_N_SIG_STATES is always defined to be the total # of states in (a), (b) &
+(c).  
+
+If --backup-optimize == 0, then a-d above are followed by:
+
+g) YY_N_STATES pseudo jam states for each of the states in a-d.
+Actually none of the pseudo jam states corresponding to the states in
+(d) will ever be used, but creating these extra states allows easy
+recreation of the predecessor of a jam or sentinel state.
+
+h) YY_N_SIG_STATES pseudo sentinel states for each of the states in a-c.
+
+
+When --backup-optimize == 1, then YY_N_STATES is the # of states in (a) thru
+(e).  When --backup-optimize == 0, then YY_N_STATES is the # of states in
+(a) thru (d).
+
+The following loop uses transition states (YYTState): this may be
+identical to the numeric state, or may be a pointer within a next state
+table depending on table-entry options.  Conversions are inserted to and
+from transition states before and after the loop.  This implies that
+most of the rest of the scanner need know only about numeric states.
+
+YY_SIG_LIMIT is > than the max. value of a significant transition state.
+Hence the following scanner loop continues transiting states until the
+current state in yyState has no legal transitions.
+
+m4_app([{_INNER_LOOP}], [{
+  yyContinueScan:	/* Reenter after seeing a sentinel. */
+    yyTState= YY_NUM_STATE_TO_T_STATE(yyState);
+    do { /* This is the scanner inner-loop. */
+      unsigned yyEqChar; 
+      yyChar= YY_CHAR_TO_UNSIGNED(*yyCP++); /* Get next character. */
+      YY_SET_EQ_CLASS(yyEqChar, yyChar);
+#if YY_BACKUP_OPTIMIZE
+      *yyRSP++ = YY_SIG_STATE_NUM(yyTState);/* Remember state in state-stack. */
+      assert(yyCP - YY_TEXT0 == yyRSP - yyStk);/* sp, cp in sync. */
+#endif
+      YY_TRACE_TRANSIT(YY_SIG_STATE_NUM(yyTState), yyChar);
+      YY_SET_NEXT_STATE(yyTState, yyEqChar);
+    } while (yyTState < YY_SIG_LIMIT); 
+    yyState= YY_NON_SIG_STATE_NUM(yyTState); 
+    YY_TRACE_END(yyState); m4_dnl
+}]
+)
+
+The above loop allows implementing interactive scanners without any
+additional mechanisms as there is no overscanning of characters unless 
+required by the automaton.
+
+We maintain a stack which keeps track of all the transited states for
+backtracking purposes.  yyRSP points to the top of the stack (the next
+location about to be written).  It is in synch with yyCP.  The state
+currently in yyState has not been pushed on the stack.
+
+yyContinueScan is a label used to reenter the scanning loop after seeing a
+sentinel character.
+
+----------------------------------------------------------------------------
+JAM PROCESSING
+
+If after the inner loop, the state is >= N_STATES, we may have jammed
+or hit a sentinel character.  The JAM_PROCESS macro below distinguishes
+between these possibilities.
+
+There are two variables: whether table compression is used and 
+whether backing up is optimized.
+
+If backing up is optimized, then there is a single sentinel state and a
+single jam state.  If backing up is not optimized, then the jam state is
+represented as multiple pseudo-jam states in [N_STATES, 2*N_STATES) and
+the sentinel state is represented as multiple pseudo-sentinel states in
+[2*N_STATES, 2*N_STATES + N_SIG_STATES).
+
+If table compression is not used, then the sentinel successors or
+pseudo-sentinel successor are explicitly stored in the table; if table
+compression is not used, then the sentinel is treated like a jam as far as
+the table is concerned, and jam processing needs to check explicitly for a
+SENTINEL_CHAR to initiate sentinel processing.
+
+Lets first handle the situation where backing-up is optimized.
+Then a stack is used for backing up; yyCP need not be computed as
+it can be computed implicitly from the stack pointer.
+
+When table compression is not used, if we jam it must mean a real jam.  All
+the scanner needs to do is pop a state off the stack to return to the
+predecessor of the jam state.
+
+m4_app([{_JAM_PROCESS_MACRO}], [{
+/* Macro to check if we've landed up in a jam-state because of a
+ * sentinel char.
+ */
+#if YY_COMPRESS == YY_NO_COMPRESS && YY_BACKUP_OPTIMIZE
+#define YY_JAM_PROCESS()	do { yyState= *--yyRSP; } while (0)
+#endif m4_dnl
+}]
+)
+
+If table compression is used, then the sentinel transitions are not stored
+in the table; hence we need to check if the jam is really caused by a
+sentinel: if so, we set yyState to the sentinel state; otherwise we set
+yyState to the state popped off the stack.  We ensure that yyChar is no
+longer the sentinel char so that if the sentinel processing code returns to
+this code after processing the sentinel, we don't get caught in a loop.
+
+m4_app([{_JAM_PROCESS_MACRO}], [{
+#if YY_COMPRESS != YY_NO_COMPRESS && YY_BACKUP_OPTIMIZE
+#define YY_JAM_PROCESS()						\
+  do {									\
+    if (yyChar == YY_SENTINEL_CHAR) {					\
+      yyChar++;	/* Set yyChar to any char != YY_SENTINEL_CHAR. */	\
+      yyState= YY_SENTINEL_STATE;					\
+    }									\
+    else {								\
+      yyState= *--yyRSP;						\
+    }									\
+  } while (0)
+#endif m4_dnl
+}]
+)
+
+Hence when backing up is optimized, the following is true:
+
+a) If it was a sentinel, then the state is the sentinel state.  The yyCP
+corresponding to the stack pointer points just past the sentinel
+character.
+
+b) If it wasn't a sentinel, then the state is set to the predecessor of
+the jam state. The yyCP corresponding to the stack pointer points to the
+character which caused the jam.
+
+Now let's handle the situation where backing up is not optimized.  No
+stack is used, pseudo-states are used to remember the predecessor of the
+jamming pseudo-state, and yyCP may need to be backed up.
+
+When table compression is not used, the pseudo-sentinel transition is
+stored within the table.  Hence at jam entry we can have the state in
+[N_STATES, 2*N_STATES) if it is a real jam and in [2*N_STATES,
+2*N_STATES + N_SIG_STATES) if it is a sentinel.  We first correct for
+the overscan.  Then by subtracting N_STATES, we restore to the
+predecessor state if it was a real jam, or we get a state in [N_STATES,
+N_STATES + N_SIG_STATES) if it was a sentinel.
+
+m4_app([{_JAM_PROCESS_MACRO}], [{
+#if YY_COMPRESS == YY_NO_COMPRESS && !YY_BACKUP_OPTIMIZE
+#define YY_JAM_PROCESS()						\
+  do {									\
+    yyCP--;	/* Backup corrects for 1-char overscan. */		\
+    /* If jammed, set yyState to state before overscan. */		\
+    yyState-= YY_N_STATES;						\
+  } while (0)
+#endif m4_dnl
+}]
+)
+
+When table compression is used, then sentinel transitions are not stored
+in the table and when we start processing the jam, yyState will be a
+pseudo-jam state (predecessor + N_STATES).  We first correct yyCP for
+the overscan.  Then if we have a sentinel, we ensure that yyChar is not
+a sentinel character any more (to prevent loops if we return to this
+code) and conceptually adjust the state to a new value s', such that the
+sentinel predecessor is s' - N_STATES (this turns out to be a NOP).  If
+it is not a sentinel, then we change the state to its predecessor.
+
+m4_app([{_JAM_PROCESS_MACRO}], [{
+#if YY_COMPRESS != YY_NO_COMPRESS && !YY_BACKUP_OPTIMIZE
+#define YY_JAM_PROCESS()						\
+  do {									\
+    yyCP--;	/* Backup corrects for 1-char overscan. */		\
+    if (yyChar == YY_SENTINEL_CHAR) {					\
+      yyChar++;	/* Set yyChar to any char != YY_SENTINEL_CHAR. */	\
+    } else {  /* We have a jam. */					\
+      yyState-= YY_N_STATES;	 /* Set yyState to jam predecessor. */	\
+    }									\
+  } while (0)
+#endif m4_dnl
+}]
+)
+
+After jam-processing when backup-optimize == 0, the following are true.
+
+a) yyCP has been adjusted to point to the character causing the jam.
+
+b) If the resulting state s' is in [0, N_STATES), then it was a real jam
+and s' is the predecessor of the jam.
+
+c) If the resulting state s' is in [N_STATES, N_STATES + N_SIG_STATES)
+then it was a sentinel and the predecessor of the sentinel transition is
+s' - N_STATES.  yyCP points to the sentinel character.
+
+----------------------------------------------------------------------------
+SCANNER OVERSCAN BACKUP
+
+After we exit the inner loop, we may have overscanned by several
+characters.  We correct this overscan below: the exact method which is
+used depends on whether or not the scanner specified --backup-optimize.
+
+1.  backup-optimize is TRUE
+
+When we exited the inner scanner loop, yyState had no outgoing
+transitions.  We need to pop the stack until yyState is an accepting
+state.  Because of the above ordering on states, it is sufficient to pop
+the stack while yyState < YY_N_NON_FINAL_STATES (the # of states in (a)
+& (b) above), except in the case when the yyState on exit from the inner
+loop is YY_JAM_STATE which is special-cased below.  (I am unhappy with
+the special-case for YY_JAM_STATE as it is on the scanner's critical
+path).
+
+m4_app([{_BACKUP}], [{
+#if YY_BACKUP_OPTIMIZE
+  yyEndScan:	/* Label for a sentinel which terminates scan loop. */ 
+    if (yyState == YY_JAM_STATE) { 
+      YY_JAM_PROCESS();
+    }
+  yyFindAction: /* Label for rejecting to shorter lexeme or backing up. */
+    assert(yyState != YY_JAM_STATE);
+    while (yyState < YY_N_NON_FINAL_STATES) {
+      /* Pop states off stack, until an accepting state is found. */
+      yyState= *--yyRSP; 
+      YY_TRACE_REJECT(yyState);
+    }
+#endif /* #if YY_BACKUP_OPTIMIZE */m4_dnl
+}]
+)
+
+When we exit the backup loop, yyState will be an accepting state.
+
+During the backup process, yyRSP and yyCP are no longer synchronized.
+
+yyEndScan is a label used after we've seen a sentinel, but the sentinel
+action realizes that the scan has been completed.
+
+yyFindAction is a label used for rejecting to shorter-length lexemes after
+all actions for lexemes of longer lengths have done REJECTs.
+
+2.  --backup-optimize is FALSE.
+
+When we exit the inner loop we are guaranteed that the state is
+non-significant.  If the state # is < YY_N_STATES, then we are in an
+accepting non-significant state and have not overscanned at all: hence
+we can continue without doing anything.  Else we are in a pseudo jam
+state (YY_N_STATES <= yyState < 2*YY_N_STATES) or a pseudo sentinel
+state (YY_N_STATES + YY_N_SIG_STATES <= yyState < 2*YY_N_STATES +
+YY_N_SIG_STATES).  The jam processing code is used to backup cp and get
+the state back to its predecessor.  The following possibilities hold
+after this backup code.
+
+a) The state # corresponds to a accepting state.  In that case we're ok.
+
+b) The state # corresponds to a non-accepting state.  This means that
+we're in a bit of a pickle --- we jammed and could not recover the
+predecessor state.  However, in this situation, the cases for
+non-accepting states in the action switch will simply rescan the token
+using a slower scanning loop.
+
+c) The state is still >= YY_N_STATES.  That implies we must have hit a
+sentinel character.  The situation will be handled by the default case
+in the action switch.
+
+m4_app([{_BACKUP}], [{
+#if !YY_BACKUP_OPTIMIZE
+  yyEndScan:	/* Label for a sentinel which terminates scan loop. */ 
+    if (yyState >= YY_N_STATES) { /* Overscanned. */
+      YY_JAM_PROCESS();
+    }
+#endif /* #if !YY_BACKUP_OPTIMIZE */m4_dnl
+}]
+)
+
+----------------------------------------------------------------------------
+SCAN FINALIZATION
+
+m4_app([{_SCAN_FINAL}], [{
+#if YY_DO_CODE
+yyGetRecorded:
+  yyCP= yyLastAcceptCP; yyState= yyLastAcceptState;
+#endif
+  yyTerminateText:
+#if YY_BACKUP_OPTIMIZE
+    YY_LENG= yyRSP - yyStk; 
+    yyData.saveCP= yyBuf.cp= yyCP= YY_TEXT0 + YY_LENG;
+    /* yyBuf.cp, sp now in synch. */
+#else
+    YY_LENG= yyCP - YY_TEXT0;
+    yyData.saveCP= yyBuf.cp= yyCP;
+#endif	
+    YY_SAVE_LAST();
+    yyData.saveCh= *yyCP; *yyCP= '\0';
+    YY_COPY_TEXT_TO_ARRAY();  /* Copy from buf to yytext[] if %array. */m4_dnl
+}]
+)
+
+We first compute the length of the lexeme in the variable specified by the
+macro YY_LENG (yytext was setup before the scanner inner loop).  We then
+resynch cp.  The macro YY_SAVE_LAST() will save the last character scanned
+in lastCh if the ^ start-of-line anchor was used in patterns.  We then
+terminate the lexeme with a '\0' after saving the character currently at cp
+in saveCh.  Finally, if %array has been specified then the lexeme is copied
+to the yytext[] array.
+
+Note that the last ch is set at the end of a scan and used in '^'
+patterns at the start of the *next* scan.  An alternative design which
+initially appears more direct would examine the previous character at
+the start of the next scan.  This would require ensuring that there is
+always a previous character to examine: we could have an extra character
+at the start of every buffer to ensure this condition, but this hits
+problems with the flex interface for yy_scan_buffer().  Implementing
+YY_AT_BOL() and YY_SET_BOL() would also become problematic.
+
+----------------------------------------------------------------------------
+SCANNER ACTIONS
+
+m4_app([{_ACTIONS}], [{
+#if YY_DO_REJECT
+    yyRejectState= yyState; /* Remember original state for doing rejects. */
+#endif  
+  yyDoAction:		/* For eof and reject actions. */	
+    YY_SET_ACT();
+    YY_TRACE_ACT(yyAct);
+    YY_USER_ACT;
+    switch (yyState) { /* Action table. */
+/* User actions specified in zlex source file. */
+/*_F(outActCases)*/
+    } /* switch (yyState) */m4_dnl
+}]
+)
+
+When REJECTs are supported, we remember the current state in
+yyRejectState so that we can test it to determine which yyState we
+should subsequently reject to.  yyDoAction is a special label used for
+EOF and reject actions.  We then lookup the action (actually pattern)
+number if that has been requested.  After tracing the action if
+requested and supporting the user action we finally do a switch on the
+state to get to the appropriate action.
+
+The cases in the switch are generated entirely by zlex.  Besides the
+actions specified by the user they may contain some of the following
+special actions (invoked via calls to macros defined below):
+
+1.  An action to process a sentinel character (in a backup-optimized
+table scanner).
+
+2.  A default case for pseudo-sentinel states (in a non-backup-optimized
+table scanner).
+
+3.  A action to rescan the current token (in a non-backup-optimized
+table scanner) for non-accepting states.
+
+4.  A action to support yylineno.
+
+5.  The default action when no pattern matches.
+
+6.  EOF actions for the start states (both user specified or the default
+EOF action).
+
+----------------------------------------------------------------------------
+SENTINEL ACTION
+
+When backing up is optimized in a table scanner, on seeing a sentinel
+character the scanner will enter a special sentinel state.  The
+following macro cleans up and transfers control to the sentinel
+processing code.
+
+The sentinel action is structured as follows:
+
+m4_app([{_SENTINEL_STATE_MACRO}], [{
+#if YY_BACKUP_OPTIMIZE && !YY_DO_CODE
+/* Macro to handle a sentinel action in the action switch. */
+#define YY_DO_SENTINEL()						\
+  do { /* Sentinel action: cp points just past sentinel char. */	\
+    assert(yyCP == yyBuf.cp);	/* Cached yyCP in synch. */		\
+    assert(yyCP == yyData.saveCP);/* Just terminated yytext. */		\
+    *yyCP= yyData.saveCh;	/* Restore ch. clobbered by '\0'. */	\
+    --yyCP;			/* Point to sentinel char. */		\
+    yyState= *--yyRSP;		/* yyState to sentinel state pred. */	\
+    goto yyDoSentinel;							\
+  } while (0)
+#else
+/* We should never get here. */
+#define YY_DO_SENTINEL() assert(0)	/* Bad sentinel. */
+#endif /* #if YY_BACKUP_OPTIMIZE && !YY_DO_CODE */m4_dnl
+}]
+)
+
+We first ensure that yyCP and yyData.cp are in synch and restore the
+character clobbered by the '\0' terminator.  We then set the current state
+to the predecessor of the sentinel state and then go to process the
+sentinel. 
+
+----------------------------------------------------------------------------
+PSEUDO-SENTINEL ACTION
+
+When we are using pseudo-states and the current state # is still >=
+YY_N_STATES by the time we hit the action switch, then we have
+encountered a sentinel character.  We get the real state # by
+subtracting YY_N_STATES and go to yyDoSentinel after removing the
+lexeme termination.
+
+m4_app([{_SENTINEL_PSEUDO_MACRO}], [{
+/* Macro to handle a sentinel which resulted in a pseudo sentinel state.
+ * Used in the default case in the action switch.
+ */
+#if !YY_BACKUP_OPTIMIZE && !YY_DO_CODE
+#define YY_DO_PSEUDO_SENTINELS()					\
+  do {									\
+    *yyData.saveCP= yyData.saveCh;	/* Replace NUL terminator. */	\
+    yyState-= YY_N_STATES; /* set to sentinel state predecessor. */	\
+    goto yyDoSentinel;							\
+  } while (0)
+#else
+/* We shouldn't get here. */
+#define YY_DO_PSEUDO_SENTINELS() assert(("Bad pseudo-sentinel" , 0)) 
+#endif /* if !YY_BACKUP_OPTIMIZE && !YY_DO_CODE */m4_dnl
+}]
+)
+
+----------------------------------------------------------------------------
+RESCAN ACTION
+
+When we have a scanner which is using pseudo-states, we will need to
+rescan the token if the state we have landed up in is a non-accepting
+state.
+
+m4_app([{_RESCAN_MACRO}], [{
+/* Macro to rescan the current lexeme, using a slower scan. */
+#if !YY_BACKUP_OPTIMIZE && !YY_DO_CODE
+#define YY_RESCAN()							\
+  do {									\
+    *yyData.saveCP= yyData.saveCh;	/* Replace NUL terminator. */	\
+    yyLimit= yyCP;							\
+    goto yyScan2;							\
+  } while (0)
+#else
+/* We should never get here. */
+#define YY_RESCAN() assert(("Bad rescan sentinel" , 0))
+#endif /* if !YY_BACKUP_OPTIMIZE && !YY_DO_CODE */m4_dnl
+}]
+)
+
+When the scanner overscans by more than 1 character, backing up is
+extremely painful.  The above code restores the NUL terminator, sets the
+limit to the current cp and then goes to yyScan2 which does a complete
+rescan of the entire lexeme using a more conventional inner loop which
+records the state and character pointer yyCP at each accepting state.
+
+----------------------------------------------------------------------------
+YYLINENO ACTION
+
+If the --yylineno option is specified, then code is conditionally included
+in the scanner (#if YY_LINENO_ACTN).  The processing is similar but not
+identical to that of intra-token actions.
+
+When --yylineno is requested, we maintain yylineno on a per buffer basis.
+Maintaining it is complicated by the fact that we'd like yylineno to
+maintain the linecount as per the start of the token, and the possibility of
+backtracking.
+
+When an intra-token '\n' is encountered we do not directly increment
+yylineno for the following reasons:
+
+a) We'd like yylineno to reflect the line # at the start of a token rather
+than that at the end of the token.
+
+b) It is possible that when the intra-token '\n' is scanned we may be
+overscanning the current token and may subsequently backtrack over the
+newline.  Hence it would be incorrect to merely increment yylineno.
+
+Instead when an intra-token '\n' is encountered, we record the fact.  We
+update yylineno appropriately at the start of the scan of the next token
+from that buffer.
+
+The following macro is invoked for the appropriate state(s) within the
+action switch:
+
+m4_app([{_YYLINENO_ACT_MACRO}], [{
+/* Macro to perform yylineno action in action switch. */
+#if YY_LINENO_ACTN
+#define YYLINENO_ACT()							\
+  do {									\
+    yyCP= yyBuf.cp;							\
+    if (!yyBuf.hasNL) { /* no '\n' in current token so far. */		\
+      yy_size_t nlPos=  yyBuf.nRead + (yyCP - yyBuf.buf);		\
+      if (nlPos > yyBuf.lastLinePos) { /* Not previously counted. */	\
+	yyBuf.hasNL= 1; yyBuf.firstNLPos= nlPos;			\
+      }									\
+    }									\
+    assert(yyCP == yyData.saveCP);					\
+    *yyCP= yyData.saveCh;						\
+    yyAltState= YY_ALT_STATE(yyState);					\
+    YY_CONTINUE(yyBackup);						\
+ } while (0)
+#endif /* #if YY_LINENO_ACTN */m4_dnl
+}]
+)
+
+If we haven't recorded any newlines in the current scan (hasNL is FALSE),
+then if the position of the current newline is greater than that of the last
+counted newline in lastLinePos, then we record the newline as a new one.
+The comparison with lastLinePos permits ignoring newlines which have been
+REJECTed and are being rescanned.
+
+We then restore the character at yyCP and set the state to the alternate
+state we'd have been in but for the implicit intra-token newline
+pattern.  Then we continue with the scan as documented for the
+YY_CONTINUE() macro.
+
+When we start scanning the next token, we execute the following line #
+counter update code before the start of the inner scanning loop:
+
+m4_app([{_UPDATE_YYLINENO}], [{
+#if YY_LINENO_ACTN
+    if (yyBuf.hasNL) {
+      YY_CONST YYChar *p;
+      for (p= yyBuf.buf + (yyBuf.firstNLPos - 1 - yyBuf.nRead); 
+	   p < yyCP; p++) {
+        if (*p == '\n') {
+	  YY_LINENO++;
+  	  yyBuf.lastLinePos= yyBuf.nRead + (p - yyBuf.buf) + 1;
+        }
+      }
+      yyBuf.hasNL= 0;
+    }
+#endif /* if YY_LINENO_ACTN */m4_dnl
+}]
+)
+
+We look at all the characters between firstNLPos and cp: this guarantees
+that we do not count newlines which may have been backtracked over, but
+count newlines which were read using an input() action (assuming that
+input() sets firstNLInScan).  
+
+This complex method for supporting yylineno pays the cost of 1 test per
+token on the critical path (as opposed to the 1 test per character which
+would be the cost of the obvious method).  It will also slow down things
+like input() (which is extremely sluggish anyway).
+
+----------------------------------------------------------------------------
+CONTINUING A SCAN
+
+There are several situations (sentinel processing, intra-token action
+processing, yylineno processing) when we are in the middle of a token,
+take off to do something and then need to "continue" with the scan.  The
+word "continue" can refer to reading more characters for the lexeme,
+ending the scan or totally rescanning the lexeme upto a particular
+limit.
+
+The action to be taken depends on whether we are a code scanner or a
+table scanner and whether backing up has been optimized.  We encapsulate
+this common situation in the YY_CONTINUE(codeJamLabel) macro, where the
+parameter codeJamLabel should specify the label to transfer to if we are
+a code scanner and are jamming.  We assume that the next state we may
+want to enter is in variable yyAltState.
+
+m4_app([{_YY_CONTINUE_MACRO}], [{
+/* A utility macro to continue scanning used in several situations. */
+#if YY_DO_CODE
+#define YY_CONTINUE(codeJamLabel)					\
+  do {									\
+    if (yyAltState == YY_JAM_STATE) { goto codeJamLabel; }		\
+    else { yyState= yyAltState; goto yyStateSwitch; }			\
+  } while (0)
+#endif
+}]
+)
+
+If we're a code scanner, then if we're jammed we go to the specified
+codeJamLabel.  Else we set the state to the alternate state and do a
+state switch.  
+
+There are two possibilities for codeJamLabel: if we're processing a
+sentinel action, then the scanner has retained enough information to do
+a jam directly; codeJamLabel is specified as yyJamSwitch and we handle a
+jam by doing the jam processing for the current state (the state which
+saw the sentinel character).  The other possibility is when the scanner
+has not retained information to handle a jam (in an intra-token or
+yylineno action): in that case codeJamLabel is specified as yyBackup
+which involves a complete rescan upto but not including yyCP.
+
+m4_app([{_YY_CONTINUE_MACRO}], [{
+#if !YY_DO_CODE && YY_BACKUP_OPTIMIZE
+#define YY_CONTINUE(codeJamLabel)					\
+  do {									\
+    yyState= yyAltState;						\
+    if (yyState < YY_N_SIG_STATES) goto yyContinueScan;			\
+    else goto yyEndScan;						\
+  } while (0)
+#endif
+}]
+)
+
+If we're a table scanner and backing up is optimized, then we simply
+set yyState to the alternate state.  If it is a significant state,
+we continue on with the inner scanning loop; else we wind up the scan.
+
+m4_app([{_YY_CONTINUE_MACRO}], [{
+#if !YY_DO_CODE && !YY_BACKUP_OPTIMIZE 
+#define YY_CONTINUE(codeJamLabel)					\
+  do {									\
+    yyState= yyAltState;						\
+    if (yyState < YY_N_SIG_STATES) goto yyContinueScan;			\
+    else if (yyState != YY_JAM_STATE) goto yyTerminateText;		\
+    else { /* Rescan upto (not including) yyLimit. */			\
+      yyLimit= yyCP - 1; goto yyScan2;					\
+    }									\
+  } while (0)
+#endif m4_dnl
+}]
+)
+
+If we're a table scanner and backing up is optimized, then we simply
+set yyState to the alternate state.  If the state is significant then
+we continue on with the inner scan loop; otherwise if it is not a jam,
+then we have an accepting non-significant state and we goto where
+we terminate the lexeme.  If it is a jam state, we do a rescan upto
+but not including yyLimit.
+
+----------------------------------------------------------------------------
+SENTINEL PROCESSING
+
+A sentinel character causes a branch to the yyDoSentinel label: when
+the label is entered, yyState is the state which is seeing the sentinel
+character, yyCP points to the sentinel character and any termination of
+yytext has been removed.
+
+m4_app([{_PROCESS_SENTINEL}], [{
+#if YY_DO_CODE
+      yyDoSentinel1: /* yyCP points past sentinel char. */
+	yyCP--;	/* Point yyCP to sentinel character. */
+#endif
+      yyDoSentinel: { /* cp points to the sentinel char. */
+	assert(*yyCP == YY_SENTINEL_CHAR);
+	yyData.saveCP= yyBuf.cp= yyCP;
+	yyData.saveCh= YY_SENTINEL_CHAR; *yyCP= '\0';
+	YY_LENG= yyCP - YY_TEXT0;
+#if YY_DO_CODE && !YY_BACKUP_OPTIMIZE
+	if (yyCP == yyBackupSaveP) {
+	  _BACKUP_SENTINEL
+	}
+	else 
+#endif /* #if !YY_BACKUP_OPTIMIZE */
+	if (yyCP != yyData.sentinelP) { /* A sentinel char in input. */
+          _FALSE_SENTINEL 
+	}
+	else if (yyBuf.eofState && yyCP >= yyBuf.end) {
+	  /* End-of-file sentinel. */ 
+          _EOF_SENTINEL 
+	}
+	else { 
+          /* Buffer end, stack overflow or yymore action. */ 
+	  _MISC_SENTINEL 
+        }
+      } /* yyDoSentinel */m4_dnl
+}]
+)
+
+We first uncache yyCP, reterminate yytext (this retermination being
+needed when we have a unprocessed token at EOF) and compute YY_LENG.
+
+Then we determine the cause for the sentinel character:
+
+a) It is a sentinel caused by trying to backup to a shorter lexeme after a
+REJECT, etc which went to yyBackup.
+
+b) It is a sentinel character which occurred in the input: indicated by
+cp != point at which the sentinel character was inserted by the
+scanner (sentinelP).
+
+c) It is an EOF sentinel, indicated by the EOF indicator for the current
+buffer being set and cp pointing past the end of the current buffer.
+
+d) It is a sentinel signifying end-of-buffer, stack overflow, yymore()
+processing or initialization.
+
+It is not possible to replace the above code by a call to out-of-line
+code as it requires access to labels and other things known only within
+yylex(). 
+
+----------------------------------------------------------------------------
+BACKUP SENTINEL
+
+The backup sentinel is entered via a sentinel setup from the yyBackup
+label.  It is an extremely clumsy way of backing up which is used only
+when the --backup-optimize option is off and YY_DO_CODE is on.
+
+m4_app([{_BACKUP_SENTINEL}], [{
+	  *yyBackupSaveP= yyBackupSave; yyBackupSaveP= 0; 
+  	  yyCP++; goto yyJamSwitch;m4_dnl
+}]
+)
+
+If its a backup sentinel we restore the saved character and reset the
+backup pointer.  We then point CP past the jamming sentinel and backup
+to the last accepting state by going to yyJamSwitch.
+
+----------------------------------------------------------------------------
+FALSE SENTINEL
+
+The sentinel character really occurred in the input stream.  Hence we need
+to find the user-specified transition from the current yyState (which is the
+predecessor of the sentinel state) on the sentinel character.
+
+m4_app([{_FALSE_SENTINEL}], [{
+	{ yyAltState= 
+	    (yyState < 
+             sizeof(yyTab.u.s.sentinel)/sizeof(yyTab.u.s.sentinel[0])) 
+	    ? yyTab.u.s.sentinel[yyState]
+	    : YY_JAM_STATE;
+	  yyCP++;	/* Sentinel-char read as normal char. */
+#if YY_BACKUP_OPTIMIZE
+	  yyRSP++;	/* Adjust stack to recontain sentinel state pred. */
+#endif
+	  YY_CONTINUE(yyJamSwitch);
+	} /* { yyAltState= */m4_dnl
+}]
+)
+
+The transition on the sentinel character is stored in the sentinel
+array which is indexed by state.  To save a few bytes, the tail of the
+array with transitions to only YY_JAM_STATE is not stored: this is
+checked by comparing the current yyState with the # of entries in
+sentinel[].  We then increment cp to include the sentinel character
+we're making a transition on and if backing up is optimized we also
+increment the stack pointer to include the predecessor of the sentinel
+state (which should already be on the stack).  We then continue with the
+scan as specified by the YY_CONTINUE() macro documented above.
+
+----------------------------------------------------------------------------
+END-OF-FILE SENTINEL
+
+When we hit EOF, we have the following possibilities (accounted for by the
+cases in the outermost if in the following code):
+
+a) We still have an outstanding token (indicated by the yyCP !=
+YY_TEXT0).  We process it essentially by pretending that we've jammed.
+We first move cp past the jam char (the eof sentinel).  If we're a code
+scanner we then perform the jam action by going to yyJamSwitch.  If
+we're not a code scanner and backup optimize is true we can process it
+by simply going to yyEndScan; if backup optimize is false then we set
+the state to the corresponding pseudo jam state and goto yyEndScan to
+process the jam action.
+
+b) This is the first time we are processing EOF (indicated by no current
+token and eofState == 1).  Since the saveCh should be a SENTINEL_CHAR
+(setup at the beginning of the sentinel code), subsequent scans will
+always hit the sentinel.  We also clear out yyin (so that we can tell if
+the user resets it).  We set eofState to 2 to show that we've processed
+EOF.  Finally, we lookup the current EOF action (depending on the
+current start-state) and go do it.
+
+c) If we have already processed EOF, but yyin is non-NULL, then the user
+must have reset yyin in an EOF action.  Hence we do a restart and continue
+on with the outer scanning loop.
+
+d) If we have already processed EOF and yyin is still NULL, then the scanner
+is done and we simply return 0.
+
+m4_app([{_EOF_SENTINEL}], [{
+            if (YY_TEXT0 != yyCP) { /* EOF but need to process current token. */
+	      assert(yyState < YY_N_STATES);
+	      yyCP++;	/* Make cp point past char. which caused jam. */
+#if YY_DO_CODE
+	      goto yyJamSwitch;
+#else
+#if !YY_BACKUP_OPTIMIZE
+	      yyState+= YY_N_STATES;
+#endif
+	      goto yyEndScan;
+#endif 
+	    }
+            else if (yyBuf.eofState == 1) { /* Process <<EOF>> act. */
+	      YY_EOF_MSG();
+              assert(yyData.saveCh == YY_SENTINEL_CHAR);
+              YY_IN= 0; yyBuf.eofState= 2; 
+	      yyState= yyData.startState; 
+              goto yyDoAction;
+            }
+            else if (YY_IN) {	/* User has reset yyin in <<EOF>> act. */
+              YY_RESTART(YY_IN); 
+              continue;		/* Continue with outer scanning loop. */
+            }
+            else {
+              return YY_EOF_OUT;  
+            }m4_dnl
+}]
+)
+
+----------------------------------------------------------------------------
+MISCELLANEOUS SENTINEL PROCESSING
+
+The remaining possibilities for the cause of the sentinel are:
+
+a) End-of-buffer sentinel.
+
+b) Stack overflow sentinel.
+
+c) yymore() sentinel.
+
+d) Initialization.
+
+m4_app([{_MISC_SENTINEL}], [{
+	    assert(yyState < YY_N_SIG_STATES);
+	    if ((yyData.flags & YY_INIT_SENTINEL)) { YY_USER_INIT; }
+            yyProcessSentinel(&yyData, yyCP - YY_TEXT0);
+            yyCP= yyBuf.cp;	/* Recache updated cp. */
+#if YY_BACKUP_OPTIMIZE
+            yyStk= yyData.stk;	/* Recache stack which may have changed. */
+            yyRSP= yyStk + (yyCP - YY_TEXT0);
+#endif
+#if YY_DO_CODE
+            goto yyStateSwitch;	/* Continue scan, sentinel char undone. */
+#else
+            goto yyContinueScan;/* Continue scan, after sentinel char undone. */
+#endif /* #if YY_DO_CODE */m4_dnl
+}]
+)
+
+These miscellaneous sentinels are handled by an out-of-line routine
+yyProcessSentinel().  The second argument is the number of chars
+currently scanned in yytext.  After the routine returns, we recache
+variables which may have changed and continue with the inner scanning
+loop.
+
+INITIALIZATION: The actions which make sense before the first call to the
+scanner are buffer creation and switching.  Initialization must establish
+the following postconditions:
+
+a)  All user file pointers should be initialized.
+
+b)  A dynamic buffer must be setup.
+
+c)  If YY_BACKUP_OPTIMIZE, then a backtrack stack must be setup.
+
+We first perform the user-specified initialization in the inline guarded
+code.  Then we achieve the initialization post-conditions by calling the
+initialization routine thru the sentinel processing routine.
+
+----------------------------------------------------------------------------
+SUPPORTING REJECT
+
+YY_DO_REJECT is a macro which is set if the user has specified the --reject
+option and controls whether reject code should be included.
+
+For each action, the YY_REJECT macro is redefined in the form:
+
+do {
+  if (yyRejectState == s11 || yyRejectState == s12 || ... ) REJ1
+  if (yyRejectState == s21 || yyRejectState == s22 || ... ) REJ2
+  ...
+  if (yyState == sI1 || yyState == sI2 || ... ) REJI
+  REJN
+} while (0)
+
+Usually, there are no if-tests, only the default REJn is usually present.
+
+Each REJi action is either of the form:
+
+	{ yyState= si; goto yyDoAction; }
+
+or 
+	goto yyBackup;
+		
+m4_app([{_BACKUP_SEG}], [{
+      yyBackup:
+        yyCP= yyBuf.cp;			/* Recache after possible input(). */
+        if (YY_TEXT0 + YY_LENG != yyCP) {
+	  yyMakeAdjText(&yyData);	/* Ensure yytext ends at cp. */
+	  yyCP= yyBuf.cp;
+        }
+	assert(yyData.saveCP == &YY_TEXT0[YY_LENG]);
+        *yyData.saveCP= yyData.saveCh;/* Restore saved char. */
+#if YY_DO_CODE
+	yyBackupSaveP= &yyCP[-1]; 
+	yyBackupSave= *yyBackupSaveP; *yyBackupSaveP= YY_SENTINEL_CHAR;
+	yyBuf.cp= YY_TEXT0;
+	goto yyRescan;	/* Rescan in outer scanning loop. */
+#elif YY_BACKUP_OPTIMIZE	
+        yyState= *--yyRSP; 		/* Pop state off stack. */
+        goto yyFindAction;
+#else
+	yyLimit= yyCP - 1;
+	goto yyScan2;
+#endif /* #if YY_DO_CODE */m4_dnl
+}]
+)
+
+We first ensure that yytext ends at cp.  Then we restore the NUL
+terminator.  Then we perform the backup action depending on the type of
+scanner we are.
+
+If we are a code scanner, we perform the backup action by setting the
+a sentinel char to fire at the end of the current yytext.
+
+If we are a table scanner with backup optimized, then we simply pop a
+state off the stack and reenter the backup loop.  
+
+If we are a table scanner without backup optimized, then we enter the
+scanner rescan loop with the rescan limit set to the end of the current
+yytext. 
+
+Since there is a default action, we are guaranteed that there will
+always be an accepting state which will not be backup'd over any
+further.
+
+----------------------------------------------------------------------------
+SLOWER RESCAN
+
+When backing up has not been optimized for a table driven scanner, it is
+possible to jam in a significant non-accepting state and have no way of
+returning to the last accepting state because enough information has not
+been saved.  In that case, the following code contains a fairly
+conventional inner loop which does a complete rescan of the current text
+while recording the last accepting state and cp.  However its
+termination condition depends on yyLimit: it will scan upto but not
+including yyLimit.
+
+We assume that all the states encountered during the scan upto yyLimit
+are significant.
+
+m4_app([{_SLOW_RESCAN_SEG}], [{
+#if !YY_DO_CODE && !YY_BACKUP_OPTIMIZE
+  yyScan2: { /* Label to rescan chars upto but not including yyLimit. */	
+    YYState acceptState;
+    YYChar *acceptCP;
+    yyCP= YY_TEXT0;
+    YY_RESCAN_RESTORE(); /* Restore yyBuf.lastCh to get correct start state. */
+    yyState= YY_START;
+    yyTState= YY_NUM_STATE_TO_T_STATE(yyState);
+    do { /* Repetition of inner-loop, but tracking accept states. */
+      unsigned yyChar= YY_CHAR_TO_UNSIGNED(*yyCP++); /* Get next character. */
+      unsigned yyEqChar; 
+      YY_SET_EQ_CLASS(yyEqChar, yyChar);	
+      YY_TRACE_TRANSIT(YY_SIG_STATE_NUM(yyTState), yyChar);
+      YY_SET_NEXT_STATE(yyTState, yyEqChar);
+      yyState= (yyTState < YY_SIG_LIMIT) 
+	       ? YY_SIG_STATE_NUM(yyTState)
+               : YY_NON_SIG_STATE_NUM(yyTState);
+      assert(yyState < YY_N_SIG_STATES);
+      if (YY_N_NON_FINAL_STATES <= yyState) {
+	acceptState= yyState; acceptCP= yyCP;
+      }
+    } while (yyCP < yyLimit);
+    yyState= acceptState; yyCP= acceptCP;
+    goto yyTerminateText;
+  } /* yyScan2: */
+#endif
+}]
+)
+
+----------------------------------------------------------------------------
+SUPPORTING INTRA-TOKEN PATTERNS
+
+Before each intra-token action, a call is inserted to the following macro:
+
+m4_app([{_YY_INTRA_PRE_MACRO}], [{
+/* Macro which is invoked before the action for any intra-token pattern. */
+#define YY_INTRA_PRE(len)						\
+  do {									\
+   yyAltState= YY_ALT_STATE(yyState);					\
+   yyIntraPos= yyBuf.nRead + (yyBuf.cp - yyBuf.buf);			\
+   if (yyIntraPos <= yyBuf.intraPos)					\
+     goto yyIntraEnd;							\
+   yyIntraText= YY_TEXT0; yyIntraLeng= YY_LENG;				\
+   YY_TEXT0= yyBuf.cp - (len); YY_LENG= (len);				\
+   YY_COPY_TEXT_TO_ARRAY();						\
+  } while (0)
+}]
+)
+
+len is the length of the intra-token pattern (this is known at
+scanner-generation time because of the restrictions on intra-token
+patterns).  /* We first change state to the state we'd have been in, in
+the absence of the intra-token pattern. */ We then check whether we've
+seen this intra-token pattern previously (we may have seen it
+previously, performed the intra-token pattern action, only to backtrack
+over it because the main pattern didn't match).  This check is by
+comparing the current buffer position with the position of the last
+matched intra-token pattern in the current buffer.  We then save the
+yytext and yyleng of the current pattern, setup the yytext and yyleng of
+the intra-token pattern.
+
+All intra-token pattern actions terminate with a call to the
+YY_INTRA_POST() macro which merely goes to yyIntraDone which is one
+of the goto segments at the end of yylex having the following code.
+
+m4_app([{_YY_INTRA_POST_MACRO}], [{
+/* Macro which is invoked after the action for any intra-token pattern. */
+#define YY_INTRA_POST()	 goto yyIntraDone
+}]
+)
+
+m4_app([{_INTRA_SEG}], [{
+#if YY_HAS_INTRA_TOK_PAT
+yyIntraDone: 
+  yyBuf.intraPos= yyIntraPos;
+  YY_TEXT0= yyIntraText; YY_LENG= yyIntraLeng;
+yyIntraEnd: {
+  yyCP= yyBuf.cp;
+  *yyData.saveCP= yyData.saveCh;
+  YY_CONTINUE(yyBackup);
+} /* yyIntraEnd */
+#endif m4_dnl
+}]
+)
+
+yyIntraDone saves the buffer position (just after the end of the
+intra-token pattern) in the buffer structure.  It then restores the
+yytext and yyleng of the pattern being scanned when the intra-token
+pattern was encountered.  It restores the current character and
+continues scanning using the YY_CONTINUE() macro documented above.
+
+----------------------------------------------------------------------------
+GOTO SEGMENTS
+
+These segments of code at the end of yylex are entered only via gotos and
+exited via gotos:
+
+m4_app([{_GOTO_SEGMENTS}], [{
+  /* Code to process sentinel. */
+  _PROCESS_SENTINEL
+  /* Code to reject to next lexeme. */ 
+  _BACKUP_SEG 
+  /* Code to rescan text relatively slowly. */
+  _SLOW_RESCAN_SEG
+  /* Code to windup an intra-token action. */ 
+  _INTRA_SEG m4_dnl
+}]
+)
+
+----------------------------------------------------------------------------
+m4_divert(0)
+
+/*			MACROS USED WITHIN yylex()			*/
+
+_JAM_PROCESS_MACRO
+_RESCAN_MACRO
+_SENTINEL_STATE_MACRO
+_SENTINEL_PSEUDO_MACRO
+_YY_CONTINUE_MACRO
+_YYLINENO_ACT_MACRO
+_YY_INTRA_PRE_MACRO
+_YY_INTRA_POST_MACRO
+
+/*			MAIN SCANNER ROUTINE.				*/
+
+_LEX_FN
+
+/* 			SECTION 3 CODE					*/
+
+/*_F(outSec3)*/

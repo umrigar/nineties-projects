@@ -1,0 +1,66 @@
+zlex is a scanner generator which is largely upward-compatible with lex and
+flex.  
+
+INSTALLATION:
+
+The file INSTALL contains generic installation instructions.  Refer to that
+file if the following instructions are insufficient.
+
+If are lucky, all you will need to install the package is the following
+sequence of commands.
+
+cd to the directory this file is in.
+
+./configure  #Figure out what features relevant to zyacc your system has.
+	     #Generate customized Makefiles and a config.h file.
+
+make         #compile and link.  Executables reside within this directory.
+
+make check   #Do some testing (but see below for further tests).
+
+make install #Install zyacc executable and zyacc skeleton file in
+	     #"standard" places.
+
+The "standard" places where the above sequence will install (unless your
+environment specifically requests something different from configure), is
+/usr/local/bin for the zyacc executable and /usr/local/share/zyacc for the
+zyacc skeleton file, usr/local/info for the info documentation,
+/usr/local/share/doc for the HTML documentation.  The postscript
+documentation is not installed by default, but can be printed out or copied
+over to another directory.
+
+If the above "standard" places is not acceptable, then if you would just
+like to install at a different prefix, then specify the --prefix option when
+you run configure.  For example, if you would like to install in your home
+directory, configure as follows:
+
+./configure --prefix="$HOME"
+
+If you are not installing in the standard places (for example, you may
+not have root access, or your site may use different conventions from
+those assumed here), then one alternative is to compile zyacc specifying
+some make variable definitions on the make command line.  Assume I'd
+like the executable to go in /usr/users/zdu/bin and the skeleton to go
+in /usr/users/zdu/etc, I'd use the following command line:
+
+make bindir=/usr/users/zdu/bin datadir=/usr/users/zdu/etc
+
+Use the same definitions for make install
+
+make install bindir=/usr/users/zdu/bin datadir=/usr/users/zdu/etc
+
+or you can simply copy the files over, and set appropriate permissions.
+(the info file goes into Make variable $(infodir) and the HTML into 
+$(docdir)).
+
+ADDITIONAL TESTS:
+
+If you'd like, you can run additional tests before making install.  Go to
+the src/tests directory and type make.  This will do additional testing ---
+these tests could take a very long time to run (hours) depending on the
+capabilities of your system.
+
+CONTACT:
+
+zerksis d. umrigar
+umrigar@cs.binghamton.edu

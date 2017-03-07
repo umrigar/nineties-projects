@@ -1,0 +1,128 @@
+Last Update Time-stamp: "97/07/31 15:15:19 zdu"
+
+The file INSTALL contains generic installation instructions.  
+
+This package was developed on a Linux 2.0.18 Pentium.  Additionally it has
+been compiled and tested using both gcc 2.7.* AND the native cc on the
+following systems:
+
+SunOS 4.1.3_U1 1 sun4m
+SunOS 5.4 Sparc
+SunOS 5.5 sun4d sparc SUNW,SPARCserver-1000
+AIX 4 Power-PC
+Ultrix 4.2 MIPS R3000
+
+FOR THE IMPATIENT
+=================
+
+If are lucky, all you will need to install the package is the following
+sequence of commands.
+
+cd to the directory this file is in.
+
+./configure  Figure out what features relevant to zyacc your system has.
+	     Generate customized Makefiles and a config.h file.
+
+make         compile and link.  Executables reside within this directory.
+
+make check   Do some testing (but see below for further tests).
+
+make doc     Do this step ONLY if the distribution you obtained is the
+	     minimum doc distribution.  To build the doc, you must have
+	     reasonably current versions of Gnu m4, texinfo, texi2dvi,
+	     dvips and info2html.
+
+make install Install zyacc executable, skeleton file, library,
+	     documentation in "standard" places.
+
+
+INSTALLATION DIRECTORIES
+========================
+
+The places where the software is installed can be controlled by several
+Makefile variables:
+
+Make Variable	Default Value		Controls Installation Of
+-------------------------------------------------------------------
+prefix		/usr/local		base of all files installed
+exec_prefix	$(prefix)		base of all executables installed
+bindir		$(exec_prefix)/bin	zyacc, zydebug
+datadir		$(prefix)/share/$(PROGRAM) zyaccskl.c 
+includedir	$(prefix)/include	 ---
+infodir		$(prefix)/info		zyacc manual info files
+libdir		$(exec_prefix)/lib	libzyacc.a
+classdir	$(prefix)/share/classes java classfiles for debugger GUI
+mandir		$(prefix)/man		 ---
+libsrcdir	$(datadir)		 ---
+htmldir		$(prefix)/doc/html	zyacc manual html files
+
+
+
+After the info documentation has been installed, you will need to manually
+edit the dir file in the info directory to add a node for zyacc (the
+Makefile does not do it automatically, as it may be error-prone or not fit
+into the formatting of the dir file).  All you need to do is to add a line
+similar to:
+
+* Zyacc: (zyacc).	A bison/yacc compatible parser generator.
+
+The postscript documentation (distributed in the zyacc/doc subdirectory) is
+not installed by default, but can be printed out or copied over to another
+directory.
+
+If the above "standard" places is not acceptable, then if you would just
+like to install at a different prefix, then specify the --prefix option when
+you run configure.  For example, if you would like to install in your home
+directory, configure as follows:
+
+./configure --prefix="$HOME"
+
+If you are not installing in the standard places (for example, you may
+not have root access, or your site may use different conventions from
+those assumed here), then one alternative is to compile zyacc specifying
+some make variable definitions on the make command line.  Assume I'd
+like the executable to go in /usr/users/zdu/bin and the skeleton to go
+in /usr/users/zdu/etc, I'd use the following command line:
+
+make bindir=/usr/users/zdu/bin datadir=/usr/users/zdu/etc
+
+Use the same definitions for make install
+
+make install bindir=/usr/users/zdu/bin datadir=/usr/users/zdu/etc
+
+or you can simply copy the files over, and set appropriate permissions.
+(the info file goes into Make variable $(infodir) and the HTML into 
+$(docdir)).
+
+
+ADDITIONAL TESTS
+================
+
+If you'd like, you can run additional tests before making install.  Go to
+the ./zyacc/src/tests directory and type make.  This will do some additional
+parser tests.  (Ultrix and some Sun makes have problems with this
+directory's Makefile.  Also go to the ./zyacc/zpl directory and `make' the
+Prolog parser there.  Type `make check' to run the tests for the Prolog
+parser. (The files in the zpl directory have not been made acceptable to a
+compiler which doesn't support function prototypes. If your compiler is one
+of those, then you may have to convert them manually).
+
+For examples, look at the *.y files in the ./zyacc/src/test directory and
+zpl directories, as well as the ./zyacc/doc/examples directory.
+
+
+
+INSTALLATION PROBLEMS
+=====================
+
+Except for the sockets code used by the debugger, the rest of Zyacc should
+make pretty easily with an ANSI-C compiler.  gcc works well.  If you have
+problems with the sockets, then you can should set things up so at to avoid
+compiling the files ./zyacc/libzyacc/remote.c and ./zyacc/src/zydebug.c.
+The resulting program will be fully functional except for not permitting
+multi-process or GUI debugging.
+
+
+zerksis d. umrigar
+zdu@acm.org
+

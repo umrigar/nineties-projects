@@ -1,0 +1,121 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Introduction</TITLE>
+</HEAD>
+<BODY>
+Go to the first, previous, <A HREF="zyacc_2.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<P>
+Copyright (C) 1996, 1997 Zerksis D. Umrigar
+<P>
+This is the first edition of the Zyacc documentation.
+<P>
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+<P>
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that the
+sections entitled "GNU General Public License" and "Conditions for
+Using Zyacc are included exactly as in the original, and provided that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+<P>
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+<P>
+<A NAME="IDX1"></A>
+<H1><A NAME="SEC1" HREF="zyacc_toc.html#SEC1">Introduction</A></H1>
+<P>
+<DFN>Zyacc</DFN> is a general-purpose parser generator that converts a
+grammar description for an LALR(1) context-free grammar into a C
+program to parse that grammar.  Once you are proficient with Zyacc,
+you may use it to develop a wide range of language parsers, from those
+used in simple desk calculators to complex programming languages.
+<P>
+Zyacc is largely upward compatible with Yacc and Bison: all properly-written
+Yacc and Bison grammars ought to work with Zyacc with minimal change.
+Anyone familiar with Yacc or Bison should be able to use Zyacc with little
+trouble.  This manual uses the spellings Zyacc, Bison and Yacc to refer to
+the specific programs, while using the spelling yacc to refer to any one of
+the above programs.  You need to be fluent in C programming in order to use
+Zyacc or to understand this manual.
+<P>
+We begin with tutorial chapters that explain the basic concepts of using
+Zyacc and show six explained examples, each building on the last.  If you
+don't know yacc or Zyacc, start by reading these chapters.  Reference
+chapters follow which describe specific aspects of Zyacc in detail.
+<P>
+<H2><A NAME="SEC2" HREF="zyacc_toc.html#SEC2">Acknowledgements</A></H2>
+The bulk of this manual is derived from the well-written Bison
+manual (see section `Bison Manual' in <CITE>Bison: The YACC-compatible Parser Generator</CITE>).  The changes made by the present author include
+reformatting the examples and adding sections specific to Zyacc.
+<P>
+Many of the algorithms used within Zyacc is based on work by others.  See
+the <CODE>zyacc/refs.bib</CODE> file included with the distribution for some of
+the references.
+<P>
+<H2><A NAME="SEC3" HREF="zyacc_toc.html#SEC3">Zyacc Enhancements</A></H2>
+<P>
+Zyacc provides the following enhancements:
+<P>
+<UL>
+
+<LI>
+Supports inherited attributes which can be uniquely evaluated in a
+left-to-right parse (see section <A HREF="zyacc_4.html#SEC55">Inherited Attributes</A>).
+
+<LI>
+Supports semantic tests which allow the outcome of runtime semantic
+tests to affect parsing decisions (see section <A HREF="zyacc_4.html#SEC59">Semantic Tests</A>).
+
+<LI>
+Permits remote interactive debugging of generated parsers either by using a
+textual interface or by using a java-based GUI (see section <A HREF="zyacc_9.html#SEC104">Debugging Your Parser</A>).  The
+debugger allows the setting of breakpoints on any grammar symbol and
+selective display of the current parser state.
+
+<LI>
+Allows named attribute variables which make maintaining grammars easier
+(see section <A HREF="zyacc_4.html#SEC52">Named Attributes</A>).
+
+<LI>
+Can generate its parser description files in HTML which can then be
+viewed using any Web browser (see section <A HREF="zyacc_10.html#SEC122">Zyacc Options</A>).
+
+<LI>
+Provides a <CODE>%look</CODE> directive to check (at parser construction time)
+whether a reduction requires lookahead (see section <A HREF="zyacc_4.html#SEC74">Specifying the Lookahead</A>).
+
+<LI>
+Allows multiple start nonterminals and allows a call to the parsing function
+to be made for a particular start nonterminal (see section <A HREF="zyacc_4.html#SEC70">The Start-Symbol</A>). 
+
+<LI>
+It is possible to avoid having types which are only used in describing
+nonterminal semantics written into the generated <SAMP>`.h'</SAMP> file
+(see section <A HREF="zyacc_4.html#SEC47">Data Types of Semantic Values</A>).
+
+<LI>
+Allows multiple-character quoted literal tokens (see section <A HREF="zyacc_4.html#SEC66">Multi-Character Literal Tokens</A>).
+
+<LI>
+Allows command-line options to be specified from within the parser file
+(see section <A HREF="zyacc_4.html#SEC73">Option Declaration</A>).
+
+</UL>
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the first, previous, <A HREF="zyacc_2.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,4 @@
+#Automatically generated dependencies.
+debug.o: debug.c libzyacp.h libzyacc.h
+main.o: main.c
+remote.o: remote.c libzyacp.h libzyacc.h frames.str applet.str

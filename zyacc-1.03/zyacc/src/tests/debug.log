@@ -1,0 +1,24 @@
+  zyacc debugger.  'h' for help.
+zydebug> zydebug>   '+'
+zydebug>   [ 0/$S ] '1' REDUCE 4; GOTO 2; LINE 16; S: 
+  [ 0/$S 2/S ] '1' SHIFT 9
+  [ 0/$S 2/S 9/'1' ] $yyEmptyTok REDUCE 15; GOTO 20; LINE 31; F:  '1'
+  [ 0/$S 2/S 20/F ] $yyEmptyTok REDUCE 10; GOTO 19; LINE 25; T:  F
+zydebug>   '+'
+zydebug>   [ 0/$S 2/S 19/T ] '+' REDUCE 7; GOTO 18; LINE 21; E:  T
+zydebug>   '+'
+zydebug> zydebug>   '+'
+zydebug>   [ 0/$S 2/S 18/E ] '+' SHIFT 24
+zydebug>   '+'
+zydebug>   [ 0/$S 2/S 18/E 24/'+' ] '2' SHIFT 10
+3
+  [ 0/$S 2/S 18/E 26/YY_3 ] '\n' SHIFT 32
+  [ 0/$S 2/S ] '1' SHIFT 9
+  [ 0/$S 2/S 18/E ] '+' SHIFT 24
+zydebug>   [ 0/$S 2/S 18/E 24/'+' ] '2' SHIFT 10
+  [ 0/$S 2/S 18/E 24/'+' 30/T ] '*' SHIFT 27
+  [ 0/$S 2/S 18/E 24/'+' 30/T 27/'*' ] '3' SHIFT 11
+zydebug>   [ 0/$S 2/S 18/E 24/'+' 30/T ] '\n' REDUCE 5; GOTO 18; LINE 19; E:  E '+' T
+zydebug> 7
+  [ 0/$S 2/S 18/E 26/YY_3 ] '\n' SHIFT 32
+  [ 0/$S 2/S ] <EOF> SHIFT 4

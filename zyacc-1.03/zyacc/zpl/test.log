@@ -1,0 +1,13 @@
+1 2 +/2 
+X Y f/2 Z A ,/2 b 97 92 110 [] ./2 ./2 ./2 ->/2 a f/1 C d e b/3 [] ./2 ./2 ;/2 ;/2 :-/2 
+1 z ./2 a b ,/2 ;/2 b a c -/1 */2 :-/2 :-/2 
+a b :-/2 c parse error near `.	'.
+a ??/1 ??/1 ^^/1 
+a ^^/1 parse error near `??'.
+a ??/1 b ^^/1 +/2 
+a parse error near `b'.
+b -/1 a +/2 
+a parse error near `1'.
+a -1 +/2 
+a parse error near `1'.
+a 1 -/1 +/2 

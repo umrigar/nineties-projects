@@ -1,0 +1,125 @@
+DEC 5000/25 Workstation: MIPS R3000 CPU @ 25 MHz.
+cscan1:	A C-scanner which recognizes and returns tokens. It uses
+	start-states for processing comments.
+	wc on input file: 34944 129728 1010784 cscan1.in
+
+SCANGEN     SCANNER OPTIONS	 	               SIZE        TIME
+../zlex --no-reject --no-compress --no-equiv            45056   2.4(1.7u/0.7s)
+../zlex --no-reject --compress --no-equiv               36864   3.0(2.3u/0.7s)
+../zlex --no-reject --no-compress --equiv               32768   2.6(1.9u/0.7s)
+../zlex --no-reject --compress --equiv                  28672   3.1(2.4u/0.7s)
+../zlex --no-reject --no-compress --no-equiv --array    45056   2.9(2.2u/0.7s)
+../zlex --no-reject --compress --equiv --array          28672   3.6(2.9u/0.7s)
+../zlex --no-reject --no-compress --no-equiv --align   102400   2.4(1.8u/0.6s)
+../zlex --no-reject --compress --equiv --align          36864   3.1(2.4u/0.7s)
+flex    -CrF                                            53248   2.6(1.8u/0.8s)
+flex    -Crf                                            57344   2.5(1.8u/0.7s)
+flex    -CrFe                                           36864   2.8(2.1u/0.7s)
+flex    -Crfe                                           36864   2.7(2.0u/0.7s)
+flex    -Cr                                             45056   4.1(3.4u/0.7s)
+flex    -Cre                                            32768   4.2(3.5u/0.7s)
+flex    -Crm                                            32768   4.3(3.6u/0.7s)
+flex    -Crem                                           32768   4.4(3.7u/0.7s)
+flex    -CrFa                                           77824   2.6(1.9u/0.7s)
+flex    -Crfa                                           86016   2.5(1.8u/0.7s)
+lex     -n                                              28672   6.9(6.3u/0.6s)
+
+cscan2:	A C-scanner which recognizes and returns tokens. It uses
+	input() for processing comments.
+	wc on input file: 34944 129728 1010784 cscan2.in
+
+SCANGEN     SCANNER OPTIONS	 	               SIZE        TIME
+../zlex --no-reject --no-compress --no-equiv            45056   2.7(2.0u/0.7s)
+../zlex --no-reject --compress --no-equiv               36864   3.3(2.5u/0.8s)
+../zlex --no-reject --no-compress --equiv               28672   2.9(2.2u/0.7s)
+../zlex --no-reject --compress --equiv                  28672   3.2(2.5u/0.7s)
+../zlex --no-reject --no-compress --no-equiv --array    45056   3.2(2.4u/0.8s)
+../zlex --no-reject --compress --equiv --array          28672   3.6(2.9u/0.7s)
+../zlex --no-reject --no-compress --no-equiv --align    98304   2.8(2.1u/0.7s)
+../zlex --no-reject --compress --equiv --align          36864   3.3(2.6u/0.7s)
+flex    -CrF                                            49152   2.7(2.0u/0.7s)
+flex    -Crf                                            53248   2.7(2.0u/0.7s)
+flex    -CrFe                                           32768   2.7(2.1u/0.6s)
+flex    -Crfe                                           36864   2.7(2.1u/0.6s)
+flex    -Cr                                             36864   3.7(3.1u/0.6s)
+flex    -Cre                                            32768   3.9(3.2u/0.7s)
+flex    -Crm                                            32768   3.9(3.3u/0.6s)
+flex    -Crem                                           32768   4.1(3.4u/0.7s)
+flex    -CrFa                                           69632   2.7(2.0u/0.7s)
+flex    -Crfa                                           81920   2.6(2.0u/0.6s)
+lex     -n                                              28672   6.0(5.4u/0.6s)
+
+crec1:	A C-scanner which simply RECOGNIZES tokens; it uses start-states 
+	for processing comments.
+	wc on input file: 34944 129728 1010784 crec1.in
+
+SCANGEN     SCANNER OPTIONS	 	               SIZE        TIME
+../zlex --no-reject --no-compress --no-equiv            45056   2.1(1.4u/0.7s)
+../zlex --no-reject --compress --no-equiv               36864   2.7(2.0u/0.7s)
+../zlex --no-reject --no-compress --equiv               32768   2.4(1.7u/0.7s)
+../zlex --no-reject --compress --equiv                  28672   2.9(2.2u/0.7s)
+../zlex --no-reject --no-compress --no-equiv --array    45056   2.6(2.0u/0.6s)
+../zlex --no-reject --compress --equiv --array          28672   3.3(2.6u/0.7s)
+../zlex --no-reject --no-compress --no-equiv --align   102400   2.3(1.6u/0.7s)
+../zlex --no-reject --compress --equiv --align          36864   2.8(2.1u/0.7s)
+flex    -CrF                                            53248   2.4(1.6u/0.8s)
+flex    -Crf                                            57344   2.3(1.5u/0.8s)
+flex    -CrFe                                           36864   2.5(1.8u/0.7s)
+flex    -Crfe                                           36864   2.6(1.8u/0.8s)
+flex    -Cr                                             45056   3.9(3.1u/0.8s)
+flex    -Cre                                            32768   3.9(3.2u/0.7s)
+flex    -Crm                                            32768   4.0(3.3u/0.7s)
+flex    -Crem                                           32768   4.2(3.5u/0.7s)
+flex    -CrFa                                           77824   2.4(1.7u/0.7s)
+flex    -Crfa                                           86016   2.2(1.5u/0.7s)
+lex     -n                                              28672   6.8(6.2u/0.6s)
+
+crec2:	A C-scanner which simply RECOGNIZES tokens; it uses input()
+	for processing comments.
+	wc on input file: 34944 129728 1010784 crec2.in
+
+SCANGEN     SCANNER OPTIONS	 	               SIZE        TIME
+../zlex --no-reject --no-compress --no-equiv            45056   2.4(1.7u/0.7s)
+../zlex --no-reject --compress --no-equiv               36864   2.9(2.1u/0.8s)
+../zlex --no-reject --no-compress --equiv               28672   2.6(1.8u/0.8s)
+../zlex --no-reject --compress --equiv                  28672   3.0(2.2u/0.8s)
+../zlex --no-reject --no-compress --no-equiv --array    45056   3.2(2.5u/0.7s)
+../zlex --no-reject --compress --equiv --array          28672   3.4(2.6u/0.8s)
+../zlex --no-reject --no-compress --no-equiv --align    98304   2.4(1.7u/0.7s)
+../zlex --no-reject --compress --equiv --align          32768   2.9(2.2u/0.7s)
+flex    -CrF                                            49152   2.5(1.8u/0.7s)
+flex    -Crf                                            53248   2.4(1.7u/0.7s)
+flex    -CrFe                                           32768   2.5(1.9u/0.6s)
+flex    -Crfe                                           36864   2.6(1.9u/0.7s)
+flex    -Cr                                             36864   3.5(2.8u/0.7s)
+flex    -Cre                                            32768   3.6(3.0u/0.6s)
+flex    -Crm                                            32768   3.7(3.0u/0.7s)
+flex    -Crem                                           32768   3.8(3.1u/0.7s)
+flex    -CrFa                                           69632   2.5(1.8u/0.7s)
+flex    -Crfa                                           81920   2.5(1.8u/0.7s)
+lex     -n                                              28672   5.5(4.9u/0.6s)
+
+reject: A scanner which does repeated rejects.  
+	wc on input file: 279936 279936 1399680 reject.in
+
+SCANGEN     SCANNER OPTIONS	 	               SIZE        TIME
+../zlex --no-compress --no-equiv                        28672   10.6(9.7u/0.9s)
+../zlex --compress --no-equiv                           28672   12.0(11.0u/1.0s)
+../zlex --no-compress --equiv                           28672   11.3(10.3u/1.0s)
+../zlex --compress --equiv                              28672   13.0(11.7u/1.3s)
+../zlex --no-compress --no-equiv --array                28672   14.3(13.3u/1.0s)
+../zlex --compress --equiv --array                      28672   16.0(15.0u/1.0s)
+../zlex --no-compress --no-equiv --align                36864   11.2(10.2u/1.0s)
+../zlex --compress --equiv --align                      28672   13.3(12.1u/1.2s)
+flex    -CrF                                                0   **flex error**
+flex    -Crf                                                0   **flex error**
+flex    -CrFe                                               0   **flex error**
+flex    -Crfe                                               0   **flex error**
+flex    -Cr                                             28672   16.0(14.8u/1.2s)
+flex    -Cre                                            28672   17.1(16.0u/1.1s)
+flex    -Crm                                            28672   16.0(15.0u/1.0s)
+flex    -Crem                                           28672   17.7(16.7u/1.0s)
+flex    -CrFa                                               0   **flex error**
+flex    -Crfa                                               0   **flex error**
+lex     -n                                              24576   33.0(32.0u/1.0s)
+

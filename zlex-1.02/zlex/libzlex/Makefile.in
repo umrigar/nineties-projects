@@ -1,0 +1,434 @@
+#Makefile.in produced automatically using GNU-m4.
+
+#DIRECTORIES FOR SOURCES AND BUILD.
+#Source directory controlled by this makefile.
+srcdir=			@srcdir@
+
+#Define VPATH to ensure that source files found even if build directory is
+#different from srcdir.
+VPATH=			@srcdir@
+
+#Top-level source directory for entire package.
+topdir=			@top_srcdir@
+
+#Top-level build directory for package.
+builddir=		@builddir@
+
+#INSTALLATION PATHS.
+#Prefix of path where all architecture-independent files are installed.
+prefix=			@prefix@
+
+#Prefix of path where architecture-dependent files are installed.
+exec_prefix=		@exec_prefix@
+
+#Path where executables are installed.
+bindir=			$(exec_prefix)/bin
+
+#Path where skeleton file and library sources are installed.
+datadir=		$(prefix)/share/$(PROGRAM)
+
+#Path where include files are installed.
+includedir=		$(prefix)/include
+
+#Path where info files are installed.
+infodir=		$(prefix)/info
+
+#Path where libraries are installed.
+libdir=			$(exec_prefix)/lib
+
+#Path where library sources and skeleton are installed.
+libsrcdir=		$(datadir)
+
+#Path where html files are installed.
+docdir=			$(datadir)/doc
+
+SHELL=			/bin/sh
+RM=			rm -f
+AR=			ar
+LN=			ln -f
+MV=			mv
+CAT=			cat
+CMP=			cmp
+SED=			sed
+DEPEND_CMD=		gcc -MM $(CPPFLAGS) $(DFLAGS)
+MAKE_MF_IN=		$(GM4) --include=$(topdir)/mf \
+		        Makefile.m4 >$(srcdir)/Makefile.in
+MAKEINFO=		makeinfo
+TEXI2DVI=		texi2dvi
+TEXI2HTML=		texi2html
+DVI2PS=			dvips
+GM4=			gm4 --prefix-builtins
+RANLIB=			@RANLIB@
+INSTALL=		@INSTALL@
+INSTALL_PROGRAM=	@INSTALL_PROGRAM@
+INSTALL_DATA=		@INSTALL_DATA@
+ZLEX=			zlex
+ZYACC=			zyacc
+ZYACCFLAGS=
+ZLEXFLAGS=
+
+
+#COMPILER CONTROL
+#Make variables which define compiler invocation.
+CC=			@CC@
+
+#Flags to control optimization/debugging.
+CFLAGS=			@CFLAGS@
+
+#Header file search directory and other misc. options for cpp/cc.
+CPPFLAGS=		-I$(srcdir) -I$(LIBZ_SRC) -I$(builddir)
+
+#Extra debugging and optimization options for the C compiler.
+CXXFLAGS=		@CXXFLAGS@
+
+#-D options passed to the C-compiler by configure.
+DEFS=			@DEFS@
+
+#Compose DEFFLAGS as combination of above (plus others if needed).
+#XFLAGS should be project or directory specific flags. DFLAGS are
+#intended to be passed in via the command-line; 
+DEFFLAGS=		$(DEFS) $(XFLAGS) $(DFLAGS)
+
+#Library search used.
+ZLIBS=			-L$(LIBZ_BIN) -lz
+
+LDFLAGS=		@LDFLAGS@
+
+@SET_MAKE@
+
+#Flags to be passed down to recursive compilation makes; 
+#many makes don't do it correctly thru the environment.
+REC_MAKE_FLAGS=	\
+  CFLAGS='$(CFLAGS)' \
+  DFLAGS='$(DFLAGS)' \
+  PROGRAM='$(PROGRAM)' \
+  VERSION='$(VERSION)' \
+  SIGNATURE='Zerksis'
+
+REC_MAKE=	$(MAKE) $(REC_MAKE_FLAGS)
+
+#This ends the configuration section.
+
+#The libz directory is a sibling of the main package directory.
+LIBZ_SRC=		$(topdir)/libz
+LIBZ_BIN=		$(builddir)/libz
+
+
+
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.o .c .y .l
+
+.c.o:
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $<
+
+.c:
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $< $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+
+
+#The following targets use ZYACC_PATH and ZYACC_SKEL_DIR.  If ZYACC_PATH is
+#defined, it must end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+
+ZYACCFLAGS=	-d -v
+
+.y.c:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+
+.y.o:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+	
+.y:
+		ZYACC_SKEL_DIR=$(ZYACC_SKEL_DIR) \
+		$(ZYACC_PATH)$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+#The following targets use ZLEX_PATH and ZLEX_SEARCH_PATH.  If ZLEX_PATH is
+#defined, it must end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+.l.c:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+
+.l.o:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.l:
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+
+
+
+#Main target to be built in this directory.
+TARGET=			libzlex.a
+
+#Human-generated C files.
+C_SRC_FILES= \
+  bytesbuf.c creatbuf.c debug.c delbuf.c fatal.c flushbuf.c get.c \
+  less.c main.c makeadj.c makebuf.c membuf.c more.c move.c movetext.c \
+  replace.c restart.c \
+  savetext.c sentinel.c shiftbuf.c sig.c ssstk.c strngbuf.c swtchbuf.c \
+  terminat.c unput.c wrap.c
+
+#Computer-generated C files.
+C_NON_SRC_FILES=
+
+CFILES= \
+  $(C_SRC_FILES) $(C_NON_SRC_FILES)
+
+#Human-generated header files.
+H_SRC_FILES= \
+  libzlex0.h libzlex.h libzlexs.h
+
+#Computer-generated header files.
+H_NON_SRC_FILES= \
+  libzlexp.h
+  
+#All header files.
+HFILES= \
+  $(H_SRC_FILES) $(H_NON_SRC_FILES)
+
+#C files to recompile for 16-bit library.
+CFILES_16= \
+  bytesbuf.c creatbuf.c debug.c delbuf.c \
+  flushbuf.c get.c \
+  less.c makeadj.c makebuf.c \
+  membuf.c more.c move.c movetext.c \
+  replace.c restart.c  \
+  savetext.c sentinel.c shiftbuf.c \
+  ssstk.c strngbuf.c swtchbuf.c \
+  terminat.c unput.c
+
+#Object files to be built.
+OFILES_16= \
+  bytesbuf16.o creatbuf16.o debug16.o delbuf16.o \
+  flushbuf16.o get16.o \
+  less16.o makeadj16.o makebuf16.o \
+  membuf16.o more16.o move16.o movetext16.o \
+  replace16.o restart16.o  \
+  savetext16.o sentinel16.o shiftbuf16.o \
+  ssstk16.o strngbuf16.o swtchbuf16.o \
+  terminat16.o unput16.o
+
+OFILES= \
+  bytesbuf.o creatbuf.o debug.o delbuf.o fatal.o flushbuf.o get.o \
+  less.o main.o makeadj.o makebuf.o membuf.o more.o move.o movetext.o \
+  replace.o restart.o  \
+  savetext.o sentinel.o shiftbuf.o sig.o ssstk.o strngbuf.o swtchbuf.o \
+  terminat.o unput.o wrap.o \
+  $(OFILES_16)
+ 
+#All human-generated files to be distributed.
+SRC_FILES= \
+  $(C_SRC_FILES) $(H_SRC_FILES) mklibsrc.m4 libdep Makefile.m4 \
+  NOTES.txt README
+
+#All computer-generated files to be distributed.
+NON_SRC_FILES= \
+  $(C_NON_SRC_FILES) $(H_NON_SRC_FILES) Makefile.in DEPEND mklibsrc
+
+DIST_FILES= \
+  $(SRC_FILES) $(NON_SRC_FILES)
+
+#Source files to be installed in library source directory.
+LIBINSTALL= \
+  $(CFILES) mklibsrc mklibsrc.m4 libdep libzlexp.h
+
+#PUBLIC TARGETS.
+all:		$(TARGET)
+
+install:	$(TARGET) $(LIBINSTALL)
+		if $(topdir)/install-chk $(SIGNATURE) $(libdir)/$(TARGET) ; \
+		then \
+		  $(INSTALL_DATA) $(TARGET) $(libdir)/$(TARGET) ; \
+		fi
+		if $(topdir)/install-chk $(SIGNATURE) \
+			$(includedir)/libzlex.h ; \
+		then \
+		  $(INSTALL_DATA) $(srcdir)/libzlex.h \
+			$(includedir)/libzlex.h ; \
+		fi
+		if $(topdir)/install-chk $(SIGNATURE) \
+			$(libsrcdir)/libzlexp.h ; \
+		then \
+		  for f in $(LIBINSTALL) ; \
+		  do \
+		    $(INSTALL_DATA) $(srcdir)/$$f $(libsrcdir)/$$f ; \
+		  done ; \
+		fi
+
+uninstall:
+		if $(topdir)/install-chk $(SIGNATURE) $(libdir)/$(TARGET) ; \
+		then \
+		  $(RM) $(libdir)/$(TARGET) ; \
+		fi
+		if $(topdir)/install-chk $(SIGNATURE) \
+			$(includedir)/libzlex.h ; \
+		then \
+		  $(RM) $(includedir)/libzlex.h ; \
+		fi
+		if $(topdir)/install-chk $(SIGNATURE) \
+			$(libsrcdir)/libzlexp.h ; \
+		then \
+		  $(RM) -r $(libsrcdir) ; \
+		fi
+
+$(OFILES_16):	
+		cFile16=`basename $@ '.o'`.c; \
+		srcCfile=`echo $$cFile16 | $(SED) 's/16//'`; \
+		$(LN) $$srcCfile $$cFile16 ; \
+		$(CC) -c $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) \
+		    -DYY_16_BIT $(DFLAGS) $$cFile16; \
+		$(RM) $$cFile16
+
+libzlexp.h:	libzlex.h libzlexs.h libzlex0.h
+		echo '/******* DO NOT EDIT *********/' >$@
+	        echo '/*' automatically produced by catenating \
+		     libzlex.h libzlexs.h and libzlex0.h '*/' >>$@
+	        echo >>$@
+		cat libzlex.h libzlexs.h libzlex0.h >>$@
+
+$(TARGET):	$(OFILES)
+		$(AR) r $@ $?
+		$(RANLIB) $@
+
+#We don't depend on $(TARGET) because the intention is that mklibsrc does
+#not need to be remade after distribution unless the sources have changed.
+mklibsrc:	$(SRCFILES) mklibsrc.m4
+		m4 -DDEPEND_CMD="./libdep $(TARGET) yy" \
+		  $(srcdir)/mklibsrc.m4 >$@
+
+#CLEANING TARGETS
+
+#Remove any garbage.
+clean:		FORCE
+		$(RM) *.o *~ core t.* t t[0-9]* *.bak lex.yy.c *.tmp tmp.* \
+		      *.output 
+
+#Remove all files not in distribution.
+distclean:	clean FORCE
+		$(RM) $(TARGET) Makefile makefile
+
+
+#Remove all non-source files.  May need special tools to rebuild.
+maintainer-clean: 	distclean FORCE
+		$(RM) $(NON_SRC_FILES)
+
+FORCE:
+
+
+Makefile.in:	Makefile.m4 DEPEND FORCE
+		$(MAKE_MF_IN)
+
+#Dependency generation.
+#Make dependencies to insert into Makefile.in.
+DEPEND:		$(CFILES) $(HFILES)
+		echo "#Automatically generated dependencies." >$(srcdir)/DEPEND
+		$(DEPEND_CMD) $(CFILES) >>$(srcdir)/DEPEND
+
+
+
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+
+#Manually inserted dependencies for 16-bit library.
+
+$(OFILES_16):	libzlexp.h
+
+bytesbuf16.o:	bytesbuf.c
+
+creatbuf16.o:	creatbuf.c
+
+debug16.o:	debug.c
+
+delbuf16.o:	delbuf.c
+
+flushbuf16.o:	flushbuf.c
+
+get16.o:	get.c
+
+less16.o:	less.c
+
+makeadj16.o:	makeadj.c
+
+makebuf16.o:	makebuf.c
+
+membuf16.o:	membuf.c
+
+more16.o:	more.c
+
+move16.o:	move.c
+
+movetext16.o:	movetext.c
+
+replace16.o:	replace.c
+
+restart16.o:	restart.c
+
+savetext16.o:	savetext.c
+
+sentinel16.o:	sentinel.c
+
+shiftbuf16.o:	shiftbuf.c
+
+ssstk16.o:	ssstk.c
+
+strngbuf16.o:	strngbuf.c
+
+swtchbuf16.o:	swtchbuf.c
+
+terminat16.o:	terminat.c
+
+unput16.o:	unput.c
+
+#Automatically generated dependencies.
+bytesbuf.o: bytesbuf.c libzlexp.h
+creatbuf.o: creatbuf.c libzlexp.h
+debug.o: debug.c libzlexp.h
+delbuf.o: delbuf.c libzlexp.h
+fatal.o: fatal.c libzlexp.h
+flushbuf.o: flushbuf.c libzlexp.h
+get.o: get.c libzlexp.h
+less.o: less.c libzlexp.h
+main.o: main.c libzlexp.h
+makeadj.o: makeadj.c libzlexp.h
+makebuf.o: makebuf.c libzlexp.h
+membuf.o: membuf.c libzlexp.h
+more.o: more.c libzlexp.h
+move.o: move.c libzlexp.h
+movetext.o: movetext.c libzlexp.h
+replace.o: replace.c libzlexp.h
+restart.o: restart.c libzlexp.h
+savetext.o: savetext.c libzlexp.h
+sentinel.o: sentinel.c libzlexp.h
+shiftbuf.o: shiftbuf.c libzlexp.h
+sig.o: sig.c
+ssstk.o: ssstk.c libzlexp.h
+strngbuf.o: strngbuf.c libzlexp.h
+swtchbuf.o: swtchbuf.c libzlexp.h
+terminat.o: terminat.c libzlexp.h
+unput.o: unput.c libzlexp.h
+wrap.o: wrap.c libzlexp.h
+

@@ -1,0 +1,50 @@
+[ /* Input to mix-generated compiler generator.  TM interpreter and its
+   * division in store.
+   */
+store(
+  [division, sugaredProgram],
+  [
+   [ q, qTail, instruction, operator, symbol, nextLabel ],
+   /* Turing machine interpreter. */
+{
+  read [q, right];
+  qTail:= q; left:= ~[];
+  while qTail \= ~[] do {
+    instruction:= first_instruction(qTail);
+    qTail:= rest(qTail);
+    operator:= instruction_operator(instruction);
+
+    case instruction of {
+      ~right: {
+	left:= cons(first_sym(right), left);
+	right:= tl(right)
+      };
+      ~left: {
+	right:= cons(first_sym(left), right);
+	left:= tl(left)
+      };
+      ~write(_): {
+	symbol:= arg(1, instruction);
+	right:= cons(symbol, tl(right))
+      };
+      ~goto(_): {
+	nextLabel:= arg(1, instruction);
+	qTail:= new_tail(nextLabel, q)
+      };
+      ~if(_, _): {
+	symbol:= arg(1, instruction);
+	nextLabel:= arg(2, instruction);
+	if (symbol = first_sym(right))
+	  then { qTail:= new_tail(nextLabel, q) }
+      };
+      default: {
+	return ~error
+      }
+    }
+  };
+  return right
+}
+  ]
+  )
+].
+

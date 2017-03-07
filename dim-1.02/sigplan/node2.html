@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1 (Feb 5, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>The Basic Idea</TITLE>
+<META NAME="description" CONTENT="The Basic Idea">
+<META NAME="keywords" CONTENT="sigplan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="sigplan.css">
+</HEAD>
+<BODY LANG="EN">
+ <A NAME="tex2html36" HREF="node3.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html34" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html28" HREF="node1.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html37" HREF="node3.html">But is it ?</A>
+<B>Up:</B> <A NAME="tex2html35" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html29" HREF="node1.html">Introduction</A>
+<BR> <P>
+<H1><A NAME="SECTION00020000000000000000">The Basic Idea</A></H1>
+<P>
+<A NAME="SecBasic">&#160;</A>
+<P>
+The method makes extensive use of C++ templates to track the
+dimensions of quantities at compile-time.  The basic idea is
+straight-forward and is illustrated by three simple C++ program
+fragments.  The first fragment declares a class <TT>Dim</TT> which
+represents dimensioned quantities in a dimensional space
+characterized by the three dimensions <EM>mass</EM>, <EM>length</EM> and
+<EM>time</EM>.
+
+<PRE>template&lt;int M, int L, int T&gt; class Dim {
+  double val;                   //Actual value.
+public:
+  Dim(double v= 0) { val= v; }  //Constructor. 
+  double value() { return val; }//Accessor.  
+};</PRE> 
+When the <TT>Dim</TT> class is used for a particular dimension, the
+template arguments <TT>M</TT>, <TT>L</TT> and <TT>T</TT> provided should
+correspond to the exponents of mass, length and time in that
+dimension.  Using this class it is easy to enforce dimensional
+consistency. For example, to enforce the restriction that only
+quantities having identical dimensions can be added together, we
+can overload the <TT>+</TT> operator to work on <TT>Dim</TT>s as
+follows: 
+
+<PRE> 
+template&lt;int M, int L, int T&gt;
+Dim&lt;M, L, T&gt; operator+(Dim&lt;M, L, T&gt; &amp;d1,
+                       Dim&lt;M, L, T&gt; &amp;d2) {
+  return Dim&lt;M, L, T&gt;(d1.value() + d2.value());
+}</PRE>
+
+Since <TT>operator+</TT> is defined only for <TT>Dim</TT>s with the same
+template arguments (corresponding to the same dimensional exponents),
+the C++ compiler will enforce the restriction that only
+quantities having identical dimensions can be added together.
+<P>
+Multiplying two dimensioned quantities together produces a
+dimensioned quantity whose dimensional exponents are the sum of
+the dimensional exponents of the operands.  Again, using template
+arguments for the dimensional exponents, we can overload the <TT>
+*</TT> operator to work on <TT>Dim</TT>s as follows:
+
+<PRE>template&lt;int M1, int L1, int T1, 
+         int M2, int L2, int T2&gt;
+Dim&lt;M1 + M2, L1 + L2, T1 + T2&gt; 
+  operator*(Dim&lt;M1, L1, T1&gt; &amp;d1, 
+            Dim&lt;M2, L2, T2&gt; &amp;d2) {
+  return Dim&lt;M1 + M2, L1 + L2, T1 + T2&gt;
+           (d1.value() * d2.value());
+}</PRE>
+
+<P>
+The above examples summarize the essential ideas behind the
+proposed method.  The rest is mere syntactic sugar (though
+essential to developing a usable system).
+<P>
+<HR><A NAME="tex2html36" HREF="node3.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html34" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html28" HREF="node1.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html37" HREF="node3.html">But is it ?</A>
+<B>Up:</B> <A NAME="tex2html35" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html29" HREF="node1.html">Introduction</A>
+<P><ADDRESS>
+<I>zerksis umrigar (zdu@acm.org) <BR>
+Fri Aug  8 15:41:40 EDT 1997</I>
+</ADDRESS>
+</BODY>
+</HTML>

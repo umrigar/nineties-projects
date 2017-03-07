@@ -1,0 +1,596 @@
+<HTML>
+<TITLE>Designing a Basic Block Profiler</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Designing a Basic Block Profiler</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/07/04 01:20:59 zdu"
+</FONT>
+
+<P>This note serves as a advanced tutorial on the use of lex and yacc and how
+to control the interactions between them.  It documents the design of a
+source-to-source transformation tool which enables profiling the basic
+blocks of Ansi-C programs.  The tool transforms a C source file into another
+<EM>instrumented</EM> source file.  When the instrumented source file is compiled
+and executed, it produces a count of the number of times each of its basic
+blocks is executed.
+
+<H2>Requirements</H2>
+
+<P> A <EM>basic block</EM> is a maximal sequence of consecutive statements
+in which flow of control enters at the beginning and leaves at the end
+without halt or the possibility of branching except at the end.  Basic
+blocks can be used to capture the control-flow information associated with a
+particular execution of a program.  Specifically, we define the <EM>basic
+blocks</EM> of a C program to include the entry points to all functions, as
+well as all points indicated by a <CODE>^</CODE> in the following
+constructs (recursively expanding <CODE>statement</CODE>s):
+
+<PRE>
+	if (expr) statement
+		 ^	    ^
+
+	if (expr) statement else statement
+	         ^              ^	   ^
+
+	while (expr) statement
+                    ^	       ^
+
+	for (expr; expr; expr) statement
+                              ^		 ^
+
+	do statement while (expr)
+          ^			  ^
+
+	label: statement
+	      ^
+
+	case const-expr: statement
+			^
+
+	default: statement
+	        ^
+	expr ? expr : expr
+	      ^      ^
+</PRE>
+
+For each basic block in the program being profiled, the profiler is required
+to produce a count of the number of times execution flows through that basic
+block.
+
+<H2>Overall Design</H2>
+
+The profiling tool operates in three phases:
+
+<OL>
+    <LI>  <B>Instrumentation Phase</B>: The tool modifies the source program
+    so as to enable it to produce its basic block profile when it
+    is subsequently executed.
+
+    <LI> <B>Execution Phase</B>: The instrumented program is run to produce
+    its basic block profile.
+
+    <LI> <B>Post Execution Phase</B>: The user browses and collates the
+    basic block profile using general tools and scripts.
+</OL>
+
+<P> Basic block profiling is achieved by associating a unique counter with
+each basic block.  During the instrumentation phase, code is inserted at
+each basic block to increment its associated counter.  Code is also
+inserted to ensure that the counts in <B>all</B> basic block counters are
+captured in a file when the program exits.
+
+<P> The instrumentation phase assumes that the source program is syntactically
+and semantically correct.  Hence it may do minimal error-checking.
+
+<P> The instrumentation phase is implemented using three main components:
+
+<OL TYPE=a>
+  <LI>  A standard C preprocessor.  Any off-the-shelf preprocessor can
+  be used.  This component may be omitted if requested via a command-line 
+  option.
+
+  <LI>  A C scanner.  
+
+  <LI>  A C parser which understands C well enough to
+  produce the instrumentation.
+
+</OL>
+
+<P> The input to the <EM>scanner</EM> is fed by the output of the C
+preprocessor.  When requested by the parser, the scanner tokenizes its input
+and passes the next token onto the parser.  It maintains the name of the
+current source file and the current line number (obeying any <CODE>#</CODE>
+directives from the preprocessor specifying the current filename and line
+number).  Along with each token, the scanner passes any <EM>whitespace</EM>
+between the previous token and the current token, where <EM>whitespace</EM>
+includes the text of comments and residual preprocessor directives.  The
+scanner is implemented using a version of <CODE>lex</CODE>.
+
+<P> The <EM>parser</EM> parses the token stream passed to it by the scanner.
+As it parses each input token, it emits it's associated text (including
+whitespace) to the output stream associated with the instrumented source.
+When it recognizes a basic block it emits suitable instrumenting code to the
+output stream.  Note that since C preprocessors do not concatenate adjacent
+string tokens, the parser treats adjacent string tokens as though they had
+been concatenated.  The parser is implemented using a version of
+<CODE>yacc</CODE>.
+
+<P> This design appears somewhat clumsy because of the passing of the text
+of all preceeding whitespace, comments and preprocessor tokens from the
+scanner to the parser.  An alternative design would make the scanner
+responsible for copying the source program to the output stream.  All that
+the parser would need to emit would be the additional code required to
+instrument the source program.  In fact, an earlier version of this program
+did use such a design, but it was abandoned for the following reason:
+
+<BLOCKQUOTE>
+
+    In some situations, the parser requires a lookahead token before
+    it can execute any actions which emit the additional instrumenting 
+    code;  in other situations it does not.  Unfortunately, the requests 
+    made to the scanner do not distinguish between a request for a 
+    lookahead token versus a request for a token which will be shifted 
+    immediately.  Hence it becomes difficult to synchronize the output 
+    actions of the scanner with the output actions of the parser to ensure 
+    that the instrumenting code is inserted at precisely the right point in
+    the source file.  It can be done (using features like the 
+    <CODE>%nolook</CODE> directive provided by zyacc), but the resulting
+    parser can be quite fragile.
+  
+</BLOCKQUOTE>
+
+<H2>Instrumenting a Program</H2>
+
+<P>  The inserted instrumenting code has to achieve the following:
+
+<OL>
+    <LI>  Declare and define all the auxiliary entities needed for profiling.
+
+    <LI>  Increment the unique counter associated with a basic block whenever
+    that basic block is executed.
+
+    <LI>  Ensure that all profiling information is captured in persistent
+    storage before the program exits.
+</OL>
+
+<P>  (1) is easy to achieve by including declarations and definitions in the
+instrumented file.  The entities include an array of counters (one counter
+for each basic block), an array of line numbers (one line number for each
+counter), and an array of file names (one file name for each counter, at
+least conceptually), and an entity which points to all the other entities
+and contains other miscellaneous information.  To facilitate instrumentation
+using a single pass, the entities are first declared at the beginning of the
+instrumented file and defined only at the end of the file when their sizes
+are known.
+
+<P> (2) is trivial to achieve: a simple statement which increments the
+appropriate member of the counter array is inserted.  However, we must be
+careful as we insert the counter increments. Consider the following
+<CODE>if</CODE> statement:
+
+<PRE>
+
+	if (a != 0) b= c/a;
+
+</PRE>
+
+Assuming the <CODE>then</CODE> basic block controls counter
+<CODE>_BBCntrs[235]</CODE>, then we could insert code
+<CODE>_BBCntrs[235]++</CODE> just before the <CODE>then</CODE>-statement as
+follows:
+
+<PRE>
+
+	if (a != 0) _BBCntrs[235]++; b= c/a;
+
+</PRE>
+Unfortunately, we have changed the user's semantics of the program --- the
+statement <CODE>b= c/a</CODE> is no longer governed by the <CODE>if</CODE>-test!
+
+<P>  The correct way to do this is to insert the counter increment surrounded
+by braces as in:
+<PRE>
+
+	if (a != 0) { _BBCntrs[235]++; b= c/a; }
+
+</PRE>
+Though braces are not always necessary when inserting the counter increment
+before a statement, it is simplest to merely insert them in all cases.
+
+<P> Similarly, when incrementing the counters for a conditional expression
+like
+<PRE>
+
+	max= (a > b) ? a : b;
+
+</PRE>
+we insert the counter incrementing code using the comma-operator:
+<PRE>
+
+	max= (a > b) ? ( _BBCntrs[441]++ , a ) : ( _BBCntrs[442]++ , b );
+
+</PRE>
+In this case, the inserted parentheses are always necessary.
+
+<P> (3) can be achieved by registering a function to be called when the
+program exits.  This can be done using C's <CODE>atexit()</CODE> library
+function.  Unfortunately, in the absence of any information about the global
+control flow of the program being instrumented, there is no really good
+place to call <CODE>atexit()</CODE>.  The solution used is to insert code at
+the beginning of each function in a file to check whether
+<CODE>atexit()</CODE> has been called for that file; if it has not been
+called, then it is called to register a function specific to that file.
+
+
+<H2>The Scanner</H2>
+
+<P>The scanner in <A HREF="scan.l">scan.l</A> is a straight-forward use of
+<CODE>lex</CODE> technology.  Multi-character tokens involving
+non-alphanumeric characters like <CODE>&lt;&lt;=</CODE> and <CODE>...</CODE>
+are recognized by merely listing out the patterns describing them.  Single
+character non-alphanumeric tokens like <CODE>&lt;</CODE> and <CODE>=</CODE>
+are recognized using a catch-all <CODE>.</CODE> pattern.
+
+<P> Reserved words like <CODE>for</CODE> and <CODE>switch</CODE> are treated
+just like identifiers as far as the patterns are concerned.  During
+initialization, the reserved words are entered into a <EM>string-table</EM>
+(maintained by an auxiliary library module).  The string table assigns
+successive indexes or <CODE>ID</CODE>s (starting at 0) to each distinct
+identifier it is given.  When a identifier is recognized via a
+<CODE>lex</CODE> pattern, it is looked up in the string-table.  If its
+<CODE>ID</CODE> is less than the number of reserved words, then it
+corresponds to a reserved word; its token number is computed using a simple
+computation.  Otherwise it must be a C identifier and a <CODE>ID_TOK</CODE>
+token is returned.
+
+<P>  The only complicated patterns are those for floating point numbers,
+strings and character constants.  These are simplified by using auxiliary
+<CODE>lex</CODE> <EM>macros</EM> which are defined in section 1 of the <CODE>lex</CODE> file.  Since we
+are not concerned about the semantics of most tokens, we do not process
+escape sequences in any detail greater than needed to find the end of a
+string or character constant.
+
+<P> Comments are handled using an exclusive start state.  In the
+<CODE>COMMENT</CODE> start state, comment lines which do not contain
+<CODE>*</CODE>s, are processed a line at a time to maximize performance.
+There is a special case pattern to handle a sequence of <CODE>*</CODE>s
+which occur within the comment but do not terminate the comment (they are
+not immediately followed by a <CODE>/</CODE>).  There is another special
+case pattern to handle <CODE>'\n'</CODE>s within a comment.
+
+<P>  Line numbers are tracked using zlex's yylineno feature.
+
+<P> The scanner is written so that it can be used to scan C text which may
+or may not have been previously preprocessed (depending on a command-line
+option).  Preprocessor directives are handled by another exclusive start
+state <CODE>CPP</CODE> which is entered when a <CODE>#</CODE> is seen at the
+beginning of a line.  It uses an auxiliary state maintained in a global C
+variable to record whether it has seen something which looks like a
+<CODE>#line</CODE> directive or a <CODE>#</CODE> followed by a line number
+and a file name.  It it finds such a directive, it records the line number
+and file name in a global variable.  It ignores all other characters until
+it sees a <CODE>'\n'</CODE> at which point it returns to the
+<CODE>INITIAL</CODE> start state.  It is important to note that since the
+number mentioned in the <CODE>#</CODE> directive is the number of the
+<EM>next</EM> line, the <CODE>yylineno</CODE> variable is updated to one
+less than that specified so that when it is incremented after seeing the
+terminating <CODE>'\n'</CODE>, it will be correct.
+
+<P> Passing the text of each token (including preceeding whitespace) is
+handled using two dynamically-grown buffers.  Two buffers are sufficient to
+handle upto a single token of lookahead by the parser.  The buffers may get
+quite large when large comments are encountered, but most existing computer
+systems should be able to cope with the sizes.
+
+<P> The parser's interface to the scanner does not directly use the
+<CODE>lex</CODE> generated <CODE>yylex()</CODE>.  Instead, the interface is
+a wrapper <CODE>scan()</CODE> around <CODE>yylex()</CODE>.  The wrapper is
+responsible for the following tasks:
+
+<OL TYPE=a>
+
+    <LI> It takes care of the necessary cleanup necessary when the scanner
+    has hit the end of its current file.
+
+    <LI> It concatenates the lexeme (contained in <CODE>yytext</CODE>) of
+    the token being returned to the current buffer.  (The lexemes for 
+    tokens like whitespace and comments which are not returned to the
+    parser, are added directly to the buffer within the action 
+    associated with the corresponding pattern).
+
+    <LI> It extracts the text of the current buffer into the semantics
+    (<CODE>yylval</CODE>) associated with the current token and switches buffers
+    in preparation for the next token.
+
+</OL>
+
+<P>  The current filename is intern'd and stored in the string-table module.
+The filename and line number are maintained as part of <CODE>yylval</CODE> --- the
+semantic value of the token.  This has the advantage that the parser can
+access the line number of a token which was scanned much earlier, but has
+the disadvantage that the size of parser stack entries may be increased.
+
+<P>  The semantic value of a token also contains the buffered text of the
+current lexeme including its preceeding whitespace, plus the total length of
+the buffered text as well as the length of the preceeding whitespace.
+
+<P> The other field which is returned as part of the <CODE>yylval</CODE>
+semantics of a token is the string-table <CODE>ID</CODE> of any identifier
+token.  The parser needs this field to distinguish between identifiers used
+as <CODE>typedef</CODE>-names and those used for other purposes.
+
+<P>  The scanner also provides a routine the parser can use to start scanning a
+new file.  Depending on a command-line option, the routine uses the C
+preprocessor to first preprocess the new file into a temporary file (this is
+more portable than using a <EM>pipe</EM>).  It tries to read the name of the
+preprocessor to be used from variables in the environment.
+
+<H2>The Parser</H2>
+
+<P> The parser in <A HREF="parse.y">parse.y</A> uses the grammar given in
+the ANSI-C standard fairly directly. The grammar is organized in the order
+given in K&R2 rather than the order used in the actual ANSI standard, as
+that order appears preferable.  Except for the <CODE>typedef-name</CODE>
+non-terminal, the standard grammar is suitable for LALR(1) parsing after
+productions containing optional constructs are duplicated, once with and
+once without the optional construct.  Since <CODE>typedef-name</CODE>s
+cannot be recognized purely syntactically, the <CODE>typedef-name</CODE>
+nonterminal is recognized using a semantic predicate.
+
+<P>  The grammar is divided into the following sections:
+
+<DL>
+    <DT><B>Declarations</B>  
+    <DD>This section takes care of entering <CODE>typedef-name</CODE>s 
+    into a simple symbol table when they are declared, and recognizing 
+    identifiers as <CODE>typedef-name</CODE>s when they are referenced.
+
+    <DT><B>Statements</B> 
+    <DD>This section takes care of emitting the additional
+    instrumenting code necessary to update profiling counters at the
+    start of each basic block.
+
+    <DT><B>Expressions</B>  
+    <DD>This section contains the expression grammar of the 
+    ANSI-C standard largely unchanged except for the addition of actions
+    for profiling <CODE>?:</CODE> conditional expressions.
+
+    <DT><B>Terminals</B>  
+    <DD>Each actual terminal is accessed via a nonterminal
+    (which is treated as a pseudo-terminal in the rest of the grammar).
+    There is a pseudo-terminal for each real terminal, where each pseudo-
+    terminal is responsible for copying its lexeme (including preceeding 
+    whitespace) to the output stream.  All output (including keeping
+    track of the counters) is done using <A HREF="out.c">out.c</A> (with
+    declarations in <A HREF="out.h">out.h</A>).
+
+</DL>
+
+<H3>Typedef Names</H3>
+
+<P> One of the challenges involved in parsing C is that parsing decisions
+depend on whether or not a particular identifier is a
+<CODE>typedef-name</CODE>.  The recognition of <CODE>typedef-name</CODE>s
+cannot be achieved using purely syntactic methods but requires some semantic
+knowledge.  One possible solution is to make the scanner lookup an
+identifier in a symbol table and return a special <CODE>TYPEDEF_NAME</CODE>
+token if it is a <CODE>typedef-name</CODE>.  Unfortunately, such a solution
+can be quite difficult to implement because even when an identifier has been
+declared to be a <CODE>typedef-name</CODE>, the scanner should still return
+it as a normal <CODE>ID</CODE> identifier in contexts where the identifier
+is being redeclared.  What is really needed is a way for the semantics of a
+token to affect the parsing decisions made by the parser: the zyacc parser
+generator provides such a mechanism via semantic predicates.
+
+<P> The overall strategy used to process <CODE>typedef-name</CODE>s is as
+follows:
+
+<BLOCKQUOTE>
+
+    When a <CODE>typedef</CODE> declaration is parsed, all the identifiers
+    declared in it are entered into a scoped <EM>typedef table</EM>.  
+    Then when the parser encounters a reference to an identifier in a 
+    context where a <CODE>typedef-name</CODE> is possible, it uses a 
+    semantic predicate to check whether the identifier is indeed a 
+    <CODE>typedef-name</CODE> by looking it up in the typedef table.
+
+</BLOCKQUOTE>
+
+<P> The correct processing of a <CODE>typedef</CODE> declaration is achieved
+by associating a synthesized attribute <CODE>$dclType</CODE> with the
+<CODE>declaration_specifiers</CODE> nonterminal.  This attribute is set to
+<CODE>TYPEDEF_DCL</CODE> if the <CODE>typedef</CODE>
+<CODE>storage_class_specifier</CODE> is specified.  The other possibilities
+for this attribute are a <CODE>ID_DCL</CODE> if a non-typedef identifier is
+declared in the same namespace as typedef-names, and a
+<CODE>OTHER_DCL</CODE> for an identifier in another namespace (like
+structures).  This synthesized attribute is propagated via inherited
+attributes to <CODE>init_declarator_list</CODE>,
+<CODE>init_declarator</CODE>, <CODE>declarator</CODE> and
+<CODE>direct_declarator</CODE>.  The base production (<CODE>ID</CODE>) for
+<CODE>direct_declarator</CODE> checks if this attribute is not
+<CODE>OTHER_DCL</CODE>; if so, it adds the <CODE>ID</CODE> to a simple
+symbol table maintained for the <CODE>typedef</CODE> namespace, specifying
+whether or not it is a typedef.  (Since <CODE>declaration_specifiers</CODE>
+is a simple linear list of <CODE>storage_class_specifier</CODE>s,
+<CODE>type_specifier</CODE>s and <CODE>type_qualifier</CODE>s, it is
+possible to have propagated the <CODE>dclType</CODE> information using a
+single global attribute rather than the multiple synthesized and inherited
+attributes used above).
+
+<P> When a <CODE>typedef</CODE> declaration is recognized, the
+<CODE>ID</CODE> of the identifier being declared is added to a scoped symbol
+table.  The table uses a simple hashtable search.  A new scope is begun at
+the beginning of each compound statement and the current scope is closed at
+the end of each compound statement; this is achieved by actions associated
+with the nonterminals <CODE>lbrace</CODE> and <CODE>rbrace</CODE>.
+Collision resolution is achieved by chaining, with the chained symbols
+maintained in a stack.  Ending a scope is achieved by merely popping this
+stack, after ensuring that all the popped symbols are removed off their
+hash-chains.
+
+<P> What remains is to handle the situation where a existing
+<CODE>typedef-name</CODE> is referenced. This is complicated by the fact
+that a <CODE>typedef-name</CODE> may be redeclared; fortunately, the
+standard requires that any such redeclaration have at least one
+<CODE>type_specifier</CODE> among its <CODE>declaration_specifiers</CODE>.
+Hence an identifier occurring in a declaration is recognized as a
+<CODE>typedef-name</CODE> only if no <CODE>type-specifier</CODE>s have been
+seen previously in the declaration --- this is tracked by means of a global
+attribute <CODE>seenType</CODE>.  Hence a identifier should be recognized as
+a <CODE>typedef_name</CODE> only if both the following conditions are true:
+
+<UL>
+    <LI>  <CODE>seenType</CODE> is <CODE>FALSE</CODE>.
+
+    <LI>  The identifier is in the current typedef table as a 
+    <CODE>typedef</CODE>.  
+</UL>
+
+This test is done using the <CODE>%test</CODE> semantic predicate: note that
+the test is performed on the lookahead token.
+
+
+<H3>Instrumenting Code</H3>
+
+<P> The statements section of the grammar is responsible for inserting the
+instrumenting code.  This is achieved by associating
+<CODE>CounterType</CODE> inherited and synthesized attributes with each
+<CODE>statement</CODE> nonterminal, where <CODE>CounterType</CODE> is
+defined as follows:
+<PRE>
+
+	typedef enum {
+	  NO_COUNTER,		/* no counter needed */
+	  COMPOUND_COUNTER,	/* counter at start of compound */
+	  COND_COUNTER,		/* counter for ?: conditional expressions */
+	  FN_COUNTER,		/* counter for function entry */
+	  STMT_COUNTER		/* counter for statements */
+	} CounterType;
+
+</PRE>
+
+A <CODE>FN_COUNTER</CODE> differs from a <CODE>STMT_COUNTER</CODE> in that
+it also inserts code to ensure that <CODE>atexit()</CODE> has been called.
+A <CODE>COMPOUND_COUNTER</CODE> differs from a <CODE>STMT_COUNTER</CODE> in
+that it is safe to insert the incrementing code for a compound counter
+directly within a <CODE>compound_statement</CODE>, whereas code for a
+<CODE>STMT_COUNTER</CODE> can only be safely inserted if paired with the
+corresponding <CODE>statement</CODE> within braces.
+
+<P> The inherited attribute of <CODE>statement</CODE> denotes the counter
+type needed just before that <CODE>statement</CODE>; the synthesized
+attribute denotes the counter which will be needed for the <EM>next</EM>
+statement.  All the productions for <CODE>statement</CODE> except the one
+for <CODE>compound_statement</CODE> use the inherited attribute to insert a
+left brace followed by the appropriate counter increment (the action is
+encapsulated in the nonterminal <CODE>counter_begin</CODE>), and finish up
+by inserting a closing right brace.  The inherited attribute is simply
+passed down to <CODE>compound_statement</CODE>.
+
+<P> Most of the nonterminals for the individual kinds of statements merely
+have a synthesized attribute which specifies the kind of counter needed by
+the <EM>next</EM> statement.  However, in many situations the
+<EM>statement</EM> nonterminal does not need to look at this attribute:
+
+<UL>
+    <LI> An <CODE>expression_statement</CODE> will never need to be followed
+    by a counter increment.  Hence <CODE>expression_statement</CODE>s do 
+    not have any <CODE>CounterType</CODE> attributes; the 
+    <CODE>expression_statement</CODE> rule within <CODE>statement</CODE> 
+    asserts this fact by setting the attribute <CODE>$counterZ</CODE> 
+    of <CODE>statement</CODE> to <CODE>NO_COUNTER</CODE>.
+
+    <LI> A <CODE>selection_statement</CODE> or an 
+    <CODE>iteration_statement</CODE> must always be followed by a counter 
+    increment.  Hence the corresponding rules in <CODE>statement</CODE> 
+    ensure this by always setting the attribute <CODE>$counterZ</CODE> 
+    of <CODE>statement</CODE> to <CODE>STMT_COUNTER</CODE>.
+
+    <LI> Surprisingly enough, the <CODE>jump_statement</CODE> rule in 
+    <CODE>statement</CODE> also specifies attribute <CODE>$counterZ</CODE> 
+    to be <CODE>NO_COUNTER</CODE>.  However, this makes sense 
+    since a jump statement represents an unconditional
+    control transfer and the statement following the jump statement
+    will never be executed unless control is transferred to it in some
+    way other than sequentially from the jump statement.  In that case,
+    the counter increment code will be inserted there by some other rule.
+</UL>
+A counter is required after a <CODE>labelled_statement</CODE> or a
+<CODE>compound_statement</CODE> depending on each individual statement.
+Hence in those cases, the <CODE>$counterZ</CODE> attribute of
+<CODE>statement</CODE> is set to the value returned by the corresponding
+nonterminal.
+
+<P>  The computation of the attribute <CODE>$counterZ</CODE> in the rules for each
+individual kind of statement are straight-forward.  This attribute should be
+set to the type of counter needed by the next statement.  For example, a
+counter is needed after a if-then-else statement if it is needed after the
+then-statement or it is needed after the else-statement.
+
+<P>  Note that many of the newly introduced empty nonterminals are necessary
+for avoiding conflicts.  For example, if the <CODE>counter_begin</CODE> nonterminal in
+the rules for <CODE>statement</CODE> was directly replaced by the corresponding action,
+conflicts would result.  That is because even though the actions are
+identical, the parser generator does not realize it and creates different
+empty rules for each insertion of a mid-rule action, resulting in
+reduce-reduce conflicts.  Similarly, the <CODE>needs_counter_statement</CODE>
+nonterminal in the rules for <CODE>selection_statement</CODE> is necessary to avoid an
+attribute conflict, as the parser generator does not realize that the value
+<CODE>STMT_COUNTER</CODE> being assigned to the inherited attribute of <CODE>statement</CODE> is
+the same in both cases.
+
+<H2>Execution Phase</H2>
+
+<P>  The instrumented program must be linked with the zprof library before
+it can be executed.  The library provides a routine <CODE>_bbProfOut()</CODE> which
+is called by each program file on exit to append basic block counts to
+the file <CODE>zprof.out</CODE>.
+
+<H2>Post-Execution Phase</H2>
+
+<P>  The format of the file <CODE>zprof.out</CODE> consists of lines of the form:
+<PRE>
+
+	<EM>filename</EM><CODE>:</CODE><EM>linenum</EM><CODE>:</CODE> <EM>count</EM>
+
+</PRE>
+specifying that line number <EM>linenum</EM> in file <EM>filename</EM> was executed
+<EM>count</EM> times.  If there are multiple basic blocks associated with a
+particular source line, then multiple lines will be produced for the
+same <EM>filename</EM> and <EM>linenum</EM>.
+
+<P>  The above format is amenable to easy processing by several tools:
+
+<UL>
+    <LI> The file can easily be sorted in descending order of counts:
+    <PRE>
+
+	sort -t: -k3 -nr zprof.out
+
+    </PRE>
+    <LI> Emacs compilation-mode can be used to interactively browse this 
+    file.  <CODE>M-x compile</CODE> can be used to start compilation and the
+    compilation command can be specified simply as <CODE>cat zprof.out</CODE>.
+    Then the <CODE>M-`</CODE> command can be used repeatedly to position the
+    cursor at each source line with its execution count shown in
+    the compilation buffer.
+
+    <LI> The trivial Perl script <CODE>zcounts</CODE> distributed with this program
+    can be used to generate annotated versions of each source file
+    (with a <CODE>.bb</CODE> extension) where each source line is preceeded by
+    its execution count.
+
+</UL>
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A HREF="../index.html">Back to zprof home page</A>
+
+</BODY>
+</HTML>

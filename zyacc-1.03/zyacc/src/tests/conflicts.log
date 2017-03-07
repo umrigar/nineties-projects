@@ -1,0 +1,307 @@
+                        PARSER DESCRIPTION FILE
+
+                               CONFLICTS
+
+4 conflicts (3 shift-reduce, 1 reduce-reduce).
+State 1 has  2 conflicts.
+State 2 has  1 conflicts.
+State 3 has  1 conflicts.
+
+                                 RULES
+
+  0: $S: S <EOF> 
+  1: S: A 'z' 
+  2: S: B 'z' 
+  3: S: C 'z' 
+  4: A: 'a' 
+  5: A: 'a' 
+  6: A: 'a' 'z' 
+  7: B: 'b' YYTest_1 
+  8: YYTest_1: /* EMPTY */
+  9: B: 'b' 
+ 10: B: 'b' 'z' 
+ 11: C: 'c' 
+ 12: C: 'c' 
+ 13: $Err: /* EMPTY */
+                      STATES WITHOUT CLOSURE ITEMS
+
+State   0:	
+  0: $S: . S <EOF> 
+      GOTO   4 on S
+      GOTO   5 on A
+      GOTO   6 on B
+      GOTO   7 on C
+      SHIFT 1 on 'a'
+      SHIFT 2 on 'b'
+      SHIFT 3 on 'c'
+DEFAULT: Error
+
+State   1:	
+  4: A: 'a' . 
+  5: A: 'a' . 
+  6: A: 'a' . 'z' 
+        SHIFT 8 on 'z'
+      [ REDUCE 4 (A) on 'z' ]
+      [ REDUCE 5 (A) on 'z' ]
+DEFAULT: Error
+
+State   2:	
+  9: B: 'b' . 
+ 10: B: 'b' . 'z' 
+  7: B: 'b' . YYTest_1 
+      GOTO  10 on YYTest_1
+        TEST SET #0 on 'z'
+      [ REDUCE 9 (B) on 'z' ]
+DEFAULT: REDUCE 9 (B)
+	TEST SET #0.
+	  Test 1: REDUCE 8 (YYTest_1)
+	ELSE SHIFT 9
+
+State   3:	
+ 11: C: 'c' . 
+ 12: C: 'c' . 
+      [ REDUCE 12 (C) on 'z' ]
+DEFAULT: REDUCE 11 (C)
+
+State   4:	
+  0: $S: S . <EOF> 
+      SHIFT 11 on <EOF>
+DEFAULT: Error
+
+State   5:	
+  1: S: A . 'z' 
+      SHIFT 12 on 'z'
+DEFAULT: Error
+
+State   6:	
+  2: S: B . 'z' 
+      SHIFT 13 on 'z'
+DEFAULT: Error
+
+State   7:	
+  3: S: C . 'z' 
+      SHIFT 14 on 'z'
+DEFAULT: Error
+
+State   8:	
+  6: A: 'a' 'z' . 
+DEFAULT: REDUCE 6 (A)
+
+State   9:	
+ 10: B: 'b' 'z' . 
+DEFAULT: REDUCE 10 (B)
+
+State  10:	
+  7: B: 'b' YYTest_1 . 
+DEFAULT: REDUCE 7 (B)
+
+State  11:	
+  0: $S: S <EOF> . 
+DEFAULT: REDUCE 0 ($S)
+
+State  12:	
+  1: S: A 'z' . 
+DEFAULT: REDUCE 1 (S)
+
+State  13:	
+  2: S: B 'z' . 
+DEFAULT: REDUCE 2 (S)
+
+State  14:	
+  3: S: C 'z' . 
+DEFAULT: REDUCE 3 (S)
+
+                       STATES WITH CLOSURE ITEMS
+
+State   0:	
+  4: A: . 'a' 
+  5: A: . 'a' 
+  6: A: . 'a' 'z' 
+  7: B: . 'b' YYTest_1 
+  9: B: . 'b' 
+ 10: B: . 'b' 'z' 
+ 11: C: . 'c' 
+ 12: C: . 'c' 
+  0: $S: . S <EOF> 
+  1: S: . A 'z' 
+  2: S: . B 'z' 
+  3: S: . C 'z' 
+      GOTO   4 on S
+      GOTO   5 on A
+      GOTO   6 on B
+      GOTO   7 on C
+      SHIFT 1 on 'a'
+      SHIFT 2 on 'b'
+      SHIFT 3 on 'c'
+DEFAULT: Error
+
+State   1:	
+  4: A: 'a' . 
+  5: A: 'a' . 
+  6: A: 'a' . 'z' 
+        SHIFT 8 on 'z'
+      [ REDUCE 4 (A) on 'z' ]
+      [ REDUCE 5 (A) on 'z' ]
+DEFAULT: Error
+
+State   2:	
+  9: B: 'b' . 
+ 10: B: 'b' . 'z' 
+  8: YYTest_1: . /* EMPTY */. 
+  7: B: 'b' . YYTest_1 
+      GOTO  10 on YYTest_1
+        TEST SET #0 on 'z'
+      [ REDUCE 9 (B) on 'z' ]
+DEFAULT: REDUCE 9 (B)
+	TEST SET #0.
+	  Test 1: REDUCE 8 (YYTest_1)
+	ELSE SHIFT 9
+
+State   3:	
+ 11: C: 'c' . 
+ 12: C: 'c' . 
+      [ REDUCE 12 (C) on 'z' ]
+DEFAULT: REDUCE 11 (C)
+
+State   4:	
+  0: $S: S . <EOF> 
+      SHIFT 11 on <EOF>
+DEFAULT: Error
+
+State   5:	
+  1: S: A . 'z' 
+      SHIFT 12 on 'z'
+DEFAULT: Error
+
+State   6:	
+  2: S: B . 'z' 
+      SHIFT 13 on 'z'
+DEFAULT: Error
+
+State   7:	
+  3: S: C . 'z' 
+      SHIFT 14 on 'z'
+DEFAULT: Error
+
+State   8:	
+  6: A: 'a' 'z' . 
+DEFAULT: REDUCE 6 (A)
+
+State   9:	
+ 10: B: 'b' 'z' . 
+DEFAULT: REDUCE 10 (B)
+
+State  10:	
+  7: B: 'b' YYTest_1 . 
+DEFAULT: REDUCE 7 (B)
+
+State  11:	
+  0: $S: S <EOF> . 
+DEFAULT: REDUCE 0 ($S)
+
+State  12:	
+  1: S: A 'z' . 
+DEFAULT: REDUCE 1 (S)
+
+State  13:	
+  2: S: B 'z' . 
+DEFAULT: REDUCE 2 (S)
+
+State  14:	
+  3: S: C 'z' . 
+DEFAULT: REDUCE 3 (S)
+
+                   STATES ACCESSED BY GRAMMAR SYMBOLS
+
+                  STATES ACCESSED BY TERMINAL SYMBOLS
+
+States accessed by terminal `error'
+	
+States accessed by terminal `<EOF>'
+	11 
+States accessed by terminal `'z''
+	14 13 12 9 8 
+States accessed by terminal `'a''
+	1 
+States accessed by terminal `'b''
+	2 
+States accessed by terminal `'c''
+	3 
+States accessed by terminal `$yyBadTok'
+	
+States accessed by terminal `$yyEmptyTok'
+	
+                STATES ACCESSED BY NON-TERMINAL SYMBOLS
+
+States accessed by non-terminal `$S'
+	0 
+States accessed by non-terminal `S'
+	4 
+States accessed by non-terminal `A'
+	5 
+States accessed by non-terminal `B'
+	6 
+States accessed by non-terminal `C'
+	7 
+States accessed by non-terminal `YYTest_1'
+	10 
+States accessed by non-terminal `$Err'
+	
+                          REDUCTION LOOKAHEADS
+
+LALR lookaheads for reducing by rule 4 (A) in state 1
+	'z'
+
+
+LALR lookaheads for reducing by rule 5 (A) in state 1
+	'z'
+
+
+LALR lookaheads for reducing by rule 9 (B) in state 2
+	'z'
+
+
+LALR lookaheads for reducing by rule 8 (YYTest_1) in state 2
+	'z'
+
+
+LALR lookaheads for reducing by rule 11 (C) in state 3
+	'z'
+
+
+LALR lookaheads for reducing by rule 12 (C) in state 3
+	'z'
+
+
+SLR lookaheads for reducing by rule 6 (A) in state 8
+	'z'
+
+
+SLR lookaheads for reducing by rule 10 (B) in state 9
+	'z'
+
+
+SLR lookaheads for reducing by rule 7 (B) in state 10
+	'z'
+
+
+SLR lookaheads for reducing by rule 0 ($S) in state 11
+
+
+SLR lookaheads for reducing by rule 1 (S) in state 12
+	<EOF>
+
+
+SLR lookaheads for reducing by rule 2 (S) in state 13
+	<EOF>
+
+
+SLR lookaheads for reducing by rule 3 (S) in state 14
+	<EOF>
+
+
+                         USER SPECIFIED ACTIONS
+
+                          USER SPECIFIED TESTS
+
+Test 1: 0

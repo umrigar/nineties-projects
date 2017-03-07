@@ -1,0 +1,61 @@
+7: abc MULTI REJECTING
+9: abc REJECTING
+12: ab REJECTING
+26: `a' echoed.
+26: `b' echoed.
+26: `c' echoed.
+7: 123 MULTI REJECTING
+8: 123 REJECTING
+11: 12 REJECTING
+26: `1' echoed.
+26: `2' echoed.
+26: `3' echoed.
+7: def MULTI REJECTING
+10: def REJECTING
+13: de REJECTING
+26: `d' echoed.
+26: `e' echoed.
+26: `f' echoed.
+26: `
+' echoed.
+14: ABC INTRA ERASED
+7: abc MULTI REJECTING
+9: abc REJECTING
+12: ab REJECTING
+26: `a' echoed.
+26: `b' echoed.
+26: `c' echoed.
+17: DEF INTRA ERASED
+20: GHI INTRA ERASED
+7: 123 MULTI REJECTING
+8: 123 REJECTING
+11: 12 REJECTING
+26: `1' echoed.
+26: `2' echoed.
+26: `3' echoed.
+14: ABC INTRA ERASED
+7: def MULTI REJECTING
+10: def REJECTING
+13: de REJECTING
+26: `d' echoed.
+26: `e' echoed.
+26: `f' echoed.
+17: DEF INTRA ERASED
+26: `
+' echoed.
+23: qabef INTRA ERASED
+26: `q' echoed.
+7: abc MULTI REJECTING
+9: abc REJECTING
+12: ab REJECTING
+26: `a' echoed.
+26: `b' echoed.
+26: `c' echoed.
+7: 123 MULTI REJECTING
+8: 123 REJECTING
+11: 12 REJECTING
+26: `1' echoed.
+26: `2' echoed.
+26: `3' echoed.
+26: `
+' echoed.

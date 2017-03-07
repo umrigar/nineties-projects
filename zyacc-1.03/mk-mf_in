@@ -1,0 +1,22 @@
+#! /bin/sh
+#This script can be used to regenerate Makefile.in files if
+#they are deleted.  Should be run from the top-directory of the package.
+#
+if test ! -f zlex-id.txt
+then
+  echo "Must be run in top-directory of package."
+  exit 1;
+fi
+
+#Directories containing Makefile.m4's to be converted to Makefile.in's.
+DIRS=". doc libz libzlex src src/perf src/tests"
+
+topdir=`pwd`
+for d in $DIRS
+do
+  ( cd $d ; echo $d ; \
+    gm4 --prefix-builtins --include=$topdir/mf Makefile.m4 >Makefile.in \
+  ) 
+done
+
+

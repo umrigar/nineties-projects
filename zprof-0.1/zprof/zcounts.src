@@ -1,0 +1,80 @@
+#! /usr/bin/perl
+
+#File:	 zcounts
+#Purpose: Analyze bb.out output of zprof.
+#
+#Last Update Time-stamp: <97/07/09 10:14:01 zdu>
+#
+#Copyright (C) 1995, 1997 Zerksis D. Umrigar
+#
+#See the file LICENSE for copying and distribution conditions.
+#THERE IS ABSOLUTELY NO WARRANTY FOR THIS PROGRAM.
+
+#Trivial script to analyze prof.out output of zprof.  
+#Produces an annotated FILE.bb for each FILE mentioned
+#in the bb.out input, where each source line is preceeded by its
+#execution count.
+
+if (@ARGV > 0) {
+  die "usage: zcounts\n"
+}
+
+$bbFile= "zprof.out";
+
+if (!open(BBIN, $bbFile)) {
+  die "could not open profile file $bbFile\n";
+}
+
+while (<BBIN>) {
+  #read counts into assoc-array indexed by file-name:line-num
+  if (/([^:]*):(\d*):(.*)/) {
+    $key= "$1:$2"; $count= $3;
+    #just in case there were two basic-blocks in a line.
+    $stats{$key}.= $count;
+  }
+}
+
+foreach $key (keys %stats) {
+  #create array containing "file-name:line-num: count"
+  push(@stats, "$key: " . $stats{$key});
+}
+
+
+sub statssort { 
+  #sort by "file-name:line-num".
+  local($aName, $aLineN, $aCount, $bName, $bLineN, $bCount);
+  $a =~ /([^:]*):(\d+):\s*(\d+)/; $aName= $1; $aLineN= $2; $aCount= $3;
+  $b =~ /([^:]*):(\d+):\s*(\d+)/; $bName= $1; $bLineN= $2; $bCount= $3;
+  return ($aName eq $bName) ? $aLineN <=> $bLineN : $aName cmp $bName;
+}
+
+$fName= "";
+foreach $bb (sort statssort @stats) {
+  $bb =~ /([^:]*):(\d+):\s*(.+)/; $f= $1; $n= $2; $c= $3;
+  if ($f ne $fName) {
+    if ($f ne "") { 
+      while (<IN>) { printf(OUT "%-8s %s", "", $_); }
+      close(IN); close(OUT); 
+    }
+    if (!open(IN, $f)) {
+      die "could not open source file $f\n";
+    }
+    if (!open(OUT, ">$f.bb")) {
+	die "could not open output file $f.bb\n"; 
+    }
+    $lineN= 0; $fName= $f;
+  }
+  while ($lineN < $n) {
+    $line= <IN>; $lineN++;
+    $i= 0;
+    while (($x= index($line, "\t", $i)) >= 0) { #detabify, so line looks ok.
+      substr($line, $x, 1)= ' ' x (8 - $x % 8); $i= $x + 1;
+    }
+    printf(OUT "%-8s %s", 
+	   ($lineN == $n) ? (($c == 0) ? "*0*" : "$c" ) : "", 
+	   $line);
+  }
+}
+while (<IN>) { printf(OUT "%-8s %s", "", $_); }
+close(IN); close(OUT);
+

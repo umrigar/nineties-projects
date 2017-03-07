@@ -1,0 +1,87 @@
+#Automatically generated dependencies.
+utcesc.o: utcesc.c zutil.h ccport.h
+utflfind.o: utflfind.c autobuf.h memalloc.h ccport.h osport.h zutil.h
+utlnglen.o: utlnglen.c zutil.h ccport.h
+utopen.o: utopen.c error.h ccport.h errorz.h zutil.h
+utlg2.o: utlg2.c zutil.h ccport.h
+utread.o: utread.c memalloc.h ccport.h zutil.h
+utstrlo.o: utstrlo.c memalloc.h ccport.h zutil.h
+utstrlon.o: utstrlon.c memalloc.h ccport.h zutil.h
+utstrnst.o: utstrnst.c zutil.h ccport.h
+utstrup.o: utstrup.c memalloc.h ccport.h zutil.h
+utstrupn.o: utstrupn.c memalloc.h ccport.h zutil.h
+utsuffix.o: utsuffix.c memalloc.h ccport.h zutil.h
+idsfail.o: idsfail.c idsp.h ids.h ccport.h strspace.h textid.h
+idsget.o: idsget.c idsp.h ids.h ccport.h strspace.h textid.h
+idsinit.o: idsinit.c idsp.h ids.h ccport.h strspace.h textid.h
+idsintrn.o: idsintrn.c idsp.h ids.h ccport.h strspace.h textid.h
+idslen.o: idslen.c idsp.h ids.h ccport.h strspace.h textid.h
+idsstrng.o: idsstrng.c idsp.h ids.h ccport.h strspace.h textid.h
+arcutx.o: arcutx.c area.h ccport.h memalloc.h
+ardel.o: ardel.c area.h ccport.h memalloc.h
+ardelx.o: ardelx.c area.h ccport.h memalloc.h
+arfreeze.o: arfreeze.c area.h ccport.h memalloc.h
+argrow.o: argrow.c area.h ccport.h errorz.h memalloc.h
+argrowx.o: argrowx.c area.h ccport.h errorz.h memalloc.h
+armem.o: armem.c area.h ccport.h memalloc.h
+arreset.o: arreset.c area.h ccport.h memalloc.h
+tiadd.o: tiadd.c hashtab.h ccport.h textidp.h area.h memalloc.h \
+ textid.h
+tidel.o: tidel.c area.h ccport.h textidp.h hashtab.h memalloc.h \
+ textid.h
+tigetid.o: tigetid.c textidp.h area.h ccport.h hashtab.h memalloc.h \
+ textid.h strspace.h
+tiidlen.o: tiidlen.c textidp.h area.h ccport.h hashtab.h memalloc.h \
+ textid.h
+tiidtext.o: tiidtext.c textidp.h area.h ccport.h hashtab.h memalloc.h \
+ textid.h
+tiinit.o: tiinit.c area.h ccport.h hashtab.h textidp.h memalloc.h \
+ textid.h
+titxtlen.o: titxtlen.c textidp.h area.h ccport.h hashtab.h memalloc.h \
+ textid.h
+memcheck.o: memcheck.c memalloc.h ccport.h
+memdebug.o: memdebug.c memalloc.h ccport.h
+error.o: error.c error.h ccport.h errorz.h
+errorz.o: errorz.c autobuf.h memalloc.h ccport.h errorz.h
+libzerr.o: libzerr.c errorz.h ccport.h
+htbasic.o: htbasic.c area.h ccport.h hashtabp.h hashtab.h memalloc.h \
+ zutil.h
+htcursor.o: htcursor.c area.h ccport.h hashtabp.h hashtab.h
+htdelete.o: htdelete.c hashtabp.h hashtab.h ccport.h area.h
+htscope.o: htscope.c area.h ccport.h hashtabp.h hashtab.h
+htstats.o: htstats.c hashtabp.h hashtab.h ccport.h area.h memalloc.h
+ssadd.o: ssadd.c sspacep.h memalloc.h ccport.h strspace.h
+sscat.o: sscat.c sspacep.h memalloc.h ccport.h strspace.h
+ssdel.o: ssdel.c sspacep.h memalloc.h ccport.h strspace.h
+ssinit.o: ssinit.c sspacep.h memalloc.h ccport.h strspace.h
+ssmore.o: ssmore.c sspacep.h memalloc.h ccport.h strspace.h
+sspop.o: sspop.c sspacep.h memalloc.h ccport.h strspace.h
+po01fn.o: po01fn.c optp.h parseopt.h ccport.h
+po2info.o: po2info.c optp.h parseopt.h ccport.h memalloc.h zutil.h
+pochklng.o: pochklng.c optp.h parseopt.h ccport.h
+pochrfn.o: pochrfn.c optp.h parseopt.h ccport.h
+pochrfn0.o: pochrfn0.c optp.h parseopt.h ccport.h
+pochrfn1.o: pochrfn1.c optp.h parseopt.h ccport.h
+poerr.o: poerr.c optp.h parseopt.h ccport.h
+pohelp.o: pohelp.c optp.h parseopt.h ccport.h
+pohlpfmt.o: pohlpfmt.c optp.h parseopt.h ccport.h memalloc.h zutil.h
+pointfn0.o: pointfn0.c optp.h parseopt.h ccport.h
+pointfn1.o: pointfn1.c optp.h parseopt.h ccport.h
+polngfn0.o: polngfn0.c optp.h parseopt.h ccport.h
+polngfn1.o: polngfn1.c optp.h parseopt.h ccport.h
+pooptdef.o: pooptdef.c optp.h parseopt.h ccport.h memalloc.h
+poparse.o: poparse.c optp.h parseopt.h ccport.h
+poshift.o: poshift.c optp.h parseopt.h ccport.h
+poshrfn0.o: poshrfn0.c optp.h parseopt.h ccport.h
+poshrfn1.o: poshrfn1.c optp.h parseopt.h ccport.h
+postrarg.o: postrarg.c optp.h parseopt.h ccport.h memalloc.h
+postrfn.o: postrfn.c optp.h parseopt.h ccport.h
+postvfn.o: postvfn.c optp.h parseopt.h ccport.h
+utfltest.o: utfltest.c zutil.h ccport.h osport.h
+titest.o: titest.c errorz.h ccport.h hashtab.h textidp.h area.h \
+ memalloc.h textid.h strspace.h
+memtest.o: memtest.c memalloc.h ccport.h
+ertest.o: ertest.c errorz.h ccport.h
+httest.o: httest.c hashtabp.h hashtab.h ccport.h area.h memalloc.h
+potest.o: potest.c memalloc.h ccport.h parseopt.h potstchk.c \
+ potstopt.c

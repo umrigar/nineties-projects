@@ -1,0 +1,286 @@
+#! /bin/sh
+
+#This script accepts the following arguments from the environment:
+#
+#FLEX_FLAGS, LEX_FLAGS, ZLEX_FLAGS: A set of blank-separated words where 
+#each word gives the set of flags for a single invocation of the 
+#corresponding lex.
+#
+#TESTS: The set of performance tests to be run.
+
+GREP=grep
+ECHO=echo
+UNAME='uname -a'
+
+#Turn on debugging if any arguments are specified.
+case $# in
+  0) DEBUG=: ;;
+  *) DEBUG=$ECHO ;;
+esac
+
+
+#BEGIN portability section.
+#There is some Ultrix specific stuff within the inner loop.
+
+#The following definitions may need to be changed:
+#SYS:		The system being used.
+#ECHO_NO_NL:	Command used to echo without a newline.
+#SIZE:		The command used to determine segment sizes of executables.
+#SIZE_FILTER:	Command used to massage output of SIZE.
+#TIME:		Command used to time execution.
+#TIME_FILTER:	Command used to massage output of TIME.
+
+
+#First determine name of current system to use in other porting definitions.
+SYS=`
+  ( $UNAME | $GREP -i linux >/dev/null && $ECHO LINUX ) ||
+  ( $UNAME | $GREP -i 'sun.*5\.' >/dev/null && $ECHO SOLARIS ) ||
+  ( $UNAME | $GREP -i 'ultrix' >/dev/null && $ECHO ULTRIX ) ||
+  $ECHO OTHER
+  `
+$DEBUG SYS=$SYS
+
+
+#How to echo without a newline:
+case $SYS in
+  SOLARIS)	ECHO_NO_NL='/usr/ucb/echo -n';;
+  *)		ECHO_NO_NL='echo -n';;
+esac
+$DEBUG ECHO_NO_NL=$ECHO_NO_NL
+    
+#Command used to determine the segment sizes of a file.
+case $SYS in
+  *)		SIZE=size;;
+esac
+$DEBUG SIZE=$SIZE
+
+#Command which transforms its standard input (the output of the 
+#above SIZE command) to its standard output in the form TEXT:DATA:BSS:
+#where TEXT, DATA, BSS are the sizes of the respective sections.  
+#The output should *NOT* be terminated by a newline.
+case $SYS in
+  SOLARIS)	
+    SIZE_FILTER='read text x data y bss rest; 
+		 $ECHO_NO_NL $text:$data:$bss: ';;
+  *)
+    SIZE_FILTER=' $TAIL -1 | 
+		 ( read text data bss rest; $ECHO_NO_NL $text:$data:$bss: ) ';;
+esac
+$DEBUG SIZE_FILTER=$SIZE_FILTER
+
+#Command used to determine execution time (user & system).
+case $SYS in
+  LINUX)	TIME=/usr/bin/time;;
+  *)		TIME=/bin/time;;
+esac
+$DEBUG TIME=$TIME
+
+#Command which transforms it standard input (the output of the 
+#above TIME command) to its standard output in the form UTIME:STIME
+#where UTIME and STIME are the user and system times respectively.
+case $SYS in
+  SOLARIS)
+    TIME_FILTER='$TR -d "a-zA-Z\\012" | 
+		 ( read real user sys rest ; $ECHO $user:$sys )';;
+  LINUX)
+    TIME_FILTER='$TR -d a-zA-Z | 
+		 ( read user sys rest ; $ECHO $user:$sys )';;
+  *)
+    TIME_FILTER='$TR -d a-zA-Z | 
+		 ( read real user sys rest ; $ECHO $user:$sys )';;
+esac
+$DEBUG TIME_FILTER=$TIME_FILTER
+
+#END portability section.
+
+AWK=awk
+CAT=cat
+CUT=cut
+DATE="date"
+MAKE="make -s"
+NLINES="wc -l"
+RM="rm -f"
+SED=sed
+STRIP=strip
+TAIL="tail"
+TOUCH=touch
+TR=tr
+
+: ${ZLEX_PATH="../"}
+: ${ZLEX_SEARCH_PATH=$ZLEX_PATH}; export ZLEX_SEARCH_PATH
+ZLEX=${ZLEX_PATH}zlex
+ZLEX_LIB_DIR=../../libzlex
+
+#Use optimized (-O) library if available.
+if test -r $ZLEX_LIB_DIR/libzlex-opt.a
+then
+  ZLEX_LIB=zlex-opt
+else
+  ZLEX_LIB=zlex
+fi
+
+LEXES="$ZLEX flex lex"
+
+DEF_LEX_FLAGS="-n"
+
+DEF_ZLEX_FLAGS="\
+  '--back=0 --code-scan	--equiv=0'					\
+  '--back=0 --code-scan	--bin-code-param=0 --lin-code-param=0 --equiv=0'\
+  '--back=0 --code-scan	'						\
+  '--back=0 --code-scan	--bin-code-param=0 --lin-code-param=0 '		\
+  '--back=0 --compress=no	--table=addr	--equiv=0 --align'	\
+  '--back=0 --compress=no	--table=addr	--equiv=0'		\
+  '--back=0 --compress=no	--table=addr	--equiv=1'		\ 
+  '--back=0 --compress=no	--table=state	--equiv=0'		\
+  '--back=0 --compress=no	--table=state	--equiv=1'		\
+  '--back=0 --compress=no	--table=state	--equiv=0 --align'	\
+  '--back=0 --compress=no	--table=state	--equiv=1 --align'	\
+  '--back=0 --compress=iter	--table=addr	--equiv=0'		\
+  '--back=0 --compress=iter	--table=addr	--equiv=1'		\
+  '--back=0 --compress=iter	--table=state	--equiv=0'		\
+  '--back=0 --compress=iter	--table=state	--equiv=1'		\
+  '--back=0 --compress=iter	--table=state	--equiv=0 --align'	\
+  '--back=0 --compress=iter	--table=state	--equiv=1 --align'	\
+  '--back=0 --compress=comb	--table=addr	--equiv=0'		\
+  '--back=0 --compress=comb	--table=addr	--equiv=1'		\
+  '--back=0 --compress=comb	--table=state	--equiv=0'		\
+  '--back=0 --compress=comb	--table=state	--equiv=1'		\
+  '--back=0 --compress=comb	--table=state	--equiv=0 --align'	\
+  '--back=0 --compress=comb	--table=state	--equiv=1 --align'	\
+  '--back=0 --compress=comb	--table=diff	--equiv=0'		\
+  '--back=0 --compress=comb	--table=diff	--equiv=1'		\
+  '--back=0 --compress=comb	--table=diff	--equiv=0 --align'	\
+  '--back=0 --compress=comb	--table=diff	--equiv=1 --align'	\
+  '--back=1 --compress=no	--table=addr	--equiv=0 --align'	\
+  '--back=1 --compress=no	--table=addr	--equiv=0'		\
+  '--back=1 --compress=no	--table=addr	--equiv=1'		\ 
+  '--back=1 --compress=no	--table=state	--equiv=0'		\
+  '--back=1 --compress=no	--table=state	--equiv=1'		\
+  '--back=1 --compress=no	--table=state	--equiv=0 --align'	\
+  '--back=1 --compress=no	--table=state	--equiv=1 --align'	\
+  '--back=1 --compress=iter	--table=addr	--equiv=0'		\
+  '--back=1 --compress=iter	--table=addr	--equiv=1'		\
+  '--back=1 --compress=iter	--table=state	--equiv=0'		\
+  '--back=1 --compress=iter	--table=state	--equiv=1'		\
+  '--back=1 --compress=iter	--table=state	--equiv=0 --align'	\
+  '--back=1 --compress=iter	--table=state	--equiv=1 --align'	\
+  '--back=1 --compress=comb	--table=addr	--equiv=0'		\
+  '--back=1 --compress=comb	--table=addr	--equiv=1'		\
+  '--back=1 --compress=comb	--table=state	--equiv=0'		\
+  '--back=1 --compress=comb	--table=state	--equiv=1'		\
+  '--back=1 --compress=comb	--table=state	--equiv=0 --align'	\
+  '--back=1 --compress=comb	--table=state	--equiv=1 --align'	\
+  '--back=1 --compress=comb	--table=diff	--equiv=0'		\
+  '--back=1 --compress=comb	--table=diff	--equiv=1'		\
+  '--back=1 --compress=comb	--table=diff	--equiv=0 --align'	\
+  '--back=1 --compress=comb	--table=diff	--equiv=1 --align'	\
+"
+ 
+DEF_FLEX_FLAGS="-CrF -Crf -CrFe -Crfe -Cr -Cre -Crm -Crem -CrFa -Crfa"
+
+DEF_TESTS="cscan1 cscan2 crec1 crec2 reject"
+
+: ${LEX_FLAGS=$DEF_LEX_FLAGS}
+: ${ZLEX_FLAGS=$DEF_ZLEX_FLAGS}
+: ${FLEX_FLAGS=$DEF_FLEX_FLAGS}
+: ${TESTS=$DEF_TESTS}
+
+$UNAME; $DATE; $ECHO
+
+for TEST in $TESTS
+do
+  $MAKE $TEST.in >/dev/null 2>&1
+  $CAT $TEST.doc 
+  $ECHO '	wc on input file:' `wc $TEST.in` ; $ECHO
+  $ECHO ========================================================================
+  $ECHO "SCANGEN    OPTIONS                SIZES                   TIMES"
+  $ECHO "                      TEXT   DATA     BSS  TOTAL     USER SYS  TOTAL"
+  $ECHO ========================================================================
+  for LEX in $LEXES
+  do
+    case $LEX in
+      lex)   SKEL_DIR=""; FLAGS=$LEX_FLAGS; LIBS="-ll";;
+      flex)  SKEL_DIR=""; FLAGS=$FLEX_FLAGS; LIBS="-ll";;
+      $ZLEX)  ZLEX_SEARCH_PATH="ZLEX_SEARCH_PATH=.."; FLAGS=$ZLEX_FLAGS; 
+	      LIBS="-L$ZLEX_LIB_DIR -l$ZLEX_LIB";;
+    esac
+    x="set dummy $FLAGS"; eval $x; shift
+    for FLAGX in "$@"
+    do
+      if test $LEX = $ZLEX && test $TEST != reject
+      then
+	FLAG="--reject=0 $FLAGX"
+      else
+	FLAG=$FLAGX
+      fi
+      $TOUCH $TEST.l
+      $ECHO_NO_NL "`basename $LEX`:" >t1.$$
+      $ECHO_NO_NL "$FLAG:" >>t1.$$
+      $RM lex.yy.c
+      $DEBUG $MAKE LEX=$LEX LFLAGS="$FLAG" CC=gcc CFLAGS="-O2 -DNDEBUG" \
+	     LIBS="$LIBS" SKEL_DIR="$SKEL_DIR" $TEST 
+      $MAKE LEX=$LEX LFLAGS="$FLAG" CC=gcc CFLAGS="-O2 -DNDEBUG" LIBS="$LIBS" \
+	SKEL_DIR="$SKEL_DIR" $TEST >/dev/null 2>/dev/null
+      $DEBUG Made
+      if test $? -eq 0
+      then
+        $STRIP $TEST
+	#Set $1, $2, $3 to text-size, data-size, bss-size resp.
+	$DEBUG exec size =`$SIZE $TEST`
+	$DEBUG t1.$$
+	( $SIZE $TEST | eval $SIZE_FILTER ) >>t1.$$
+	$DEBUG About to check execution of $TEST...
+	if ./$TEST <$TEST.in >/dev/null 2>/dev/null
+	then
+    	  #$TEST runs correctly.
+	  $DEBUG Entering test loop.
+	  test $DEBUG != : && \
+	  $DEBUG "$TIME $TEST <$TEST.in 2>&1 | eval $TIME_FILTER" && \
+	  $DEBUG `$TIME $TEST <$TEST.in 2>&1 | eval $TIME_FILTER`
+	  $RM t2.$$
+	  for i in 1 2 3
+	  do
+	    #Ultrix sh is weird.
+	    if test $SYS = ULTRIX
+	    then
+	      set `$TIME $TEST <$TEST.in 2>&1 | tr -d a-zA-Z`
+	      $ECHO $2:$3 >>t2.$$
+	    else 
+	      $TIME $TEST <$TEST.in 2>&1 | eval $TIME_FILTER >>t2.$$
+	    fi
+	  done
+	  $DEBUG Exited test loop.
+	  $AWK -F: '{ u+= $1; s+= $2; }
+		   END { printf("%.2f:%.2f:\n", u/NR, s/NR); }' \
+	    <t2.$$ >>t1.$$
+	  test $DEBUG != : && \
+	  $ECHO Temp file t1.$$ && $CAT t1.$$ &&
+	  $ECHO Temp file t2.$$ && $CAT t2.$$ &&
+	  $RM t2.$$
+	else
+	  $AWK -F: '{ printf("%-7s %s ** exec error **\n", $1, $2); }' <t1.$$
+	  continue
+	fi
+      else
+	$AWK -F: '{ printf("%-7s %s ** make failed **\n", $1, $2); }' <t1.$$
+	continue
+      fi
+      $AWK -F: '{
+	if (length($2) <= 10) {
+	  printf("%-7s %-10s   %6d %6d %6d %6d   %5.2f %5.2f %5.2f\n", \
+		 $1, $2, $3, $4, $5, $3+$4+$5, $6, $7, $6+$7);
+	}
+	else {
+	  printf("%-7s %-10s   %6d %6d %6d %6d   %5.2f %5.2f %5.2f\n  %s\n", \
+		 $1, "", $3, $4, $5, $3+$4+$5, $6, $7, $6+$7, $2);
+	}
+      }' <t1.$$
+      $ECHO \
+------------------------------------------------------------------------
+      $RM t1.$$
+    done
+  done
+  $ECHO
+done
+
+$RM t*.$$

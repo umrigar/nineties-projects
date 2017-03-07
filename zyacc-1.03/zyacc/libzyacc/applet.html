@@ -1,0 +1,98 @@
+<HTML><HEAD>
+<!-- for used by zydebug Java applet -->
+<!-- stringified to a printf() format: hence '%%'s should be escaped -->
+<TITLE>Debugging Applet for %s Parser</TITLE>
+</HEAD>
+<BODY>
+<H1>Debugging Applet for %s Parser</H1>
+
+<H2>Running the Applet</H2>
+
+<P>To start the applet in a separate window, please click this
+
+<APPLET CODEBASE="%s" CODE="zdu.zydebug.FullFrame.class"
+  WIDTH=40 HEIGHT=25 ALIGN="ABSMIDDLE"> 
+<PARAM NAME= "PORT" VALUE="%d">
+<PARAM NAME="SRC" VALUE="%s">
+<PARAM NAME= "HTMLBASE" VALUE="%s">
+start <EM>(but your browser doesn't appear to be java-enabled)</EM> 
+<CODE>:-(</CODE>
+</APPLET>
+
+button.  Please be patient; depending on the speed of your network
+connection, it may take a few minutes to load. 
+
+<P> As the applet is talking to a compiled C parser with unobstrusive
+debugging hooks, it is not possible to have the applet <A
+NAME="restart"><I>restart</I></A> the parser once it has completed its
+parse.  Instead you will have to repeat the procedure you followed to get to
+this page.
+
+<P>The applet has four main windows.  Clockwise from the top-left they are
+the following:
+
+<DL>
+
+<DT><B>Parse Forest Window</B><DD> Shows the current parse-forest.  The
+nodes on top are the nodes currently on the stack.  Terminal nodes are in
+red, non-terminal nodes are in green and error nodes are in pink.  The last
+active node is highlighted in yellow.  Each node contains text of the form
+<VAR>S</VAR><CODE>/</CODE><VAR>Sym</VAR>, where <VAR>S</VAR> is the state at
+which that node was created and <VAR>Sym</VAR> is the grammar symbol or
+token semantics corresponding to the node.  <B>The nodes in the top row
+correspond to nodes currently on the parse stack</B>.
+
+<P> Each non-leaf node in the forest is clickable.  Clicking on such a node
+hides all its subtrees; clicking again on that node displays the subtrees
+again.  This can be useful as the parse tree typically gets pretty large for
+practical parsers.
+
+<DT><B>Trace Window</B><DD> Shows the parse stack in gray (each entry is
+in the same format as a parse tree node), the current lookahead in red
+and the following action in blue.
+
+<DT><B>Breakpoint Window</B><DD>This allows you to set/clear breakpoints
+on all or selected nonterminals and terminals.  Clicking a line in the
+window sets a breakpoint on the symbol displayed on that line; clicking
+it again clears the breakpoint.  The currently selected breakpoints
+are highlighted.
+
+<DT><B>Source Window</B><DD> Shows the parser source file.  During a
+reduction, the line corresponding to the reduction is highlighted.
+
+</DL>
+
+<P>The debugger is controlled by the following controls:
+
+<DL>
+
+<DT><B>Shadows Checkbox</B><DD> This checkbox controls whether or not the
+parser shows crude shadows while displaying the parse forest.  It is
+useful to avoid having shadows cluttering up the display of large forests.
+
+<DT><B>Update Checkbox</B><DD> Selecting this checkbox results in the parser
+displaying the current state in the LR(0) machine in a browser frame.  For
+this to work, the parser should have been generated using the -H option, and
+the environmental variable <CODE>ZYDEBUG_HTMLBASE</CODE> should have been
+specified when the parser was started. 
+
+<DT><B>Step Button</B><DD> Steps the parser by a single step.
+
+<DT><B>Next Button</B><DD> Steps the parser to the next shift action.
+
+<DT><B>Continue Button</B><DD> Steps the parser till the next breakpoint.
+If no breakpoints are set, then the parser runs to completion.
+It is not possible to <A HREF="#restart">restart</A> the parser.
+
+</DL>
+
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+
+</BODY>
+
+</HTML>

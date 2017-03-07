@@ -1,0 +1,71 @@
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:25: allocated 1024 bytes
+memtest.c:37: *** memdebug fence error 0@[0] above block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 1@[1] below block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 2@[2] above block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 3@[3] below block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 4@[4] above block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 5@[5] below block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 6@[6] above block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 7@[7] below block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 8@[8] above block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:37: *** memdebug fence error 9@[9] below block allocated at memtest.c:25
+memtest.c:37: freed 1024 bytes which were allocated at memtest.c:25
+memtest.c:37: allocated 2048 bytes
+memtest.c:40: freed 2048 bytes which were allocated at memtest.c:37
+memtest.c:40: freed 2048 bytes which were allocated at memtest.c:37
+memtest.c:40: freed 2048 bytes which were allocated at memtest.c:37
+memtest.c:40: freed 2048 bytes which were allocated at memtest.c:37
+memtest.c:40: freed 2048 bytes which were allocated at memtest.c:37
+memtest.c:42:***** BEGIN ALLOCATIONS
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+memtest.c:42:***** END ALLOCATIONS
+memtest.c:45 *** deallocation error
+At Exit:***** BEGIN ALLOCATIONS
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+block allocated at memtest.c:37 present
+At Exit:***** END ALLOCATIONS
+memdebug memtest.c:37: *** memdebug fence error 0@[0] above block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 1@[1] below block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 2@[2] above block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 3@[3] below block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 4@[4] above block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 5@[5] below block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 6@[6] above block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 7@[7] below block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 8@[8] above block allocated at memtest.c:25
+memdebug memtest.c:37: *** memdebug fence error 9@[9] below block allocated at memtest.c:25
+memtest.c:45: *** memdebug deallocation error

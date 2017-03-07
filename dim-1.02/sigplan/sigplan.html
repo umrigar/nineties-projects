@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1 (Feb 5, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Fully Static Dimensional Analysis with C++ </TITLE>
+<META NAME="description" CONTENT="Fully Static Dimensional Analysis with C++ ">
+<META NAME="keywords" CONTENT="sigplan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="sigplan.css">
+</HEAD>
+<BODY LANG="EN">
+ <A NAME="tex2html8" HREF="node1.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html6" HREF=".."><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif_gr.gif">   <BR>
+<B> Next:</B> <A NAME="tex2html9" HREF="node1.html">Introduction</A>
+<B>Up:</B> <A NAME="tex2html7" HREF="..">Dimensional Analysis</A>
+<BR> <P>
+<H1 ALIGN=CENTER>Fully Static Dimensional Analysis with C++ </H1>
+<P ALIGN=CENTER><STRONG>
+Zerksis D. Umrigar<BR> 
+447 Plaza Dr., 5-57, Vestal NY 13850<BR> 
+(607) 729-5919<BR> 
+Email: umrigar@cs.binghamton.edu
+</STRONG></P><P>
+<P ALIGN=CENTER><STRONG></STRONG></P><P>
+<P>
+<H3 CLASS=ABSTRACT>Abstract:</H3>
+<P CLASS=ABSTRACT>Dimensional analysis is widely used by those involved in the
+physical sciences as a quick check on the dimensional sanity of
+formulas.  Many programming errors can be prevented by performing
+similar checks automatically.  Previous attempts at such
+dimensional analysis of computer programs either entailed some
+run-time overhead [<A HREF="node9.html#cmelik88">CG88</A>] [<A HREF="node9.html#hilfinger88">Hil88</A>], or
+required the modification of an existing programming language to
+add such a capability [<A HREF="node9.html#gehani77">Geh77</A>] [<A HREF="node9.html#house83">Hou83</A>].  This
+paper describes how an existing language C++\
+[<A HREF="node9.html#stroustrup91">Str91</A>] can be used to write programs which can be
+guaranteed to be dimensionally correct <B>before</B> run-time.
+Unfortunately, the method depends on a language construct which
+violates the language definition.  The paper argues that the rule
+forbidding the construct be removed from the language definition,
+or that the forbidden construct be allowed as an extension by most
+compilers.  In fact, a popular C++ compiler does accept this
+construct.  This compiler was used to implement a general package
+for dimensional analysis.  The capabilities of the package are
+briefly illustrated by means of an example.  Ultimately, the
+method should have negligible run-time costs.
+<P>
+</P><P>
+<BR> <HR>
+<UL> 
+<LI> <A NAME="tex2html10" HREF="node1.html#SECTION00010000000000000000">Introduction</A>
+<LI> <A NAME="tex2html11" HREF="node2.html#SECTION00020000000000000000">The Basic Idea</A>
+<LI> <A NAME="tex2html12" HREF="node3.html#SECTION00030000000000000000">But is it ?</A>
+<LI> <A NAME="tex2html13" HREF="node4.html#SECTION00040000000000000000">An Example</A>
+<LI> <A NAME="tex2html14" HREF="node5.html#SECTION00050000000000000000">Analysis of the Method</A>
+<LI> <A NAME="tex2html15" HREF="node6.html#SECTION00060000000000000000">Conclusions</A>
+<LI> <A NAME="tex2html16" HREF="node9.html#SECTION00090000000000000000">References</A>
+<LI> <A NAME="tex2html17" HREF="node10.html#SECTION000100000000000000000">  About this document ... </A>
+</UL>
+<HR><A NAME="tex2html8" HREF="node1.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html6" HREF=".."><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif_gr.gif">   <BR>
+<B> Next:</B> <A NAME="tex2html9" HREF="node1.html">Introduction</A>
+<B>Up:</B> <A NAME="tex2html7" HREF="..">Dimensional Analysis</A>
+<P><ADDRESS>
+<I>zerksis umrigar (zdu@acm.org) <BR>
+Fri Aug  8 15:41:40 EDT 1997</I>
+</ADDRESS>
+</BODY>
+</HTML>

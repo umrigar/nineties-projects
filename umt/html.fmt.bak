@@ -1,0 +1,145 @@
+use FileHandle;
+
+my $formatTable= {
+  'DOC' => [
+     "<html>\n", 
+     "<head>\n",
+     \&titleFn,
+     "</head>\n",
+     "<body bgcolor=\"\#ffffff\">\n",
+     \&formatTable1,
+     "</body>\n",
+     "</html>\n",
+  ],
+  'PARA' => [
+    "<p>\n", \&formatTable1, "</p>\n", 
+  ],
+  'QUOTE' => [
+    "<blockquote>\n", \&formatTable1, "</blockquote>\n",
+  ],
+  'CODE' => [
+    "<tt>", \&htmlText1, "</tt>",
+  ],
+  'BOLD' => [
+    "<b>", \&htmlText1, "</b>",
+  ],
+  'ITALIC' => [
+    "<i>", \&htmlText1, "</i>",
+  ],
+  'DISPLAY_MATH' => [
+    "<pre>", \&htmlText1, "</pre>",
+  ],
+  'INLINE_MATH' => [
+    "<pre>", \&htmlText1, "</pre>",
+  ],
+  'LINK' => [
+    "<a href=\"\$1\">", \&htmlText2, "</a>",
+  ],
+  'DEF' => [
+    "<a name=\"\$1\"> </a>",
+  ],
+  'PASSTHRU' => [
+    "\$1",
+  ],
+  'TEXT' => [
+    \&htmlText1,
+  ],
+  'HEAD0' => [
+    \&formatTable2,
+  ],
+  'HEAD1' => [
+    '<h1 align="center">', \&formatTable1, "</h1>\n", \&formatTable2,
+  ],
+  'HEAD2' => [
+    '<h2>', \&formatTable1, "</h2>\n", \&formatTable2,
+  ],
+  'HEAD3' => [
+    '<h3>', \&formatTable1, "</h3>\n", \&formatTable2,
+  ],
+  'HEAD4' => [
+    '<h4>', \&formatTable1, "</h4>\n", \&formatTable2,
+  ],
+  'HEAD5' => [
+    '<h5>', \&formatTable1, "</h5>\n", \&formatTable2,
+  ],
+  'ITEMIZED_LIST' => [
+    "<ul>\n",  \&formatTable2, "</ul>\n",
+  ],
+  'ITEMIZED_ITEM' => [
+    "<p><li>\n", \&formatTable1, \&formatTable3, "</p>\n"
+  ],
+  'ORDERED_LIST' => [
+    "<ol type=\"\$1\">\n",  \&formatTable2, "</ol>\n",
+  ],
+  'ORDERED_ITEM' => [
+    "<p><li>\n", \&formatTable1, \&formatTable3, "</p>\n"
+  ],
+  'DESC_LIST' => [
+    "<dl>\n",  \&formatTable1, "</dl>\n",
+  ],
+  'DESC_ITEM' => [
+    "<p><dt>", \&formatTable2, "<dd>\n", \&formatTable1, "</p>\n", 
+    \&formatTable3,
+  ],
+  'OBEY' => [
+    "<pre>\n", \&formatTable1, "</pre>\n",
+  ],
+  'VERBATIM' => [
+    "<pre>\n", \&htmlText1, "</pre>\n",
+  ],
+  'TABLE' => [
+    "<table>\n", \&formatTable1, "</table>\n",
+  ],
+  'TABLE_HEADING' => [
+    "<tr>\n", \&formatTable1, "</tr>\n",
+  ],
+  'TABLE_ROW' => [
+    "<tr>\n", \&formatTable1, "</tr>\n",
+  ],
+  'TABLE_HEADER' => [
+    "<th align=\"\$2\">\n", \&formatTable1, "</th>\n",
+  ],
+  'TABLE_DATA' => [
+    "<td align=\"\$2\">\n", \&formatTable1, "</td>\n",
+  ],
+
+};
+      
+sub htmlText($$)
+{
+  my($fileHandle, $text)= @_;
+  $text=~ s/\&/\&amp;/g;
+  $text=~ s/\</\&lt;/g;
+  $text=~ s/\>/\&gt;/g;
+  print $fileHandle $text;
+} 
+
+sub htmlText1($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  htmlText($outFile, $currentParse->[1]);
+}
+
+sub htmlText2($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  htmlText($outFile, $currentParse->[2]);
+}
+
+sub titleFn($$$$)
+{
+  my($outFile, $fmtTable, $topParse, $currentParse)= @_;
+  my $firstSec= $topParse->[1]->[0];
+  if ($firstSec->[0] eq 'HEAD1') {
+    print $outFile "<title>$firstSec->[1]->[0]->[1]</title>\n";
+  }
+}
+
+sub doFormat($$)
+{
+  my($inFile, $parse)= @_;
+  my $fh= new FileHandle ">-";
+  formatTable($fh, $formatTable, $parse, $parse);
+}
+
+1;

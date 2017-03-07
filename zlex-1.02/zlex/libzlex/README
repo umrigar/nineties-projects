@@ -1,0 +1,10 @@
+This directory contains the source files for the zlex library.
+
+The header for the library is divided into three portions:
+
+libzlex.h:	Public interface.
+libzlexs.h:	Interface required by scanner skeleton.
+libzlex0.h:	Private routines.
+
+The actual code files include an automatically generated header libzlexp.h
+which is simply the catenation of the above three header files.

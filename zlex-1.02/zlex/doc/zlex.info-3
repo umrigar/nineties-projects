@@ -1,0 +1,1172 @@
+This is Info file zlex.info, produced by Makeinfo-1.64 from the input
+file zlex.texi.
+
+
+File: zlex.info,  Node: Popping the Start State Stack,  Next: Top of the Start State Stack,  Prev: Pushing a Start State,  Up: Start State Stacks
+
+Popping the Start State Stack: `yy_pop_state'
+---------------------------------------------
+
+   The macro `yy_pop_state()' sets the current start state to the state
+on top of the start state stack and pops the start state stack.  The
+canonical name `YY_POP_STATE' may be used synonymously.  From files
+other than the generated scanner, the programmer can call the Zlex
+library function `yyPopState' with prototype:
+
+     void
+     yyPopState(YYDataHandle d);
+
+to set the current start state to the state on top of the start state
+stack of the scanner specified by `d' and pop its start state stack.
+
+
+File: zlex.info,  Node: Top of the Start State Stack,  Prev: Popping the Start State Stack,  Up: Start State Stacks
+
+The Top of the Start State Stack: `yy_top_state'
+------------------------------------------------
+
+   The macro `yy_top_state()' return the start state on top of the start
+state stack.  The start state stack is not changed.  The canonical name
+`YY_TOP_STATE' may be used synonymously.  From files other than the
+generated scanner, the programmer can call the Zlex library function
+`yyTopState' with prototype:
+
+     YYState
+     yyTopState(YYDataHandle d);
+
+to return the start state on top of the start state stack of the scanner
+specified by `d'.
+
+
+File: zlex.info,  Node: Start States Example,  Next: Using Inclusive Start States,  Prev: Start State Stacks,  Up: Start States
+
+Start States Example: C comments
+================================
+
+   The following example is the recommended way to process C-style
+comments using Zlex.  It illustrates the use of exclusive start states
+to allow the scanner to process the comments in reasonable line-sized
+chunks.
+
+   When the generated scanner sees a `/*' it enters a exclusive start
+state named `COMMENT' where it is looking for the terminating `*/'.
+Because `COMMENT' is an exclusive start state, Zlex will ignore all
+patterns not qualified by `COMMENT' when in the `COMMENT' state.
+
+     001     %x                      COMMENT         /* Declare start-state. */
+     002     %%
+     003     "/*"                    BEGIN COMMENT;
+     004     <COMMENT>"*/"           BEGIN INITIAL;
+     005     <COMMENT>[^*\n]+
+     006     <COMMENT>\n
+     007     <COMMENT>"*"+/[^/]
+
+   Line 1 declares the identifier `COMMENT' to be an exclusive
+start-state.  Line 3 has a pattern for recognizing the `/*' which
+begins a comment.  Since the pattern is not qualified by any start
+states, it will be active in all inclusive start states: namely
+`INITIAL'.  Its action uses the special Zlex macro `BEGIN' (*note
+Entering a Start State::.) to enter the special `COMMENT' state.
+
+   Line 4 recognizes the terminating `*/' only when the scanner is in
+the `COMMENT' state.  Its action is to change the scanner state back to
+`INITIAL'.  Once the scanner is back in the `INITIAL' state, the
+patterns prefixed by `COMMENT' are ignored, and other patterns (not
+shown) become active.
+
+   Line 5 recognizes any prefix of a comment line which does not contain
+`*'.  Note the use of `\n' in the negated character class; if we had
+simply used the regular expression `[^*]+', then it could conceivably
+match several lines of text -- something which is undesirable as the
+`yytext' saved by the scanner may become excessively large.
+
+   Lines 6 and 7 recognize those portions of a comment not recognized
+by line 5.  Line 6 recognizes a newline occurring within a comment.  The
+given code does not have any action but if the scanner is keeping track
+of line numbers, an appropriate action would be to increment a line
+number counter.  Line 7 recognizes `*'s occurring within a comment
+which are not followed by a `/'.  We use `"*"+/[^/]' rather than simply
+`"*"/[^/]', as it is always desirable to scan as large a token as
+possible to reduce scanner overhead.
+
+
+File: zlex.info,  Node: Using Inclusive Start States,  Prev: Start States Example,  Up: Start States
+
+Using Inclusive Start States
+============================
+
+   Inclusive start states are not strictly necessary, but are useful to
+capture the semantics of a state which is very similar to other
+inclusive states, in that all except a few tokens are processed
+identically.  The implementation of Zlex itself provides a practical
+example of such uses of inclusive start states.  In Zlex, the `,'
+character is usually an ordinary character: within a pattern it usually
+stands for itself specifying that a comma should be matched.  The
+exceptions to this rule are:
+
+   * A comma is used to separate start state names within the
+     qualifying start state list for a pattern,
+
+   * A comma is used within the counted repetition operator `{LO,HI}'
+     to separate LO from HI.
+
+The Zlex scanner defines two inclusive start states `RANGE' and
+`SS_USE' which return a comma as a special token.  A highly simplified
+version of the code is shown below.
+
+     %s      RANGE           /* Start state for counted repetition. */
+     %s      SS_USE          /* Start state for start state list. */
+     
+     %%
+     
+     "{"                     BEGIN RANGE;
+     
+     "<"                     BEGIN SS_USE;
+     
+     <RANGE,SS_USE>","       return ',';
+     
+     .                       return CHAR_TOK;
+
+If a comma is encountered when the scanner is in either one of the
+states `RANGE' or `SS_USE' it is returned as the special token `',''.
+Otherwise it is simply returned as a `CHAR_TOK'.  Note that any other
+characters will be matched using the patterns without any start-state
+qualifications: in the currently popular object-oriented parlance,
+`RANGE' and `SS_USE' *inherit* behavior from the patterns without
+start-state qualifications.
+
+
+File: zlex.info,  Node: Scanner Input,  Next: Scanner Output,  Prev: Start States,  Up: Top
+
+Input in a Zlex Scanner
+***********************
+
+   A Zlex scanner reads its input from a `stdio' `FILE' pointer with
+default name `yyin'.  For performance reasons, it buffers its input.
+Normally, it is the main scanner function which reads its input
+directly from the buffer, but it is also possible for the Zlex
+programmer to read directly from the buffer using the `input' macro.
+It is possible for the programmer to specify the method by which the
+scanner fills its buffer by defining the `YY_INPUT()' macro.  The
+programmer is allowed to modify the characters in the scanner buffer
+and backtrack to alternate matches with the prefix of the input.  It is
+also possible for the Zlex programmer to query the position in the
+current input stream, or the current line or column number.  When
+patterns involving the start-of-line anchor `^' have been used, Zlex
+makes it possible to query and set the current start-of-line condition.
+
+* Menu:
+
+* Input File Pointer::          `FILE' pointer to input stream.
+* Direct Input::                Reading directly from the input.
+* Redefining the Input Macro::  Controlling how buffers are filled.
+* The Null Value::
+* Modifying Input::             Putting characters into the input.
+* Rejecting to the Next Match::  Rescanning via alternate patterns.
+* Character Count::             Character count in input stream.
+* Current Line Number::         Line number in input stream.
+* Current Column Number::       Column number in input stream.
+* Querying Beginning of Line::  Check if at beginning of a line.
+* Setting Beginning of Line::   Ensure at beginning of a line.
+
+
+File: zlex.info,  Node: Input File Pointer,  Next: Direct Input,  Prev: Scanner Input,  Up: Scanner Input
+
+Input File Pointer: `yyin'
+==========================
+
+   `yyin' is the default name of the variable with declaration `FILE
+*yyin' which Zlex uses to read its input.  Like all other variable
+names, the name of this variable can be changed to an arbitrary name by
+defining the macro `YY_IN' to the new name.  Alternatively, the prefix
+used for the name can be changed by using the `--prefix' option (*note
+Variable Names::.).
+
+   When the scanner function is first entered it initializes `yyin' to
+`stdin', unless the user has already initialized it to a non-`NULL'
+`FILE' pointer.  So if the generated scanner should read from a file
+other than the standard input, the programmer need only initialize
+`yyin' to a suitable `FILE' pointer.  For example, the following main
+program illustrates how to setup the scanner to read from the file
+specified by the first command-line argument.
+
+     %{
+     #define YY_IN inFile    /* Use `inFile' instead of `yyin'. */
+     %}
+     %%
+     `Patterns go here.'
+     %%
+     int
+     main(int argc, const char *argv[])
+     {
+       if (argc < 2) {
+         `Usage error.'
+       }
+       if (!(inFile= fopen(argv[1], "r"))) {
+         `File open error.'
+       }
+       return yylex();       /* Call generated scanner function. */
+     }
+
+
+File: zlex.info,  Node: Direct Input,  Next: Redefining the Input Macro,  Prev: Input File Pointer,  Up: Scanner Input
+
+Direct Input: `input'
+=====================
+
+   The `input()' macro returns the next character from the input buffer,
+returning -1 if end-of-file is encountered.  If C++ is being used, then
+the alternate name `yy_input()' is used instead.  The canonical name
+`YY_GET()' is also recognized.  The Zlex library function `int
+yyGet(YYDataHandle)' can also be used to read the next character from
+the input.  It returns -1 on EOF.  Use `YY_GET()' to read the input
+when the call is within the scanner file.  Outside the scanner file it
+is necessary to call `yyGet()' passing it the data handle of the
+relevant scanner.
+
+   The following excerpt illustrates a common use of `input()' to ignore
+C-style comments:
+
+     "/*"            { int ch0, ch1= ' ';
+                       do {
+                         ch0= ch1; ch1= input();
+                       } while (ch1 != EOF && (ch0 != '*' || ch1 != '/'));
+                       if (ch1 == EOF) error("EOF within comment.");
+                     }
+
+Note that this is not the recommended way to process comments in Zlex.
+For the recommended method, see *Note Start States Example::.
+
+
+File: zlex.info,  Node: Redefining the Input Macro,  Next: The Null Value,  Prev: Direct Input,  Up: Scanner Input
+
+Redefining the Input Macro `YY_INPUT'
+=====================================
+
+   `YY_INPUT(buf, result, maxSize)' provides input to Zlex buffers.  It
+should fill the `char *buf' with upto `int maxSize' characters and
+return in `int result' either the number of characters read or
+`YY_EOF_IN' to indicate end-of-file.  Its default definition uses the
+system `read' routine, but if the `--stdio' option is specified (*note
+Options List::.), then its default definition uses the `fread' routine
+from the `stdio' library.
+
+   The definition of the macro `YY_EOF_IN' to be returned by `YY_INPUT'
+defaults to `YY_NULL' (*note The Null Value::.), but it can be
+redefined by the programmer in section 1 of the Zlex source file to
+some other value.
+
+   This macro can be redefined in section 1 of the Zlex file to get
+input some other way.  For example, Zlex currently supports processing
+of only 7-bit or 8-bit characters.  However, it is possible to use Zlex
+to process words of size larger than that of a `char', if those words
+can be mapped into characters without loss of information.  This can be
+done as follows:
+
+     #define YY_INPUT(buf, result, n)   result= wordInput(buf, n)
+     
+     int
+     wordInput(char *buf, unsigned n)
+     {
+       Word *wordBuf= (Word *)malloc(n * sizeof(Word));
+       unsigned nWords;
+       int result;
+       if (!wordBuf) { `Signal memory allocation error.' }
+       nWords= readWords(wordBuf, n); /* Read words from source. */
+       if (nWords == 0) {
+         result= YY_EOF_IN;
+       }
+       else {
+         unsigned i;
+         for (i= 0; i < nWords; i++) buf[i]= mapWordToChar(wordBuf[i]);
+         result= nWords;
+       }
+       free(wordBuf);
+       return result;
+     }
+
+where `mapWordToChar()' maps a word into a character.  Note that the
+scanner will maintain the current lexeme in `yytext' using characters;
+it will be the programmer's responsibility to map these characters back
+into `Word's.
+
+
+File: zlex.info,  Node: The Null Value,  Next: Modifying Input,  Prev: Redefining the Input Macro,  Up: Scanner Input
+
+The Null Value: `YY_NULL'
+=========================
+
+   The macro `YY_NULL' is used for two purposes:
+
+  1. It is the value to be returned by `YY_INPUT' (*note Redefining the
+     Input Macro::.) on end-of-file.
+
+  2. It is the value returned by the scanner when end-of-file is
+     encountered.
+
+   The default definition for `YY_NULL' is `0', but the programmer can
+redefine this macro in a C-code section in section 1 of the Zlex file.
+
+   Zlex uses `YY_NULL' only for compatibility with undocumented behavior
+of `flex'.  Its use is discouraged, as it is has two distinct purposes.
+Instead, the programmer should use `YY_EOF_IN' (*note Redefining the
+Input Macro::.) or `YY_EOF_OUT' (*note Termination Return Value::.) for
+each respective purpose.
+
+
+File: zlex.info,  Node: Modifying Input,  Next: Rejecting to the Next Match,  Prev: The Null Value,  Up: Scanner Input
+
+Modifying Characters in the Input Stream
+========================================
+
+   Two methods can be used by a Zlex programmer to force the generated
+scanner to insert characters into the input stream.  The first of these
+is `YY_LESS' which returns characters from the current lexeme to the
+input stream; the other is `YY_UNPUT' which can be used to insert
+arbitrary characters (not necessarily from the current lexeme) into the
+input stream.
+
+* Menu:
+
+* Rescanning Lexeme Text::      Pushing back scanned characters.
+* Unput::                       Pushing back arbitrary characters.
+
+
+File: zlex.info,  Node: Rescanning Lexeme Text,  Next: Unput,  Prev: Modifying Input,  Up: Modifying Input
+
+Rescanning Lexeme Text: `yyless'
+--------------------------------
+
+   `yyless(n)' returns all but the first n characters of the current
+lexeme back to the input stream.  `yytext' and `yyleng' are suitably
+adjusted.  The canonical form `YY_LESS(n)' can also be used.  The
+library function `yyLess(YYDataHandle d, int n)' can also be used from
+files other than the generated scanner file.
+
+   Note that if it is necessary to look ahead in the input stream in
+order to recognize a token, it is preferable to use right context
+patterns (*note Right Context::.).  Note also that `yyless(0)' will
+cause the scanner to enter an infinite loop unless its state is changed
+in some way.
+
+   The following excerpt illustrates the use of `yyless' to generate
+multiple tokens from the same subsequence of the input stream.  This
+may be useful in a situation where a single input subsequence signals
+both the end of a syntactic construct and the start of the next
+syntactic construct.  If we assume that `xxx' is a Zlex macro defining
+the subsequence of interest then the following code should achieve our
+goal:
+
+     {xxx}         { if (flag == 0) {
+                         flag= 1; yyless(0); return TOK0;
+                       }
+                       else {
+                         flag= 0; return TOK1;
+                       }
+                   }
+
+We assume that `flag' is a suitably declared C variable, and `TOK0' and
+`TOK1' are the token values.
+
+
+File: zlex.info,  Node: Unput,  Prev: Rescanning Lexeme Text,  Up: Modifying Input
+
+Unputting Characters: `unput'
+-----------------------------
+
+   `unput(c)' puts the character `c' onto the input stream to be the
+next character read.  The Zlex programmer should ensure that 0 <= `c' <
+CHARACTER SET SIZE; `unput' cannot be used to unput an `EOF' character.
+The contents of `yytext' are unaffected.  Note that it is more
+efficient to use `yyless' if all that is desired is to unput a suffix
+of `yytext'.
+
+   The canonical form `YY_UNPUT(c)' may also be used. The Zlex library
+function `yyUnput(YYDataHandle d, int c)' may also be used from files
+other than the generated scanner file.
+
+   The following excerpt illustrates the use of `unput' to translate
+character sequences.  If an application dictates that the input
+sequences `%%(' and `%%)' be translated to the sequences `[' and `]'
+respectively before any tokenizing occurs, and it is known that the
+sequences cannot occur within other tokens, then we can use the
+following pattern-action pairs:
+
+     "%%("   unput('[');
+     "%%)"   unput(']');
+
+Note that this suffices only because it is specified that the sequences
+cannot occur within other tokens.  If that is not the case, then the
+above code would not be correct and we would either need to redefine
+`YY_INPUT' (*note Redefining the Input Macro::.) appropriately, or use
+intra-token patterns (*note Using Intra-Token Patterns::.).
+
+
+File: zlex.info,  Node: Rejecting to the Next Match,  Next: Character Count,  Prev: Modifying Input,  Up: Scanner Input
+
+Forced Backtracking: `REJECT'
+=============================
+
+   Backtracking can be forced to occur in a Zlex scanner to try
+alternate choices for a pattern by using the `REJECT' action.  The
+initial choice of pattern is governed by the rules built into the
+generated scanner.  When multiple patterns match the input to a Zlex
+generated scanner, the choice of pattern is governed by rules which
+first prefer the longest match and then the pattern which occurs
+earlier in the Zlex source file (*note Pattern Conflicts::.).
+
+   `REJECT' transfers control to the action of the next pattern which
+matches the current lexeme or a prefix of the current lexeme.  This
+action can also be referred to using the canonical name `YY_REJECT'.
+
+   `REJECT' performs a transfer of control -- it is equivalent to an
+unconditional `goto' and the code immediately following the `REJECT'
+will never be executed.  Also `REJECT' has function scope and hence it
+cannot be used outside the actions.
+
+   `REJECT' is useful when overlapping subsequences of the input are to
+be recognized as tokens.  This is illustrated by the following scanner
+which outputs all the prefixes of the words in its input, where a word
+is a maximal sequence not containing tab, blank or newline.
+
+     %%
+     [^\t \n]+       printf("%s\n", yytext); REJECT;
+     .|\n
+
+   `yytext' is a `NUL'-terminated C-string giving the text of the
+current lexeme (*note Lexeme Text::.).  Given the word `abc' the first
+pattern will match; its action will first output `abc' on a separate
+line.  When the `REJECT' action is executed, there is no other pattern
+to match `abc'. Hence it will try to match a prefix of `abc': `ab'
+matches the first pattern.  So it will again output `ab' and execute a
+`REJECT' action.  This `REJECT' results again in a match with the first
+pattern and an output of `a'.  The subsequent `REJECT' matches the
+second pattern with `a' but no action is taken.  Hence the output will
+be:
+
+     abc
+     ab
+     a
+
+The `REJECT' action is not inordinately expensive.
+
+
+File: zlex.info,  Node: Character Count,  Next: Current Line Number,  Prev: Rejecting to the Next Match,  Up: Scanner Input
+
+Current Character Count: `YY_CHAR_NUM'
+======================================
+
+   The macro `YY_CHAR_NUM' returns the number of characters read by the
+scanner from the current file or memory buffer upto the start of the
+current `yytext'.  The position does not include any of the characters
+of `yytext'.  The returned position is zero-origin: hence the character
+just after `yytext' will be at absolute position `YY_CHAR_NUM + yyleng'
+in the file or in-memory buffer.
+
+   The value returned by `YY_CHAR_NUM' will not be correct if the
+`unput' (*note Unput::.) action is used.
+
+   Many scanning applications require tracking the current line and
+column number. If newlines can occur within other tokens, then the
+`--yylineno' option provides suitable facilities (*note Current Line
+Number::.).  If newlines cannot occur within other tokens, then the
+recommended method is illustrated by the following code fragment which
+shows how YY_CHAR_NUM can be used to compute the current column number
+within a line.
+
+     %{
+       int lineStartPos= 0;  /* Starting YY_CHAR_NUM for a line. */
+       int lineNum= 1;       /* 1 + # of '\n's seen so far. */
+     #define COL_NUM         (YY_CHAR_NUM - lineStartPos)
+     %}
+     %%
+     \n                 { lineStartPos= YY_CHAR_NUM + 1;  lineNum++;
+                          `Other actions for a newline.'
+                        }
+
+   The macro `COL_NUM' can now be used within other actions to access
+the column number.
+
+
+File: zlex.info,  Node: Current Line Number,  Next: Current Column Number,  Prev: Character Count,  Up: Scanner Input
+
+Current Line Number: `yylineno'
+===============================
+
+   If the `--yylineno' option is specified, when the scanner is
+generated, then the current line number (1-origin) is maintained in the
+variable whose default name is `yylineno' and declaration `int
+yylineno'.  Like all other variable names, the name of this variable can
+be changed to an arbitrary name by defining the macro `YY_LINENO' to
+the new name.  Alternatively, the prefix used for the name can be
+changed by using the `--prefix' option (*note Variable Names::.).
+
+   Unlike the implementation of `yylineno' by other scanner generators,
+a Zlex generated scanner does not test every character to see if it is
+a newline.  It does these tests only when it is known that a lexeme
+contains or is followed by a newline character: this information is
+obtained using a hidden intra-token pattern (*note Using Intra-Token
+Patterns::.).  Hence scanning of lexemes which do not contain newlines
+is not slowed down except for a simple test of a flag which is
+performed on once per action rather than once per character.
+
+   Since a hidden intra-token pattern `+\n' (*note Using Intra-Token
+Patterns::. is used to implement the `yylineno' feature, this feature
+will not work if the user specifies a intra-token pattern which overlaps
+with the hidden pattern.  It will also not work correctly if the
+programmer uses `unput' to put newline characters into the buffer.
+
+   This feature was added to Zlex for backward compatibility with an
+undocumented feature of `lex' (documented in `flex').  When newlines
+cannot occur within other tokens it is usually not necessary to use
+this feature as it is easy enough for the programmer to update a line
+number counter whenever a pattern containing a newline character is
+matched (*note Character Count::.).
+
+
+File: zlex.info,  Node: Current Column Number,  Next: Querying Beginning of Line,  Prev: Current Line Number,  Up: Scanner Input
+
+Current Column Number
+=====================
+
+   If the `--yylineno' option is specified, then the macro `YY_COL_NUM'
+returns the 0-origin column number within the current line.  If
+newlines cannot occur within other tokens, see the example in *Note
+Character Count::, for the recommended way to track this information.
+
+   The current column number is computed only when the Zlex programmer
+uses the `YY_COL_NUM' macro.  The implementation uses a hidden
+intra-token pattern `+\n' (*note Using Intra-Token Patterns::. to
+implement the `YY_COL_NUM' macro.  Hence this feature will not work if
+the user specifies a intra-token pattern which overlaps with the hidden
+pattern.  It will also not work correctly if the programmer uses
+`unput' to put newline characters into the buffer.
+
+
+File: zlex.info,  Node: Querying Beginning of Line,  Next: Setting Beginning of Line,  Prev: Current Column Number,  Up: Scanner Input
+
+Querying Beginning of Line: `YY_AT_BOL'
+=======================================
+
+   The macro call `YY_AT_BOL()' returns non-zero if the next token to be
+matched can match beginning-of-line patterns having a `^' anchor.
+
+   Note that this macro is provided only when there is at least one
+pattern which uses the beginning-of-line `^' anchor.
+
+
+File: zlex.info,  Node: Setting Beginning of Line,  Prev: Querying Beginning of Line,  Up: Scanner Input
+
+Setting Beginning of Line: `yy_set_bol'
+=======================================
+
+   The macro `yy_set_bol(V)' sets the beginning-of-line condition for
+the next pattern to true if V is non-zero; false if V is zero.  When
+the beginning-of-line condition is set true, the next pattern can match
+beginning-of-line patterns having a `^' anchor; when it is set false,
+the next pattern cannot match beginning-of-line patterns having a `^'
+anchor.
+
+   The canonical macro name `YY_SET_BOL' can be used synonymously with
+`yy_set_bol'.
+
+   Note that these macros are provided only when there is at least one
+pattern which uses the beginning-of-line `^' anchor.
+
+
+File: zlex.info,  Node: Scanner Output,  Next: Buffer Management,  Prev: Scanner Input,  Up: Top
+
+Output in a Zlex Scanner
+************************
+
+   Limited facilities are provided in a Zlex scanner for echoing the
+current lexeme to a `FILE' pointer with default name `yyout'
+
+* Menu:
+
+* Output File Pointer::         `FILE' pointer to output stream.
+* Echoing the Current Lexeme::  Echoing current token text.
+
+
+File: zlex.info,  Node: Output File Pointer,  Next: Echoing the Current Lexeme,  Prev: Scanner Output,  Up: Scanner Output
+
+Output File Pointer: `yyout'
+============================
+
+   `yyout' is the default name of the variable with declaration `FILE
+*yyout' which Zlex uses to echo the current lexeme (*note Echoing the
+Current Lexeme::.).  Like all other variable names, the name of this
+variable can be changed to an arbitrary name by defining the macro
+`YY_OUT' to the new name.  Alternatively, the prefix used for the name
+can be changed by using the `--prefix' option (*note Variable Names::.).
+
+   When the scanner function is first entered it initializes `yyout' to
+`stdout', unless the user has already initialized it to a non-`NULL'
+`FILE' pointer.  So if the generated scanner should echo to a file
+other than the standard output, the programmer need only initialize
+`yyout' to a suitable `FILE' pointer.
+
+
+File: zlex.info,  Node: Echoing the Current Lexeme,  Prev: Output File Pointer,  Up: Scanner Output
+
+Echoing Lexeme Text: `ECHO'
+===========================
+
+   The `ECHO' macro echoes the current lexeme to `yyout'.  The
+canonical name `YY_ECHO' can also be used.
+
+   The following example removes all lines starting with #.
+
+     %%
+     ^#.*\n          |
+     ^#.*            /* No action: don't echo. */
+     .*\n            |
+     .*              ECHO;
+
+   The patterns `^#.*' and `.*' take care of processing the last line
+in the file when it does not end with a newline.
+
+
+File: zlex.info,  Node: Buffer Management,  Next: Using Intra-Token Patterns,  Prev: Scanner Output,  Up: Top
+
+Buffer Management
+*****************
+
+   For efficiency reasons, a Zlex scanner buffers its input.  Hence if
+the Zlex programmer wishes to switch input to a new file, it is not
+sufficient to merely change `yyin' (*note Input File Pointer::.), as
+the scanner will continue reading from its previously buffered input.
+It is necessary to switch to a buffer for the new file.  Buffer
+management actions provide facilities for doing this.
+
+   Buffers need not necessarily be associated with files.  It is
+possible to create buffers whose contents are taken from a string or
+some other in-memory structure.  When the scanner reaches the end of an
+in-memory buffer, it does normal end-of-file processing.
+
+   Tokens are not allowed to span buffer boundaries.
+
+* Menu:
+
+* Buffer Type::                 Opaque pointer for buffers.
+* Current Buffer::              Accessing the current buffer.
+* Creating a Buffer::           Creating a buffer for a file.
+* Deleting a Buffer::           Deleting a previously created buffer.
+* Flushing a Buffer::           Flushing contents of a buffer.
+* In Memory Buffer::            Create buffer using memory area.
+* Bytes Buffer::                Create buffer from arbitrary bytes.
+* String Buffer::               Create buffer from a C-style string.
+* Switching Buffers::           Switching between buffers.
+* Buffer Management Example::   File inclusion using buffers.
+
+
+File: zlex.info,  Node: Buffer Type,  Next: Current Buffer,  Prev: Buffer Management,  Up: Buffer Management
+
+The Buffer Type: `YY_BUFFER_STATE'
+==================================
+
+   The handle used to refer to a buffer has the declaration:
+     typedef void *YYBufHandle;
+   For compatibility with `flex', the programmer can also refer to this
+type using the macro `YY_BUFFER_STATE'.  This opaque type can be passed
+to and returned from the buffer management actions.
+
+
+File: zlex.info,  Node: Current Buffer,  Next: Creating a Buffer,  Prev: Buffer Type,  Up: Buffer Management
+
+The Current Buffer: `yy_current_buffer'
+=======================================
+
+   `yy_current_buffer' is the default name of a variable which contains
+a `YY_BUFFER_STATE' handle to the current buffer.  Like all other
+variable names, the name of this variable can be changed to an
+arbitrary name by defining the macro `YY_CURRENT_BUFFER' to the new
+name.  Alternatively, the prefix used for the name can be changed by
+using the `--prefix' option (*note Variable Names::.).
+
+   The user should never explicitly assign a value to this variable,
+but do so only implicitly by calling the appropriate buffer management
+routine (*note Switching Buffers::.).
+
+
+File: zlex.info,  Node: Creating a Buffer,  Next: Deleting a Buffer,  Prev: Current Buffer,  Up: Buffer Management
+
+Creating a Buffer: `yy_create_buffer'
+=====================================
+
+   The macro call `yy_create_buffer(f, s)' creates a buffer for `FILE'
+pointer `f', having space for at least `s' characters.  (The macro
+`YY_BUF_SIZE' contains a recommended value for `s'.) The value returned
+is a `YY_BUFFER_STATE' (*note Buffer Type::.).
+
+   The canonical name `YY_CREATE_BUFFER' can also be used for this
+macro.  From files other than the Zlex source file, the library
+function with prototype
+
+     YY_BUFFER_STATE
+     yyCreateBuffer(YYDataHandle d, FILE *f, yy_size_t s);
+
+can be used to create and initialize a buffer for the file with `FILE'
+pointer f, having space for at least `s' characters.  It returns the
+handle of the newly created buffer, aborting execution on error.
+
+
+File: zlex.info,  Node: Deleting a Buffer,  Next: Flushing a Buffer,  Prev: Creating a Buffer,  Up: Buffer Management
+
+Deleting a Buffer: `yy_delete_buffer'
+=====================================
+
+   The macro call `yy_delete_buffer(b)' deletes the buffer with
+`YY_BUFFER_STATE b'.  `b' must have been previously returned by one of
+the buffer creation actions.
+
+   The canonical name `YY_DELETE_BUFFER' can also be used for this
+macro.  From files other than the Zlex source file, the library
+function with prototype
+
+     void
+     yyDeleteBuffer(YYDataHandle d, YYBufHandle b);
+
+can be used to delete buffer with handle `b' for the scanner with
+handle `d'.
+
+
+File: zlex.info,  Node: Flushing a Buffer,  Next: In Memory Buffer,  Prev: Deleting a Buffer,  Up: Buffer Management
+
+Flushing a Buffer: `yy_flush_buffer'
+====================================
+
+   The macro call `yy_flush_buffer(b)' flushes the buffer with
+`YY_BUFFER_STATE b'.  When the scanner subsequently tries to read a
+character from the buffer, the buffer will be refreshed.  There is no
+canonical name for the `yy_flush_buffer' macro as, for backwards
+compatibility with `flex', the name `YY_FLUSH_BUFFER' does something
+somewhat different: specifically, it is used without any arguments to
+specify an action to flush the *current* buffer (equivalent to
+`yy_flush_buffer(YY_CURRENT_BUFFER)').
+
+   From files other than the Zlex source file, the library function with
+prototype
+
+     void
+     yyFlushBuffer(YYDataHandle d, YY_BUFFER_STATE b);
+
+can be used to flush buffer `b' for the scanner whose internal state is
+encapsulated in `d'.
+
+
+File: zlex.info,  Node: In Memory Buffer,  Next: Bytes Buffer,  Prev: Flushing a Buffer,  Up: Buffer Management
+
+Creating a In-Memory Buffer: `yy_scan_buffer'
+=============================================
+
+   The macro `yy_scan_buffer(memBuf, len)' creates and returns a
+`YY_BUFFER_STATE' which contains the contents of `char *memBuf' having
+a total of `yy_size_t len' bytes.  `memBuf' is not copied: hence the
+programmer should ensure that `memBuf' is retained until the processing
+of the `YY_BUFFER_STATE' returned by `yy_scan_buffer' is completed.
+`memBuf' will be used when the newly created buffer is scanned: in
+fact, `memBuf' may even be temporarily modified during the course of
+scanning.
+
+   The last two bytes of `memBuf' must be *sentinel* characters (the
+sentinel character defaults to `'\0'' unless changed by the
+`--sentinel' option (*note Options List::.)).  If this is not true,
+then a `NULL' `YY_BUFFER_STATE' is returned.  These two sentinel
+characters will not be scanned when the scanner switches to this buffer:
+hence the characters which will be scanned will be `memBuf[0]' ...
+`memBuf[len - 3]' inclusive.
+
+   The canonical name `YY_MEM_BUFFER' can also be used for this macro.
+
+   From files other than the Zlex source file, the library function with
+prototype
+
+     YY_BUFFER_STATE
+     yyMemBuffer(YYDataHandle d, char *memBuf, yy_size_t len);
+
+can be used to create a memory buffer for the scanner whose state is
+encapsulated in `d', with the other arguments being as defined for the
+macro.  It returns the `YY_BUFFER_STATE' handle for the created buffer;
+`NULL' if `memBuf' does not have the two sentinel characters at its
+end; it aborts with an error message if it cannot create the buffer
+because it is out of memory.
+
+   It is important to realize that if the same memory area is used to
+create multiple Zlex buffers, then each Zlex buffer must be deleted
+before a new Zlex buffer is created from the same memory area.
+
+   The following function illustrates the use of in-memory buffers to
+paste tokens together as is required by the `##' operator in a C
+preprocessor.  We assume that a `Token' is a `struct' with two fields:
+a small integer `tok' giving the token number, and another small
+integer `id' which gives the text associated with the token.  We also
+assume the existence of the following routines:
+
+`getIDString(id)'
+     Returns the text associated with a `id'.
+
+`getIDLen(id)'
+     Returns the length of the text associated with a `id'.
+
+`MALLOC()'
+`FREE()'
+     These are merely error-checking versions of the standard-library
+     `malloc()' and `free()' respectively.
+
+`error()'
+     Prints out error messages.
+
+`yylex()'
+     The generated scanner function.  We assume that it is setup to
+     return a `Token' instead of simply a `int' (*note Termination
+     Return Value::.).
+
+     Token
+     tokenPaste(Token token1, Token token2)
+     /* Paste tokens token1 and token2 together, returning resulting token.
+      * Signal an error if the pasted token is not proper.
+      */
+     {
+       const unsigned id1= token1.id;
+       const unsigned id2= token2.id;
+       const unsigned len1= getIDLen(id1);
+       const unsigned len2= getIDLen(id2);
+       const unsigned bufSize= len1 + len2 + 1 + 2; 	/* 1 '\n' + 2 sentinel chars. */
+       enum { AUTO_BUF_SIZE= 100 };
+       char autoBuffer[AUTO_BUF_SIZE];
+       char *const autoBuf= autoBuffer;
+       char *const dynamicBuf= (bufSize <= AUTO_BUF_SIZE) ? NULL : MALLOC(bufSize);
+       char *const *bufP= (dynamicBuf) ? &dynamicBuf : &autoBuf;
+       Token tokenZ, eolToken;
+       YY_BUFFER_STATE oldBuf= YY_CURRENT_BUFFER;
+       YY_BUFFER_STATE pasteBuf;
+       strncpy(*bufP, getIDString(id1), len1);
+       strncpy(*bufP + len1, getIDString(id2), len2);
+       *(*bufP + bufSize - 3)= '\n';
+       *(*bufP + bufSize - 2)= *(*bufP + bufSize - 1)= '\0';
+       pasteBuf= yy_scan_buffer(*bufP, bufSize);
+       yy_switch_to_buffer(pasteBuf);
+       tokenZ= yylex(); eolToken= yylex();
+       if (eolToken.tok != '\n') {
+         error("Invalid token produced by ## pasting of `%s' and `%s'.",
+     	  getIDString(id1), getIDString(id2));
+       }
+       yy_delete_buffer(pasteBuf);
+       yy_switch_to_buffer(oldBuf);
+       if (dynamicBuf) FREE(dynamicBuf);
+       return tokenZ;
+     }
+   The function creates the in-memory buffer on the runtime stack if the
+required amount of memory is smaller than a predetermined amount;
+otherwise it creates the in-memory buffer on the heap.  It uses `bufP'
+to point to the chosen buffer.  It remembers the original Zlex buffer
+in the `YY_BUFFER_STATE' variable `oldBuf'.  It then uses the standard
+library function `strncpy()' to copy the text of the tokens to be
+catenated into the chosen buffer.  It terminates the copied text by a
+`'\n'' followed by the two required `'\0'' sentinel characters.  It
+then creates a Zlex buffer using `yy_scan_buffer()'.  It switches to
+the newly created buffer (*note Switching Buffers::.) and then reads two
+tokens from it: it expects the first token to be the catenated token
+which is desired, and the second token to be a `'\n''.  It then deletes
+the created Zlex buffer and switches back to the original Zlex buffer
+`oldBuf'.  Finally, if the in-memory buffer was allocated on the heap
+it frees it.
+
+
+File: zlex.info,  Node: Bytes Buffer,  Next: String Buffer,  Prev: In Memory Buffer,  Up: Buffer Management
+
+Creating a Buffer from In-Memory Bytes: `yy_scan_bytes'
+=======================================================
+
+   The macro `yy_scan_bytes(bytes, len)' creates and returns a
+`YY_BUFFER_STATE' which contains the contents of `char *bytes' having a
+total of `yy_size_t len' bytes.  The contents of `bytes' is copied into
+the newly created buffer.  `bytes' itself will not be used at all when
+the newly created buffer is scanned and can be destroyed once the
+buffer has been created.
+
+   The canonical name `YY_BYTES_BUFFER' can also be used for this macro.
+
+   From files other than the Zlex source file, the library function with
+prototype
+
+     YY_BUFFER_STATE
+     yyBytesBuffer(YYDataHandle d, char *bytes, yy_size_t len);
+
+can be used to create a memory buffer for the scanner whose state is
+encapsulated in `d', with the other arguments being as defined for the
+macro.  It returns the `YY_BUFFER_STATE' handle for the created buffer,
+aborting with an error message if it cannot create the buffer because
+it is out of memory.
+
+
+File: zlex.info,  Node: String Buffer,  Next: Switching Buffers,  Prev: Bytes Buffer,  Up: Buffer Management
+
+Creating a Buffer from a In-Memory String: `yy_scan_string'
+===========================================================
+
+   The macro `yy_scan_string(str)' creates and returns a
+`YY_BUFFER_STATE' which contains the contents of the NUL-terminated
+C-string `char *str' having a total of `yy_size_t len' bytes (not
+counting the terminating NUL).  The contents of `str' is copied into
+the newly created buffer.  `str' itself will not be used at all when
+the newly created buffer is scanned and can be destroyed once the
+buffer has been created.
+
+   The canonical name `YY_STRING_BUFFER' can also be used for this
+macro.
+
+   From files other than the Zlex source file, the library function with
+prototype
+
+     YY_BUFFER_STATE
+     yyStringBuffer(YYDataHandle d, char *str);
+
+can be used to create a memory buffer for the scanner whose state is
+encapsulated in `d', with the `str' argument as for the macro.  It
+returns the `YY_BUFFER_STATE' handle for the created buffer, aborting
+with an error message if it cannot create the buffer because it is out
+of memory.
+
+
+File: zlex.info,  Node: Switching Buffers,  Next: Buffer Management Example,  Prev: String Buffer,  Up: Buffer Management
+
+Switching Buffers: `yy_switch_to_buffer'
+========================================
+
+   The macro `yy_switch_to_buffer(b)' sets up the scanner to scan from
+the previously created buffer identied by the `YY_BUFFER_STATE b'. The
+contents of either buffer are not affected.
+
+   The canonical name `YY_SWITCH_TO_BUFFER' can also be used for this
+macro.
+
+   From files other than the Zlex source file, the library function with
+prototype
+
+     void
+     yyStringBuffer(YYDataHandle d, YY_BUFFER_STATE b);
+
+can be used to create a memory buffer for the scanner whose state is
+encapsulated in `d', with the `b' argument as for the macro.
+
+   `yy_switch_to_buffer' should be the only way the Zlex programmer
+changes the current buffer.
+
+
+File: zlex.info,  Node: Buffer Management Example,  Prev: Switching Buffers,  Up: Buffer Management
+
+Buffer Management Example
+=========================
+
+   The following example illustrates the use of the buffer management
+routines to implement a nested file inclusion facility similar to that
+of C.  A line starting with the # character followed by the word
+`include' and a FILE-NAME is replaced by the contents of FILE-NAME.
+
+     %{
+     enum { MAX_INCL_DEPTH= 3 };
+     
+     static YY_BUFFER_STATE inclStk[MAX_INCL_DEPTH];
+     static unsigned inclSP= 0;
+     
+     static void includeFile(char *fName);
+     
+     %}
+     
+     fileName        [0-9a-zA-Z./]+
+     
+     %x INCLUDE
+     %%
+     ^[\t ]*#[\t ]*include   BEGIN INCLUDE;
+     <INCLUDE>{fileName}     includeFile(yytext); BEGIN INITIAL;
+     <INCLUDE>[\t ]+         /* No action. */
+     <INCLUDE>\n             BEGIN INITIAL;
+     <<EOF>>                 { if (inclSP == 0)
+                                 yyterminate();
+                               else {
+                                 yy_switch_to_buffer(inclStk[--inclSP]);
+                                 BEGIN INCLUDE;
+                               }
+                             }
+     %%
+     
+     static void includeFile(char *fName)
+     {
+       if (inclSP == MAX_INCL_DEPTH) {
+         fprintf(stderr, "Includes nested too deeply.\n");
+         return;
+       }
+       inclStk[inclSP++]= YY_CURRENT_BUFFER;
+       yyin= fopen(fName, "r");
+       if (!yyin) {
+         fprintf(stderr, "Could not open %s.\n", fName); exit(1);
+       }
+       yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+     }
+
+
+File: zlex.info,  Node: Using Intra-Token Patterns,  Next: End-of-File and Termination,  Prev: Buffer Management,  Up: Top
+
+Using Intra-Token Patterns
+**************************
+
+   Sometimes it is necessary to do pre-lexical processing on the
+characters scanned by the generated scanner before they are tokenized
+by the scanner.  An example of pre-lexical processing would be mapping
+certain sequences of characters into others.  The easiest way to do so
+is to intercept the input to the scanner: Zlex provides a way for the
+Zlex programmer to do just that by redefining the `YY_INPUT()' macro.
+*Note Redefining the Input Macro::. Though this is adequate for most
+situations, it is not appropriate for all situations since Zlex buffers
+its input.  The following example illustrates the problem.
+
+   ANSI-C requires that all occurrences of escaped newlines (a `\'
+followed by a newline) in the input be deleted.  It is required that
+this be done before tokens be recognized: for example a `/' followed by
+an escaped newline followed immediately by a `*' should be recognized as
+the start of a comment.  This can be done relatively easily by defining
+`YY_INPUT()' to read the C source file into a buffer which is then
+processed to delete escaped newlines.  Unfortunately this does not
+allow the scanner to keep track of the source line number of the
+current token for proper reporting of error messages.  What is needed
+is to perform the pre-lexical processing incrementally as each token is
+scanned.
+
+   Intra-token patterns allow this type of incremental pre-lexical
+processing.  When a "intra-token pattern" is recognized *within* a
+token, the scanning of the token is suspended and the action associated
+with the intra-token pattern is executed.  Then the suspended scanning
+of the token is resumed. Thus, the only effects of recognizing the
+intra-token pattern are the possible side-effects (if any) of the
+intra-token action.
+
+* Menu:
+
+* Intra-Token Pattern Syntax::  How to specify intra-token patterns.
+* Actions for Intra-Token Patterns::  Restrictions on actions within
+                                intra-token actions.
+* Backing Up::                  A special intra-token action.
+
+
+File: zlex.info,  Node: Intra-Token Pattern Syntax,  Next: Actions for Intra-Token Patterns,  Prev: Using Intra-Token Patterns,  Up: Using Intra-Token Patterns
+
+Intra-Token Pattern Syntax
+==========================
+
+   Syntactically, an intra-token pattern consist of the `+' character
+followed by a regular expression subject to the following restrictions:
+
+   * The regular expression is restricted to match only fixed length
+     regular expressions (thus precluding the use of the `?'
+     (optional), `+' (one-or-more) or `*' (closure) operators among
+     others).
+
+   * Qualifying an intra-token pattern by start states is not allowed.
+
+   For example, `+\\\n' is an intra-token pattern which matches an
+escaped newline.
+
+
+File: zlex.info,  Node: Actions for Intra-Token Patterns,  Next: Backing Up,  Prev: Intra-Token Pattern Syntax,  Up: Using Intra-Token Patterns
+
+Actions for Intra-Token Patterns
+================================
+
+   `yytext' and `yyleng' (*note The Current Lexeme::.) are available as
+usual within intra-token pattern actions.  The special `YY_BACKUP'
+action (*note Backing Up::.) is also available within intra-token
+pattern actions.  Since an intra-token pattern represents a interrupted
+scan of a token, the action for an intra-token pattern are subject to
+the following rather severe restrictions:
+
+   * The effect of any other of Zlex's action facilities except those
+     explicitly mentioned above is undefined within an intra-token
+     pattern action.
+
+   * An intra-token pattern is not allowed to share its action with
+     that of any other pattern.  Hence the action associated with an
+     intra-token pattern or the pattern immediately before an
+     intra-token pattern cannot be `|'.
+
+   * An intra-token pattern action should not terminate by performing a
+     control transfer like a `return'.
+
+
+File: zlex.info,  Node: Backing Up,  Prev: Actions for Intra-Token Patterns,  Up: Using Intra-Token Patterns
+
+Backing Up Within a Intra-Token Pattern: `YY_BACKUP'
+====================================================
+
+   Intra-token patterns are intended for doing pre-lexical processing
+which needs to be done incrementally during scanning.  It is expected
+that this processing will usually involve translating the token
+matching the intra-token pattern to another token and then continue
+scanning.  The `YY_BACKUP' action is tailored for such processing.
+
+   The macro `YY_BACKUP(LEN, STRING)' specifies an action to be used
+only within actions for intra-pattern tokens.  The length LEN must be
+no greater than the length of the intra-token pattern and STRING should
+be a NUL-terminated C-string.  The effect of `YY_BACKUP(LEN, STRING)'
+is to backup the scanner automaton over the last LEN characters of the
+intra-token pattern, replacing those LEN characters by STRING.
+`YY_BACKUP' may perform a control transfer: hence it should not be
+followed by any code to which control is expected to fall through after
+`YY_BACKUP'.
+
+   For example, to delete escaped newlines in a C-scanner, we could use
+the following pattern-action pair.
+
+     +\\\n           YY_BACKUP(2, "");
+
+
+File: zlex.info,  Node: End-of-File and Termination,  Next: The Main Scanner Function,  Prev: Using Intra-Token Patterns,  Up: Top
+
+End-of-File and Termination
+***************************
+
+   The generated scanner normally terminates when an `EOF' is received
+on the input stream.  This default action can be changed in two ways:
+
+  1. An `EOF' on the input stream need not terminate the scanner
+     provided the Zlex programmer sets up the input to come from
+     another source.
+
+  2. A scanner can terminate before an `EOF' is received from the input
+     stream.
+
+* Menu:
+
+* Wrapping Up::                 Wrapping up a scanner run.
+* End-of-file Actions::         Actions for `<<EOF>>' patterns.
+* Terminating a Scanner::       Terminating before end-of-file.
+* Restarting a Scanner::        Restarting a scanner after termination.
+
+
+File: zlex.info,  Node: Wrapping Up,  Next: End-of-file Actions,  Prev: End-of-File and Termination,  Up: End-of-File and Termination
+
+Wrapping Up: `yywrap'
+=====================
+
+   A function whose default prototype is `int yywrap(void)' is called by
+the scanner when it detects end-of-file on its current input stream
+`yyin'.  If the function returns non-zero then the scanner proceeds to
+wrap-up its processing; it processes its `<<EOF>>' actions if any
+(*note End of File Patterns::.) and if these actions do not change its
+flow of control, it returns `YY_EOF_OUT' (which defaults to `0')
+indicating an end-of-file token.
+
+   If the call to `yywrap' returns `0', then the scanner assumes that
+the function has set up `yyin' to continue scanning.  It does not
+execute the actions associated with any `<<EOF>>' patterns but merely
+continues scanning.
+
+   Like Zlex variable names, the name of this function can be changed
+to an arbitrary name by defining the macro `YY_WRAP' to the new name.
+Alternatively, the prefix used for the name can be changed by using the
+`--prefix' option (*note Function Names::.).
+
+   The Zlex library provides a `yywrap()' function which simply returns
+`1'.
+

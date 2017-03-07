@@ -1,0 +1,8 @@
+attrfrnt.y:4: attribute $a of terminal YY cannot be declared %in
+attrfrnt.y:8: attribute $x used without being defined
+attrfrnt.y:10: attribute $a of non-terminal S declared %out, but previously inferred to be %in
+attrfrnt.y:11: attribute 0 for XX is not consistent with previous %in/%out use
+attrfrnt.y:11: attribute 1 for XX is not consistent with previous %in/%out use
+attrfrnt.y:13: attribute 0 for YY is not consistent with previous %in/%out use
+attrfrnt.y:13: warning: %out attribute $c on LHS not defined on RHS.
+6 errors. No output produced.

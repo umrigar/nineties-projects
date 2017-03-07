@@ -1,0 +1,68 @@
+			        Z Y A C C
+	      A   L A L R (1)   P A R S E R   G E N E R A T O R
+
+Last Update Time-stamp: "97/08/01 12:10:50 zdu"
+
+Zyacc is a general-purpose parser generator that converts a
+grammar description for an LALR(1) context-free grammar into a C
+program to parse that grammar. Zyacc is largely upward compatible with 
+Yacc and Bison.
+
+Zyacc provides the following enhancements:
+
+   * Supports inherited attributes which can be uniquely evaluated in a
+     left-to-right parse.
+
+   * Supports semantic tests which allow the outcome of runtime semantic
+     tests to affect parsing decisions.
+
+   * Permits remote interactive debugging of generated parsers either
+     by using a textual interface or by using a java-based GUI.
+     The debugger allows the setting of breakpoints on any grammar symbol 
+     and selective display of the current parser state.
+
+   * Allows named attribute variables which make maintaining grammars
+     easier.
+
+   * Can generate its parser description files in HTML which can then be
+     viewed using any Web browser.
+
+   * Provides a `%look' directive to check (at parser construction time)
+     whether a reduction requires lookahead.
+
+   * Allows multiple start nonterminals and allows a call to the
+     parsing function to be made for a particular start nonterminal.
+
+   * It is possible to avoid having types which are only used in 
+     describing nonterminal semantics written into the generated `.h' 
+     file.
+
+   * Allows multiple-character quoted literal tokens.
+
+   * Allows command-line options to be specified from within the parser
+     file.
+
+The distribution comes with a Prolog frontend which illustrates the use of
+semantic predicates to handle Prolog's dynamic operators.  The zyacc home
+page also links to a source-to-source profiling tool which is essentially a
+Ansi-C frontend which uses semantic predicates for a clean solution to the
+problem of parsing typedef-name's in C.
+
+The zyacc homepage is at
+
+	http://opal.cs.binghamton.edu/~zdu/zyacc
+
+The homepage has links to a live demo of the GUI debugger using java
+applets.
+
+Zyacc can also be ftp'd from:
+
+	ftp://watson2.cs.binghamton.edu/pub/zdu/zyacc-1.03.tar.gz 
+	(about 1.1MB)
+
+which contains full documentation (postscript, html & info), or
+
+	ftp://watson2.cs.binghamton.edu/pub/zdu/zyacc-1.03-min-doc.tar.gz 
+	(about 650KB)
+
+which contains only the documentation source.

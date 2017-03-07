@@ -1,0 +1,157 @@
+<HTML><HEAD>
+<TITLE> LL(1) Grammar for Simple Compiler </TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>LL(1) Grammar for Simple Compiler </H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/27 19:22:22 umrigar"
+</FONT>
+
+<P> The grammar is for a simple language consisting of assignment statements
+<CODE>ID:= expr</CODE> <EM>separated</EM> by <CODE>;</CODE>'s.  Expressions
+can contain parentheses, numbers and identifiers with the binary operators
+<CODE>+</CODE>, <CODE>-</CODE>, <CODE>*</CODE>, <CODE>/</CODE>,
+<CODE>mod</CODE> and <CODE>div</CODE> having the usual precedences.  The
+grammar follows:
+
+<PRE>
+program
+  : stmts
+  ;
+stmts
+  : assgnStmt
+  | assgnStmt ';' stmts
+  ;  
+assgnStmt
+  : ID ':='  expr
+  ;
+expr
+  : expr '+' term
+  | expr '-' term
+  | term
+  ;
+term
+  : term '*' factor
+  | term '/' factor
+  | term 'div' factor
+  | term 'mod' factor
+  | factor
+  ;
+factor
+  : '(' expr ')'
+  | ID
+  | NUM
+  ;
+</PRE>
+
+
+<P> Unfortunately, the above grammar is left-recursive and hence is not
+amenable to top-down parsing.  If we use the standard grammar
+transformations to remove the left recursion, we get the following grammar: 
+
+<PRE>
+$S: /* <A NAME="rule0">Rule 0</A> */
+  program
+  &lt;EOF&gt;
+program: /* <A NAME="rule1">Rule 1</A> */
+  stmts
+stmts: /* <A NAME="rule2">Rule 2</A> */
+  assgnStmt
+  stmtsRest
+stmtsRest: /* <A NAME="rule3">Rule 3</A> */
+  ';'
+  stmts
+stmtsRest: /* <A NAME="rule4">Rule 4</A> */
+  /* EMPTY */
+assgnStmt: /* <A NAME="rule5">Rule 5</A> */
+  ID
+  ':='
+  expr
+expr: /* <A NAME="rule6">Rule 6</A> */
+  term
+  exprRest
+exprRest: /* <A NAME="rule7">Rule 7</A> */
+  '+'
+  term
+  exprRest
+exprRest: /* <A NAME="rule8">Rule 8</A> */
+  '-'
+  term
+  exprRest
+exprRest: /* <A NAME="rule9">Rule 9</A> */
+  /* EMPTY */
+term: /* <A NAME="rule10">Rule 10</A> */
+  factor
+  termRest
+termRest: /* <A NAME="rule11">Rule 11</A> */
+  '*'
+  factor
+  termRest
+termRest: /* <A NAME="rule12">Rule 12</A> */
+  '/'
+  factor
+  termRest
+termRest: /* <A NAME="rule13">Rule 13</A> */
+  DIV
+  factor
+  termRest
+termRest: /* <A NAME="rule14">Rule 14</A> */
+  MOD
+  factor
+  termRest
+termRest: /* <A NAME="rule15">Rule 15</A> */
+  /* EMPTY */
+factor: /* <A NAME="rule16">Rule 16</A> */
+  '('
+  expr
+  ')'
+factor: /* <A NAME="rule17">Rule 17</A> */
+  ID
+factor: /* <A NAME="rule18">Rule 18</A> */
+  NUM
+
+<! insert blank lines so that Netscape will scroll for all rules >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+</BODY>
+
+</HTML>

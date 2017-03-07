@@ -1,0 +1,1154 @@
+This is Info file zlex.info, produced by Makeinfo-1.64 from the input
+file zlex.texi.
+
+
+File: zlex.info,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
+
+Zlex
+****
+
+   This file documents Zlex, a scanner-generator which is
+largely-compatible with both `lex' and `flex'.
+
+   Copyright (C) 1995 Zerksis D. Umrigar
+
+   This is the first edition of the Zlex documentation.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions.
+
+* Menu:
+
+* Introduction::                Introduction to Zlex.
+* The Scanning Process::        How Zlex generated scanners work.
+* Input File Structure::        Structure of the Zlex source file.
+* C Interface Conventions::     Conventions used for interfacing to C.
+* Patterns::                    Patterns describe lexical syntax.
+* The Current Lexeme::          Accessing attributes of the current lexeme.
+* Start States::                Incorporate left context into matching.
+* Scanner Input::               Controlling and accessing the input.
+* Scanner Output::              Controlling the scanner's output.
+* Buffer Management::           Input buffer control.
+* Using Intra-Token Patterns::  Matching *within* tokens.
+* End-of-File and Termination::  Controlling scanner termination.
+* The Main Scanner Function::   Structure of the scanning function.
+* Debugging::                   Debugging Zlex scanners.
+* Multiple Scanners::           Multiple scanners in a single program.
+* Invoking Zlex::               Zlex options.
+* Efficiency::                  Tips for writing efficient scanners.
+* Distributing Zlex Scanners::  How to distribute generated scanners.
+* Bugs and Deficiencies::       Problems with Zlex.
+* Syntax of Zlex Programs::     A semi-formal syntax description.
+* Copying::                     Copying conditions for free software.
+
+* Concept Index::
+* Name Index::
+
+ -- The Detailed Node Listing --
+
+Introduction
+
+* Scanner Generator Overview::  Introduction and terminology.
+* Background::                  Historical background and motivation.
+* An Example::                  A word-counting application.
+* Enhancements::                Enhancements over comparative programs.
+
+The Scanning Process
+
+* Pattern Conflicts::           When multiple patterns match.
+* Scanner Backtracking::        Backtracking over input characters.
+* Default Action::              When no pattern matches the input.
+
+The Structure of the Zlex Input File
+
+* Comments::                    Comments in a Zlex source file.
+* Code Blocks::                 Different ways of indicating code to be
+                                copied into the generated scanner.
+* Declarations Section::        Section for Zlex and C declarations.
+* Rules Section::               Section for pattern-action rules.
+* Code Section::                Section for C code.
+* Line Directives::             Directives for setting the current line
+                                number and source file name.
+
+C Interface Conventions
+
+* Naming Conventions::          Conventions used in naming Zlex entities.
+* Scope of Names::              Whether Zlex names have function, file
+                                or program scope.
+* Scanner State::               Passing the internal scanner state to
+                                library routines.
+
+Naming Conventions
+
+* Macros Names::                Conventions used for macro names.
+* Variable Names::              Conventions used for variable names.
+* Function Names::              Conventions used for function names.
+* Private Names::               Conventions used for private names.
+
+Patterns
+
+* Meta-Characters::             Special Zlex patterns characters.
+* Regular Expressions::         Expressions describing lexical syntax.
+* Context Operators::           Making matching sensitive to context.
+* End of File Patterns::        Patterns which match end-of-file.
+* Intra-Token Patterns::        Patterns which can be triggered
+                                *within* a token.
+* Whitespace Within Patterns::  Rules for whitespace within patterns.
+
+Regular Expressions
+
+* Single Characters::           Characters which stand for themselves.
+* Escape Sequences::            How to escape Zlex's meta-characters and
+                                specify non-printing characters.
+* Character Classes::           Specify a set of characters.
+* Named Character Classes::     Specify a set of characters in a
+                                portable way.
+* Any Character Except Newline::  A meta-character which matches any
+                                character except a newline.
+* String Quoting::              How to quote characters using `"'.
+* Regular Expression Macros::   Using macros for regular expressions.
+* Optional Regular Expression::  Specifying that a match of a regular
+                                expression is optional.
+* Zero or More Repetitions::    Specifying that a regular expression may
+                                be matched 0 or more times.
+* One or More Repetitions::     Specifying that a regular expression may
+                                be matched 1 or more times.
+* Counted Repetition::          Specifying that a regular expression may
+                                be a certain number of times.
+* Concatenation::               Using juxtaposition to specify the
+                                concatenation of the matches of multiple
+                                regular expressions.
+* Union ::                      An operator which specifies the union of
+                                two regular expressions.
+* Operator Precedence::         The precedence of the different regular
+                                expression operators.
+* Grouping Regular Expression::  Using parentheses to override the
+                                default precedence.
+* Operator Independence::       Some operators can be defined in terms
+                                of others.
+* Regular Expression Examples::  Examples of regular expressions to
+                                describe the syntax of comments in
+                                various programming languages.
+
+Regular Expression Examples
+
+* Ada Comments::                Regular expression for Ada comments.
+* Pascal Comments::             Regular expression for Pascal comments.
+* C Comments::                  Regular expression for C comments.
+
+Context Operators
+
+* Right Context::               Right-context-sensitive matching.
+* Left Context::                Left-context-sensitive matching.
+
+Right Context
+
+* Generalized Right Context::   Using an arbitrary regular expression to
+                                specify a right context.
+* End of Line::                 Matching only at end-of-line.
+* Right Context Restrictions::  No multiple right context in a pattern.
+
+Left Context
+
+* Start of Line::               Matching only at start of a line.
+* Start State Patterns::        Generalized left context matching.
+
+Accessing the Current Lexeme
+
+* Lexeme Text::                 Accessing the text of a lexeme.
+* Lexeme Length::               Accessing the length of a lexeme.
+* Catenating Tokens::           Concatenation of successive tokens.
+
+Start States
+
+* Start State Types::           Two flavors of start states.
+* Start State Declarations::    How to declare start states.
+* Entering a Start State::      Zlex action to change start state.
+* Current Start State::         Accessing the current start state.
+* Start State Stacks::          Stacking start states.
+* Start States Example::        Start states to process C comments.
+* Using Inclusive Start States::  Tips on where inclusive start states
+                                maybe useful.
+
+Start State Stacks
+
+* Pushing a Start State::
+* Popping the Start State Stack::
+* Top of the Start State Stack::
+
+Input in a Zlex Scanner
+
+* Input File Pointer::          `FILE' pointer to input stream.
+* Direct Input::                Reading directly from the input.
+* Redefining the Input Macro::  Controlling how buffers are filled.
+* The Null Value::
+* Modifying Input::             Putting characters into the input.
+* Rejecting to the Next Match::  Rescanning via alternate patterns.
+* Character Count::             Character count in input stream.
+* Current Line Number::         Line number in input stream.
+* Current Column Number::       Column number in input stream.
+* Querying Beginning of Line::  Check if at beginning of a line.
+* Setting Beginning of Line::   Ensure at beginning of a line.
+
+Modifying Characters in the Input Stream
+
+* Rescanning Lexeme Text::      Pushing back scanned characters.
+* Unput::                       Pushing back arbitrary characters.
+
+Output in a Zlex Scanner
+
+* Output File Pointer::         `FILE' pointer to output stream.
+* Echoing the Current Lexeme::  Echoing current token text.
+
+Buffer Management
+
+* Buffer Type::                 Opaque pointer for buffers.
+* Current Buffer::              Accessing the current buffer.
+* Creating a Buffer::           Creating a buffer for a file.
+* Deleting a Buffer::           Deleting a previously created buffer.
+* Flushing a Buffer::           Flushing contents of a buffer.
+* In Memory Buffer::            Create buffer using memory area.
+* Bytes Buffer::                Create buffer from arbitrary bytes.
+* String Buffer::               Create buffer from a C-style string.
+* Switching Buffers::           Switching between buffers.
+* Buffer Management Example::   File inclusion using buffers.
+
+Using Intra-Token Patterns
+
+* Intra-Token Pattern Syntax::  How to specify intra-token patterns.
+* Actions for Intra-Token Patterns::  Restrictions on actions within
+                                intra-token actions.
+* Backing Up::                  A special intra-token action.
+
+End-of-File and Termination
+
+* Wrapping Up::                 Wrapping up a scanner run.
+* End-of-file Actions::         Actions for `<<EOF>>' patterns.
+* Terminating a Scanner::       Terminating before end-of-file.
+* Restarting a Scanner::        Restarting a scanner after termination.
+
+The Main Scanner Function
+
+* Main Scanner Function::       Naming the main scanner function.
+* Declaring the Scanner Function::  Declaring the main scanner
+                                function.
+* Initialization::              Initialization within function.
+* An Action for Every Pattern::  A pre-action for every pattern.
+* Separator Between Actions::   Controlling `break' within actions.
+* Termination Return Value::    Value returned on termination.
+* Pattern Numbers::             Accessing number of matched pattern.
+
+Debugging and Errors
+
+* Debugging Control::           A variable and macro which controls
+                                debugging.
+* Debugging Example::           Debugging example using `REJECT'.
+* Scanner Tracing::             Detailed trace of scanner actions.
+* Errors::                      Runtime error message control.
+
+Multiple Scanners
+
+* Prefix Option::               Controlling prefix of names.
+* Redefining Name Macros::      Giving an arbitrary name to a scanner
+                                object.
+* Renaming Example::            Example which uses both methods.
+
+Invoking Zlex
+
+* Option Conventions::
+* Option Sources::
+* Options::
+* Data Search List::
+
+Options
+
+* Runtime Input Options::
+* Runtime Algorithm Options::
+* Code Scanner Options::
+* Table Scanner Options::
+* Miscellaneous Options::
+* Options List::
+
+Efficiency
+
+* Patterns versus Actions::     Patterns preferred.
+* Maximizing Token Length::     Match as much as possible at a time.
+* Backtracking::                Avoid backtracking.
+* Generalized Right Context Efficiency::  Avoid possible quadratic
+                                complexity.
+
+Distributing Zlex Scanners
+
+* Distributing Library Sources::  How to package Zlex library sources.
+
+Bugs and Deficiencies
+
+* Suspicions::                  Possible problem areas in Zlex.
+* Bug Reports::                 How to report bugs.
+
+Syntax of Zlex Programs
+
+* Tokens::                      Lexical syntax of Zlex tokens.
+* Grammar::                     YACC grammar for Zlex.
+
+
+File: zlex.info,  Node: Introduction,  Next: The Scanning Process,  Prev: Top,  Up: Top
+
+Introduction
+************
+
+   In order to introduce Zlex, the process of scanning is reviewed and
+some terms are introduced.  Zlex is is compared with similar programs
+and the motivation for the development of yet another scanner generator
+is presented.  An example is used to illustrate the operation of Zlex.
+
+* Menu:
+
+* Scanner Generator Overview::  Introduction and terminology.
+* Background::                  Historical background and motivation.
+* An Example::                  A word-counting application.
+* Enhancements::                Enhancements over comparative programs.
+
+
+File: zlex.info,  Node: Scanner Generator Overview,  Next: Background,  Prev: Introduction,  Up: Introduction
+
+Scanner Generator Overview
+==========================
+
+   Many programming applications require scanning a input stream and
+partitioning it into a token stream, where tokens are typically
+identified with non-overlapping subsequences of the input stream.  For
+example, a natural-language interface will need to partition a stream
+of characters into a stream of words, which constitute the tokens.  A
+compiler for a programming language will need to partition the stream
+of characters representing a program into a stream of literals,
+reserved words, operators and identifiers which constitute the tokens
+of the programming language.
+
+   A "scanner" is a program or portion of a program which performs the
+task of partitioning a input stream into a token stream.  Writing a
+scanner is a very common programming task: all applications which
+analyze some form of text input will usually contain some kind of
+scanner (even though it may not be identified as such).  Such scanners
+are usually written by hand, typically in a procedural programming
+language like C or Pascal, where knowledge about the syntax of tokens
+is intimately interwoven into programming constructs which specify how
+to recognize those tokens. Even though scanners are usually programs of
+relatively modest complexity, maintaining non-trivial hand-written
+scanners can still be a demanding task.
+
+   A "scanner-generator" is a program which is given a formal
+specification of the syntax of tokens and automatically generates a
+scanner from those specifications.  Since the specifications are largely
+declarative in that they specify only *what* constitutes a token
+without specifying *how* to recognize one, they are much easier to
+maintain than hand-written scanners.  A pattern language based on
+regular expressions is the formalization used to specify the syntax of
+tokens for most scanner generators.  The efficiency of a
+automatically-generated scanner can be comparable to that of a typical
+hand-written scanner.
+
+   *Note Patterns::.  Zlex is such a scanner generator, automatically
+transforming a scanner specification into a scanner program.  It
+accepts a scanner specification given in a file referred to as the
+"Zlex source file" and generates a C code file referred to as the
+"generated scanner file".  The Zlex source file contains (among other
+things) patterns specifying the syntax of tokens.  For each pattern
+there is also a corresponding action, consisting of arbitrary C code,
+which is to be executed when the input matches the pattern.  These
+actions are copied verbatim into the generated scanner.  The generated
+scanner file needs to be compiled and linked with the rest of the
+program and with the Zlex library to produce an executable program.
+
+   The generated scanner provides a function which is the "main scanner
+function".  Whenever this scanner function is called, it scans its input
+stream looking for a match with any of the specified patterns.  If it
+finds such a match, it executes the action corresponding to the
+pattern.  If the action terminates in a return, it returns to its
+caller; otherwise it continues scanning the input looking for the next
+match.  If no pattern matches the current input character, then the
+scanner executes a predefined action which defaults to merely echoing
+the unmatched character to the standard output.
+
+   Once the generated scanner has recognized a token, it is typically
+transformed into a small integer for processing by the rest of the
+program.  A token typically has at least one attribute: its "lexeme"
+which is the actual subsequence of the input-stream corresponding to
+that token.  The generated scanner allows its actions to access the
+lexeme for the current token.
+
+
+File: zlex.info,  Node: Background,  Next: An Example,  Prev: Scanner Generator Overview,  Up: Introduction
+
+Background
+==========
+
+   Scanner-generators were popularized by the scanner-generator `lex'
+which is distributed with the popular Unix operating system.
+Unfortunately, `lex-generated' scanners had the reputation of being
+less efficient than hand-written scanners.  An attempt to remedy this
+efficiency problem resulted in `flex' (*note Flex: (flex)top.) which
+was extremely successful in attaining this stated goal.  Zlex is
+largely upward compatible with both `flex' and lex.  Its raison d'etre
+is multi-faceted:
+
+  1. Even though `lex' and `flex' have a large number of features, they
+     are not flexible enough to be used in certain situations.
+
+  2. Even though scanning is the problem in which `lex' and `flex'
+     specialize, the lexical specifications for their own input
+     languages are severely restrictive in not allowing the free-form
+     input typical of modern programming languages.
+
+  3. Personal whimsical reasons: I wanted to play around with
+     scanner-generation algorithms.  I also suspect that I suffer from
+     the NIH (not-invented-here) syndrome.
+
+
+   The performance of Zlex-generated scanners is comparable to those
+generated by `flex', but its additional features enable tasks which
+would be very difficult if not impossible with `flex'.
+
+
+File: zlex.info,  Node: An Example,  Next: Enhancements,  Prev: Background,  Up: Introduction
+
+An Example
+==========
+
+   The following Zlex program counts the number of lines, words and
+characters in its standard input, where a *word* is a maximal string of
+characters not containing a whitespace character (a whitespace
+character is defined to be either a space, tab or new-line).
+
+     001     /* Word-count program for stdin. */
+     002     %%
+     003     %{
+     004       unsigned cc= 0;       /* # of chars seen so far. */
+     005       unsigned wc= 0;       /* # of words seen so far. */
+     006       unsigned lc= 0;       /* # of lines seen so far. */
+     007     %}
+     008
+     009
+     010     [^\t \n]+       wc++; cc+= yyleng;
+     011     [\t ]+          cc+= yyleng;
+     012     \n+             lc+= yyleng; cc+= yyleng;
+     013     <<EOF>>         printf("%d %d %d\n", lc, wc, cc);
+
+   The above program consists of two sections separated by a line
+containing only `%%'.  The first section is the declarations section
+which is used to declare Zlex and C entities (in the above program it
+is empty).  The second section contains the patterns along with the
+corresponding C actions.
+
+   Lines enclosed within decorated-braces `%{' and `%}' are copied
+directly into the generated C-file.  In this example, the lines within
+decorated braces at the start of the second section are used to declare
+and initialize C variables local to the generated scanner function
+`yylex'.  These variables are counters which keep track of the number
+of characters, words and newlines seen so far.
+
+   Line 10 in the second section consists of a pattern to match our
+specification of a *word*, followed by a C action.  The `[' and `]'
+delimit a *character-class* which specifies a set of characters.  A
+character-class is a regular expression which matches any character in
+that class.  For example, `[\t \n]' matches any character which is a
+tab, blank or newline (Zlex allows C-style escape sequences starting
+with `\' within character-classes).  The `^' at the beginning of a
+class denotes the negation of that character-class: hence `[^\t \n]'
+denotes any character except a tab, blank or newline, i.e. a
+non-whitespace character. The postfix operator `+' denotes one or more
+repetitions of the previous regular expression: hence `[^\t \n]+'
+denotes a sequence of one or more non-whitespace characters.  Since Zlex
+always prefers the longest possible match, the specified regular
+expression will match "a maximal string of characters not containing a
+whitespace character" -- namely a *word*.
+
+   The action for the first pattern simply increments the word count
+`wc' by 1 and increments the character count `cc' by the number of
+characters matched (the variable `yyleng' always contains the length of
+the current lexeme).  Lines 11 and 12 handle blanks/tabs and newlines
+in a similar manner.  Line 13 contains a special pattern which matches
+end-of-file and a action which prints out the values of the three
+counters.
+
+   Assuming that the above program is in the file `wc.l', it can be
+compiled and executed using a sequence of commands similar to the
+following:
+
+     $ zlex wc.l -o wc.c
+     $ cc wc.c -lzlex -o wc
+     $ wc
+     'Twas brillig, and the slithy toves
+       Did gyre and gimble in the wabe:
+     All mimsy were the borogoves,
+          And the mome raths outgrabe.
+     ^D
+     =>       4      23     135
+     $
+
+The option `-o' for both Zlex and the C-compiler cc allows naming the
+output file.  The first line transforms the Zlex file `wc.l' to a C
+file `wc.c'.  The second line compiles the C-file into a executable,
+linking it with the Zlex library (which provides a default `main'
+program which merely calls the generated scanner function `yylex').
+The third line runs the executable: the next six lines are input
+followed by an end-of-file (shown as a ^D).  This is followed by a line
+which is the executable's output containing the number of lines, number
+of words and number of characters.
+
+
+File: zlex.info,  Node: Enhancements,  Prev: An Example,  Up: Introduction
+
+Enhancements in Zlex
+====================
+
+   The enhancements provided by Zlex over `lex' and `flex' are the
+following:
+
+16-bit character support
+     Zlex supports the generation of scanners which process 16-bit
+     character input.  Unfortunately, due of the limitations of current
+     editors, Zlex still requires its own source file to be specified
+     using 8-bit characters.  Hence 16-bit characters need to be
+     specified using their character codes (possibly encapsulated
+     within macros).
+
+     With this support for 16-bit characters, it should be possible to
+     use Zlex to built Unicode scanners, even though Zlex does not know
+     anything about Unicode per se.
+
+Intra-token patterns
+     These are patterns which can be recognized within other tokens.
+     *Note Intra-Token Patterns::.  Intra-token patterns are useful for
+     doing the pre-lexical processing required by some programming
+     languages (for example, the deletion of a `\' followed by a newline
+     character in C).
+
+Column numbers
+     Zlex supports obtaining the column number of the current token (in
+     addition to the undocumented `yylineno' feature of `lex'.  The
+     method used does not require the generated scanner to test each
+     incoming character to see if it is a newline.
+
+Character count
+     It is possible to access the count of the number of characters
+     read from the current source file.
+
+Sharing of code among multiple scanners
+     Much of the code required for a Zlex scanner is linked in from the
+     Zlex library.  This library code can be shared among multiple
+     scanners.  The only code unique to each scanner will be a
+     relatively small main scanner function and possibly several
+     auxiliary functions (this will be in addition to several large
+     data tables which will be unique to each scanner).
+
+Ambiguous right-context patterns.
+     Unlike other scanner generators, Zlex can handle ambiguous right
+     context where the pattern to be matched overlaps with the trailing
+     context.  *Note Right Context::.  The worst case complexity of the
+     method used to identify such ambiguous trailing context can be
+     quadratic.
+
+Interactive scanners
+     As long as `<stdio>' input functions are not used (`--stdio'
+     option *note Options List::.), then all Zlex generated scanners
+     can operate interactively without any performance degradation.
+
+Code Scanners
+     Zlex supports the generation of directly encoded scanners in
+     addition to the more conventional scanners which interpret tables.
+     At this point, this option does not appear particularly useful.
+
+Whitespace within patterns
+     There is an option `--whitespace' (*note Options List::.) which
+     makes Zlex more tolerant of spaces and comments in the Zlex file.
+     This allows the Zlex programmer to format patterns so that they
+     are more readable. *Note Whitespace Within Patterns::.
+
+
+File: zlex.info,  Node: The Scanning Process,  Next: Input File Structure,  Prev: Introduction,  Up: Top
+
+The Scanning Process
+********************
+
+   When the main scanner function is entered, it initializes its data
+structures if it is the first time it has been called.  It then enters a
+"select-act" loop, where it recognizes a pattern which matches a prefix
+of the current input, carries out the specified C action and then
+repeats the process on the unprocessed suffix of the input.  If the
+action terminates in a return from the main scanner function, then when
+the scanner function is called again, it merely reenters the select-act
+loop.
+
+   The following possibilities arise as the scanner attempts to match
+its patterns with a prefix of its input:
+
+  1. The prefix of the input matches one or more patterns, but it is
+     possible that a longer prefix could also match some patterns.  In
+     that case, unless one of the matched patterns is a intra-token
+     pattern (*note Intra-Token Patterns::.), the scanner looks for the
+     longer match.
+
+  2. A single pattern matches a prefix of the input and there is no
+     possibility that a longer prefix could match any pattern.   In
+     that case, the scanner executes the action associated with the
+     pattern.
+
+  3. Multiple patterns match a prefix of the input and there is no
+     possibility that a longer prefix could match any pattern.  In that
+     case, the scanner uses a disambiguating rule to choose a pattern
+     and then executes the action associated with the chosen pattern.
+
+  4. No pattern matches a prefix of the input.  In that situation, the
+     scanner executes a predefined action.
+
+
+* Menu:
+
+* Pattern Conflicts::           When multiple patterns match.
+* Scanner Backtracking::        Backtracking over input characters.
+* Default Action::              When no pattern matches the input.
+
+
+File: zlex.info,  Node: Pattern Conflicts,  Next: Scanner Backtracking,  Prev: The Scanning Process,  Up: The Scanning Process
+
+Pattern Conflicts
+=================
+
+   When multiple patterns match a prefix of the input, the scanner
+needs to choose between these conflicting patterns.  These choices are
+governed by the following rules:
+
+  1. An intra-token pattern (*note Intra-Token Patterns::.) is
+     preferred over all other patterns and is matched as soon as it is
+     recognized, even though it may be a prefix of another pattern.
+
+  2. A pattern which matches a longer prefix of the input is preferred
+     over one which matches a shorter prefix of the input.
+
+  3. If two patterns match the same prefix of the input, then the
+     pattern which occurs earlier in the Zlex source file is preferred.
+
+
+   Hence given the scanner specification:
+
+     %%
+     while                      `Action for keyword `while'.'
+     [[:alpha:]_][[:alnum:]_]+  `Action for an identifier.'
+
+The first pattern simply matches the keyword `while'.  The second
+pattern matches an identifier which starts with an alphabetic character
+or `_' and is followed by one or more alphanumeric characters or `_'s.
+If the input is `while', the identifier pattern would match the
+prefixes `w', `wh', `whi', `whil' and `while'; the `while' keyword
+pattern would match the entire input.  By rules (2) and (3), the
+`Action for keyword `while'.' will be that executed by the generated
+scanner.
+
+
+File: zlex.info,  Node: Scanner Backtracking,  Next: Default Action,  Prev: Pattern Conflicts,  Up: The Scanning Process
+
+Backtracking in Zlex Scanners
+=============================
+
+   As a character is scanned by a Zlex scanner, it may tentatively be
+matched with a pattern, but subsequently it may be discovered that the
+tentative pattern match is incorrect and that the character needs to be
+rescanned for an alternate match.  "Backtracking" refers to the
+rescanning of characters to identify alternate matches.
+
+   Most Zlex scanners will do some backtracking under normal operation.
+Backtracking can also be forced by the Zlex programmer by using the
+special `REJECT' action (*note Rejecting to the Next Match::.).
+
+   As a Zlex scanner scans its input, it usually looks ahead by a single
+character to decide which pattern it is in, and whether it has reached
+the end of a pattern.  That single character lookahead is not always
+sufficient: the scanner may have to scan several extra characters
+before it can be sure which action to take.
+
+   Consider the following scanner which ignores an alphabetic string if
+it is followed by a digit, but outputs an alphabetic string in
+blank-separated groups of upto 4 characters when it is not followed by
+a digit.
+
+     %%
+     [[:alpha:]]{4}                  printf("%s ", yytext);
+     [[:alpha:]+/[[:digit:]]         /* No action. */
+     .|\n                            ECHO;
+
+The first pattern matches a sequence of exactly four alphabetical
+characters (indicated by the `{4}').  The second pattern matches a
+sequence of one or more alphabetical characters only if it is followed
+by a digit (indicated by the trailing context `/[[:digit:]]').  The
+final pattern matches any single character.
+
+   Consider the input line
+
+     abcdefg
+
+The scanner will scan all the characters in `abcdefg' before it
+realizes that the newline terminating this alphabetic string is not a
+digit and hence the second pattern cannot match.  It will match the
+first pattern using `abcd' returning `efg' to the input stream.  As
+part of the action of matching the first pattern it will output
+`abcd ', and will then resume scanning.  It will then look at the `efg'
+it pushed back, scanning past all three characters before realizing
+that the input does not match either of the first two patterns.  The
+only alternative is the third pattern which it matches, `ECHO'ing `e',
+and pushing back `fg'.  The same sequence of overscan and pushback
+repeats for `fg' with output `f' and pushback `g'.  Finally the
+remaining `g' matches the last pattern.  The output is:
+
+     abcd efg
+
+Note that the `e' is scanned twice, the `f' thrice, and the `g' four
+times.
+
+   This sort of backtracking in Zlex is not inordinately expensive, but
+should be avoided if possible.  As illustrated by the above example, the
+backtracking arises because of overlapping patterns: hence overlapping
+patterns should be avoided as far as possible.
+
+
+File: zlex.info,  Node: Default Action,  Prev: Scanner Backtracking,  Up: The Scanning Process
+
+Default Action
+==============
+
+   By default, characters which are not matched by any pattern are
+`ECHO'ed to `yyout' (*note Scanner Output::.).  This default action can
+be suppressed by specifying the `--suppress-default' option (*note
+Options List::.).
+
+   A scanner which marks all lines containing character sequences which
+look like ANSI-C trigraphs (which start with a sequence of 2 `?'s) can
+be generated from the following:
+
+     %%
+     .*"??".+        printf("*** %s", yytext);
+
+The `.' is a regular expression which matches any character except
+newline; the `*' is a postfix operator which specifies 0 or more
+repetitions of the preceeding regular expression; the `+' is a postfix
+operator which specifies 1 or more repetitions of the preceeding regular
+expression.  Hence the pattern will match only lines containing a
+sequence of at least two `?' followed by at least one other
+(non-newline) character.  The action specified for that pattern prints
+out the contents of the matching line (`yytext') preceeded by a mark
+`*** '. Lines which do not match the specified pattern will be handled
+character by character by the default action and echoed to `yyout'.
+
+   For all applications except very simple filters, usually it is not a
+good idea to depend on this default behavior for the following reasons:
+
+   * Since it can be confusing to a user to have an application
+     suddenly echo characters not recognized by its scanner, every
+     possible character should be handled explicitly by scanner
+     patterns.  At minimum, the scanner should specify a final pattern
+     like `.|\n' (with an error action) to ensure that every character
+     will be matched.  Such patterns will also need to be provided for
+     every exclusive start state (*note Start State Patterns::.).
+
+   * Since the default action processes only a single character at a
+     time, it is somewhat inefficient (*note Efficiency::.).
+
+
+File: zlex.info,  Node: Input File Structure,  Next: C Interface Conventions,  Prev: The Scanning Process,  Up: Top
+
+The Structure of the Zlex Input File
+************************************
+
+   A Zlex file consists of upto three sections, with each section used
+for different purposes.  The delimiter sequence `%%' on a line by
+itself is used to separate sections.
+
+   The text contained in these sections is of two types:
+
+  1. Text which is absorbed by Zlex.
+
+  2. Text which is treated as a block of code to be copied into the
+     generated scanner.  This text is delimited by being enclosed
+     within braces, decorated braces (`%{' and `%}') or by being
+     indented (*note Code Blocks::.).
+
+* Menu:
+
+* Comments::                    Comments in a Zlex source file.
+* Code Blocks::                 Different ways of indicating code to be
+                                copied into the generated scanner.
+* Declarations Section::        Section for Zlex and C declarations.
+* Rules Section::               Section for pattern-action rules.
+* Code Section::                Section for C code.
+* Line Directives::             Directives for setting the current line
+                                number and source file name.
+
+
+File: zlex.info,  Node: Comments,  Next: Code Blocks,  Prev: Input File Structure,  Up: Input File Structure
+
+Comments
+========
+
+   In a Zlex file, comments enclosed within `/*' and `*/' can span
+multiple lines.  It is also possible to have comments within patterns
+if the `--whitespace' option is used (*note Whitespace Within
+Patterns::.).
+
+
+File: zlex.info,  Node: Code Blocks,  Next: Declarations Section,  Prev: Comments,  Up: Input File Structure
+
+Code Blocks
+===========
+
+   Code blocks which are to be copied into the generated scanner can be
+delimited in any one of the following ways:
+
+C-Code
+     A C-code block starts with a left-brace `{'.  Text starting with
+     the `{', upto and including the *balancing* right-brace `}' is
+     copied into the generated scanner.  Note that braces enclosed
+     within C-style comments, strings or character-constants are not
+     counted when finding the balancing `}'.  Escaped newlines (`\'
+     followed by a newline character) are recognized within C-strings,
+     but not within other constructs.
+
+     The knowledge of C which is used to look for the balancing `}' is
+     incomplete and relatively easy to fool.  For example, Zlex would
+     get hopelessly confused if a Zlex programmer were to `#define' the
+     macro `END' to be `}', and then used `END' instead of `}': Zlex
+     does not know anything about C-preprocessing.
+
+Decorated-Brace Code
+     This is signalled by a line which begins with a decorated
+     left-brace `%{'.  The *rest* of the line and all subsequent lines
+     are copied to the generated scanner until a line starting with a
+     decorated right-brace `%}' is encountered. The delimiting `%{' and
+     `%}' are not copied.  The contents of the copied text are not
+     analyzed at all.
+
+Indented Code
+     The text is on a line which begins with a space or a tab and the
+     first non-blank characters are not `{' or `/*'.  In that case, the
+     rest of the line is copied to the generated scanner without any
+     further processing, as are all immediately following indented
+     lines.
+
+Pattern Code
+     The text follows a pattern in section 2 of the Zlex file and does
+     not start with a `{'.  The entire line except for the pattern and
+     immediately following whitespace are copied to the generated
+     scanner without any further processing as though it was indented
+     code.  Note that pattern code blocks can only be used when the
+     option `--no-whitespace' has been specified (the default), as with
+     `--whitespace' the pattern code block will be regarded as part of
+     the pattern.
+
+   Note that the text within decorated-brace, indented or pattern code
+blocks is not analyzed in any way.  This has the advantage of language
+independence: if Zlex were to be retargeted to generate a scanner in a
+language other than C, there would be no change in the specifications
+for these code blocks.  The disadvantage is that it is impossible for
+Zlex to recognize the terminating delimiter for the code block when it
+occurs within a target language construct like a comment or string.
+
+
+File: zlex.info,  Node: Declarations Section,  Next: Rules Section,  Prev: Code Blocks,  Up: Input File Structure
+
+Declarations Section
+====================
+
+   This section contains the declarations of Zlex and C entities.  It
+is the first section in the Zlex source file and must be present (even
+though it may be empty).  Hence the simplest possible Zlex source is
+
+     %%
+
+which merely copies its input to its output using the default rule
+(*note Default Action::.).
+
+   Besides comments, this declarations section can contain the
+following:
+
+C Declarations
+     These are copied directly into the generated scanner.  They can be
+     delimited in any of the ways outlined (*note Code Blocks::.).
+     Traditionally, decorated braces have been used to delimit these
+     code blocks.
+
+Macro Definitions
+     The definition of a Zlex macro consists of a line starting with
+     the name of the macro followed by whitespace, followed by a
+     regular expression giving the definition of the macro (*note
+     Regular Expression Macros::.).
+
+Directives
+     This consists of a line starting with a `%' character followed by
+     an alphabetic string specifying the directive.  The directives
+     currently accepted include:
+
+    `%option'
+          This can be followed by options as they would be specified on
+          the command-line (*note Options List::.).  The options
+          actually specified on the command-line override the options
+          specified in the source file using this directive.  `%option'
+          directives must precede all other directives.
+
+    `%array'
+          Is equivalent to `%option --array'.
+
+    `%pointer'
+          Is equivalent to `%option --pointer'.
+
+    `%s' or `%S'
+          These directives are used to declare inclusive start states.
+          The directive can be followed by one or more space-separated
+          start state names (*note Start States::.).
+
+    `%x' or `%X'
+          These directives are used to declare exclusive start states.
+          The directive can be followed by one or more space-separated
+          start state names (*note Start States::.).
+
+    Obsolete lex Directives
+          These are allowed only for backward compatibility with lex.
+          They have no effect on Zlex and are undocumented as far as
+          Zlex is concerned.
+
+
+File: zlex.info,  Node: Rules Section,  Next: Code Section,  Prev: Declarations Section,  Up: Input File Structure
+
+Rules Section
+=============
+
+   This is the second section in the Zlex file.  It consists of an
+optional initial C-code section (*note Code Blocks::.) followed by
+pattern-action rules.
+
+   If the optional initial C-code section is present, it is copied into
+the beginning of the generated scanner function.  It can be used to
+declare and initialize any local variables needed by the Zlex
+programmer.
+
+   A pattern-action rule consists of a pattern (*note Patterns::.)
+followed by a action.  The possibilities for an action are:
+
+Empty Action
+     No action is specified.  This means that when a token
+     corresponding to the pattern is recognized, it is simply discarded.
+
+C Code Block
+     The action consists of the concatenation of all the following code
+     blocks which do not have any intervening pattern (*note Code
+     Blocks::.).  Traditionally, the action is specified by a *single*
+     brace-enclosed C code block which starts on the same line as the
+     pattern.  When a token specified by the pattern is recognized, the
+     specified action is carried out.
+
+Next Pattern Action `|'
+     This special action specifies that the action for this pattern is
+     the same as the action for the next pattern.
+
+
+File: zlex.info,  Node: Code Section,  Next: Line Directives,  Prev: Rules Section,  Up: Input File Structure
+
+Code Section
+============
+
+   The third section of the Zlex source file consists of C code
+typically containing the definitions of some of the C objects declared
+in the first section.  It is simply copied unchanged into the generated
+scanner file.
+
+
+File: zlex.info,  Node: Line Directives,  Prev: Code Section,  Up: Input File Structure
+
+Line Directives
+===============
+
+   At any point in a zlex source file, outside a code block or a
+comment a line which looks like
+     %line   NNN       FILE-NAME
+   will pretend that the following line is line number NNN from
+FILE-NAME.  The FILE-NAME is any string not containing newlines
+enclosed within double quotes `"': it may contain ANSI-C escape
+sequences.  Both the line number NNN and FILE-NAME are optional.
+
+   A `%line' directive, like all other directives, is only recognized
+when it occurs at the start of a line.  It is useful to track the
+origin of source lines when a zlex file is generated automatically from
+another source file by a preprocessor.  The `%line' directive is
+similar to the `#line' directive accepted by C-preprocessors.
+
+   If a `%line' directive occurs in section 2 of the zlex source file,
+then it may break old `lex' or `flex' programs which would regard the
+character sequence `%line' at the start of a line as a pattern.  Hence
+the `%line' directive is not recognized in section 2 of the Zlex source
+file when the `--lex-compat' option is specified (*note Options
+List::.).
+
+
+File: zlex.info,  Node: C Interface Conventions,  Next: Patterns,  Prev: Input File Structure,  Up: Top
+
+C Interface Conventions
+***********************
+
+   The Zlex programmer is provided with C objects for accessing
+information about and controlling the operation of the generated
+scanner.  The C entities used for this interface are functions,
+variables and macros.  For example, Zlex provides a main scanner
+function with default name `yylex'; the text of the last matched token
+can be accessed using variables with default names `yytext' and
+`yyleng'; Zlex provides the C macro `REJECT' to find an alternate way
+to tokenize the current input.
+
+   Certain conventions are used in naming these entities.  Many of
+these names can be changed by the Zlex programmer.  Many entities also
+have alternate names.  When we refer to an entity in this manual we
+usually refer to it by its "common name", which is the way it was
+referred to in historical implementations.
+
+* Menu:
+
+* Naming Conventions::          Conventions used in naming Zlex entities.
+* Scope of Names::              Whether Zlex names have function, file
+                                or program scope.
+* Scanner State::               Passing the internal scanner state to
+                                library routines.
+
+
+File: zlex.info,  Node: Naming Conventions,  Next: Scope of Names,  Prev: C Interface Conventions,  Up: C Interface Conventions
+
+Naming Conventions
+==================
+
+   Certain conventions are used by Zlex in choosing the names for
+programmer-visible C entities.
+
+* Menu:
+
+* Macros Names::                Conventions used for macro names.
+* Variable Names::              Conventions used for variable names.
+* Function Names::              Conventions used for function names.
+* Private Names::               Conventions used for private names.
+
+
+File: zlex.info,  Node: Macros Names,  Next: Variable Names,  Prev: Naming Conventions,  Up: Naming Conventions
+
+Macros Names
+------------
+
+   There is a canonical form for all macro names defined by Zlex in the
+generated scanner.  A "canonical macro name" starts with the prefix
+`YY_', has all letters capitalized, and words are separated by
+underscores.  Examples of canonical macro names are `YY_REJECT' and
+`YY_NEW_FILE'.
+
+   In order to retain compatibility with `lex' and `flex', alternate
+names are provided for some macros.  These alternate names do not meet
+the above conventions for canonical names.  For example, `REJECT' is an
+alternate name for `YY_REJECT'.
+
+   Unfortunately, there is no consistency whether the call of a macro M
+which does not require any arguments is written as `M()' or simply `M'.
+This inconsistency arises because of the need to maintain backward
+compatibility with `lex' and `flex'.
+
+
+File: zlex.info,  Node: Variable Names,  Next: Function Names,  Prev: Macros Names,  Up: Naming Conventions
+
+Variable Names
+--------------
+
+   By default, the names of all variables begin with the prefix `yy',
+though this prefix can be changed by using the `--prefix' option (*note
+Options List::.).  The default variable names usually contain only
+lower-case letters, though in a few cases, they also contain
+underscores for backward compatibility.  It is possible for the user to
+specify an arbitrary name for any variable by defining an appropriate
+C-macro.
+
+   For example, the default name of the variable which holds the length
+of the current lexeme is `yyleng' (*note Lexeme Length::.).  If at
+scanner generation time, the programmer specifies the option
+`--prefix=lex_', then the name of the variable will be `lex_len'.  If
+the programmer `#define's the macro `YY_LENG' to be `tokLength', then
+the name will be `tokLength'.
+
+
+File: zlex.info,  Node: Function Names,  Next: Private Names,  Prev: Variable Names,  Up: Naming Conventions
+
+Function Names
+--------------
+
+   There is only one documented function in the generated scanner file:
+this is the main scanner function with default name `yylex'.  Its name
+can be changed in a manner similar to variable names (*note Variable
+Names::.), by either specifying the `--prefix' option during scanner
+generation or by defining the macro `YY_LEX'.  For example, if during
+scanner generation the programmer specifies the option `--prefix=scan',
+then the name of the main scanning function will be `scanlex'.  If the
+programmer `#define's the macro `YY_LEX' to be `scan', then the name of
+the function will be `scan'.
+
+   The other documented functions are those in the Zlex library.  With
+one exception, the names of all these library functions start with the
+prefix `yy'.  They do not contain any underscores, but the first letter
+of each word is capitalized.  It is not possible to change these names
+as they are precompiled into the Zlex library when it is built during
+installation.  Examples of these library function names are
+`yyCreateBuffer', `yyTopState' and `yySwitchToBuffer'.
+
+   The one exception to the rule for library function names is the
+function `main' which is a default main program which simply invokes
+`yylex()'.
+
+
+File: zlex.info,  Node: Private Names,  Prev: Function Names,  Up: Naming Conventions
+
+Private Names
+-------------
+
+   Some names are used by Zlex for its own internal purposes.  All these
+private names start with the prefix `yy' or `YY', independent of the
+`--prefix' option.  The user is urged to avoid using names starting
+with these prefixes to prevent possible name clashes.
+
+
+File: zlex.info,  Node: Scope of Names,  Next: Scanner State,  Prev: Naming Conventions,  Up: C Interface Conventions
+
+Scope of Names
+==============
+
+   The names provided by Zlex have three kinds of scope:
+
+Scanner Function Scope
+     If a name has scanner function scope, its use is meaningful only
+     within the main scanner function.  In practice, this means that
+     the programmer can use these names only within the actions
+     associated with patterns and not in any other functions.  Examples
+     of names with scanner function scope are `YY_REJECT' and `yy_act'.
+
+File Scope
+     Names with file scope are meaningful only within the generated
+     scanner file.  All macro names which do not have scanner function
+     scope have file scope.
+
+Program Scope
+     Names with program scope can be used through-out the program.  All
+     public function names and variable names have program scope.  No
+     macro name has program scope.
+
+   The effect of using a name outside its intended scope is undefined.
+In practice, it will usually result in a compiler error when compiling
+the generated scanner.
+

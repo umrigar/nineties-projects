@@ -1,0 +1,721 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Debugging Your Parser</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_8.html">previous</A>, <A HREF="zyacc_10.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<A NAME="IDX187"></A>
+<A NAME="IDX188"></A>
+<H1><A NAME="SEC104" HREF="zyacc_toc.html#SEC104">Debugging Your Parser</A></H1>
+<P>
+Zyacc provides facilities to get a debugger compiled into your program.
+The resulting program can be debugged in several different ways:
+<P>
+<OL>
+
+<LI>
+You can interact with the program using a command-line interface and
+control it using simple single letter debugging commands.  This approach has
+the disadvantage that debugger I/O is interspersed with the I/O of your
+program.
+
+<LI>
+As in (1) above, but separate processes are used to run your program
+and the debugger interface.  These processes communicate using a
+socket-based interface.  Hence the program being debugged can be on a
+computer different from the one on which you are doing the debugging, or it
+could be on the same one (the usual case).  When debugging and running your
+program on the same computer, you can run your program in one window and
+debug it from another window.  This avoids the problem in (1) where
+debugger and program I/O are interspersed.
+
+<LI>
+As in (2) above, but the interaction uses a GUI java-based application,
+rather than a command-line interface.  Most of the facilities of the
+command-line interface are available via the GUI.
+
+<LI>
+By specifying certain environmental variables when you run your
+program, you can get it to generate HTML files which can then be accessed
+using any Web browser.  The GUI used in (3) is then run as a java applet by
+accessing the generated HTML files using your favorite Web browser.  This
+approach has the advantage that the GUI can automatically use your Web
+browser to display the current state of the parser in the HTML files
+generated using the <CODE>--HTML</CODE> option (see section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>).
+
+</OL>
+<P>
+<A NAME="IDX189"></A>
+<A NAME="IDX190"></A>
+<H2><A NAME="SEC105" HREF="zyacc_toc.html#SEC105">Building Debugging Parsers</A></H2>
+<P>
+To build a parser which can be debugged, it is necessary to define a C
+preprocessor symbol when compiling the generated parser and to link your 
+program with the Zyacc library.  Optionally, if you would like token
+semantics to be printed out, then you need to define an auxiliary function.
+<P>
+<H3><A NAME="SEC106" HREF="zyacc_toc.html#SEC106">Compiling Debugging Parsers</A></H3>
+<P>
+To enable compilation of debugging facilities, you must define the C
+preprocessor macro <CODE>YY_ZYACC_DEBUG</CODE> to be nonzero when you compile the
+parser.  This can be done in any of the following ways:
+<P>
+<OL>
+
+<LI>
+You can define the <CODE>YY_ZYACC_DEBUG</CODE> macro in the C-declarations
+section of section 1 of your Zyacc source file.  
+
+<LI>
+You can use the <CODE>-t</CODE> or <CODE>--debug</CODE> option when you run Zyacc
+(see section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>).  This results in a definition
+of <CODE>YY_ZYACC_DEBUG</CODE> automatically being added to the generated parser.
+
+<LI>
+You can define the <CODE>YY_ZYACC_DEBUG</CODE> macro on the compiler command
+line when you compile the generated parser.  For most compilers, this can
+typically be done by specifying the option <CODE>-DYY_ZYACC_DEBUG</CODE>.
+
+</OL>
+<P>
+The third approach is the recommended approach as it defers the debugging
+decision to the latest possible point in the build process.
+<P>
+For compatibility with other parser generators, the macro <CODE>YYDEBUG</CODE> can
+be used instead of <CODE>YY_ZYACC_DEBUG</CODE>.  Zyacc provides
+<CODE>YY_ZYACC_DEBUG</CODE> in addition to <CODE>YYDEBUG</CODE> for the following
+reason: <CODE>YYDEBUG</CODE> is also used to turn on debugging in lex-based
+scanner generators; if a project uses both lex and yacc, and its compilation
+is controlled by a Makefile then it can sometimes be inconvenient to turn on
+debugging in the parser but not in the scanner, or vice-versa.
+<P>
+<H3><A NAME="SEC107" HREF="zyacc_toc.html#SEC107">Linking Debugging Parsers</A></H3>
+<P>
+A debugging parser must be linked with the Zyacc library.  Depending on your
+system, you may also need to link it with the networking library ---
+typically you need to specify <CODE>-lsocket</CODE> and <CODE>-lnsl</CODE> on the link
+command-line.  For most compilers, this is typically done using the <CODE>-L</CODE>
+option (for specifying the library path) and the <CODE>-l</CODE> option (for
+specifying the library name).  For example, if your project consists of a
+parser with object file <CODE>parse.o</CODE> and some helper functions in
+<CODE>helpers.o</CODE> and the Zyacc library is installed in the <CODE>lib</CODE>
+subdirectory of your home directory, then a typical link command line is:
+<P>
+<PRE>
+	cc parse.o helpers.o -L$HOME/lib -lzyacc -lsocket -lnsl -o my_prj
+</PRE>
+It is usually necessary that the <CODE>-L</CODE> and <CODE>-l</CODE> options occur
+<EM>after</EM> the object files.
+<P>
+<A NAME="IDX191"></A>
+<A NAME="IDX192"></A>
+<H3><A NAME="SEC108" HREF="zyacc_toc.html#SEC108">Printing Token Semantics</A></H3>
+<P>
+If you would like to have the debugger print out tokens using their
+semantics (rather than the token names), then you need to define a function
+to print them out.  If your function is <VAR>semFn</VAR>, then it should have the
+prototype
+<PRE>
+void <VAR>semFn</VAR>(FILE *out, int tokNum, void *yylvalP);
+</PRE>
+and should print in <CODE>FILE</CODE> out, the semantics associated with the token
+whose token number is <CODE>tokNum</CODE> and whose <CODE>yylval</CODE> semantic value
+(see section <A HREF="zyacc_5.html#SEC81">Semantic Values of Tokens</A>) is pointed to by <CODE>yylvalP</CODE>.
+<P>
+You may call this function whatever you like.  You should communicate the
+name of the function to Zyacc by defining (in the C declarations section of
+the source file) the C preprocessor macro <CODE>YY_SEM_FN</CODE> to the
+chosen name.
+<P>
+If you are only using the textual interface, then this function may print
+anything you wish.  However, if you wish to use the GUI, then it is
+imperative that the function <STRONG>not print any newlines</STRONG>.  
+<P>
+If you are using the GUI, then you may also want to define the C macro
+<CODE>YY_SEM_MAX</CODE> to specify the maximum number of characters your semantic
+function will print.  If you do not define this macro, then a default value
+is used.
+<P>
+<H2><A NAME="SEC109" HREF="zyacc_toc.html#SEC109">Environmental Variables</A></H2>
+<P>
+Since the program being run is <EM>your</EM> program and Zyacc has no control
+over the arguments accepted by your program from the command-line, all
+arguments to the debugger are provided via environmental variables.
+<P>
+If your shell is derived from the C-shell (<CODE>csh</CODE>, <CODE>tcsh</CODE>, etc),
+then you can specify an environmental variable using the <CODE>setenv</CODE>
+command.  For example, 
+<PRE>
+	setenv	ZYDEBUG_PORT 1
+</PRE>
+<P>
+If your shell is derived from the Bourne-shell (<CODE>sh</CODE>, <CODE>ksh</CODE>,
+<CODE>bash</CODE>, etc), then you can specify an environmental variable using the
+<CODE>export</CODE> command.  For example,
+<PRE>
+	export	ZYDEBUG_PORT=1
+</PRE>
+<P>
+If you prefer to avoid cluttering up your environment with gratuitous
+definitions, then the <CODE>sh</CODE>-based derivatives provide a neat
+alternative.  You can simply type the variable definitions immediately
+before the name of your program, as illustrated by the following example:
+<PRE>
+	ZYDEBUG_PORT=1 my_prg my_arg1 my_arg2
+</PRE>
+<P>
+The environmental variables used by the Zyacc debugger are listed below.
+They are discussed in more detail later.
+<P>
+<DL COMPACT>
+<DT><CODE>ZYDEBUG_APPLET</CODE>
+<DD>Specifies the name of a applet to be generated by the debugger.
+<DT><CODE>ZYDEBUG_CODEBASE</CODE>
+<DD>Specifies the relative path to the java-based GUI debugger.
+<DT><CODE>ZYDEBUG_HTMLBASE</CODE>
+<DD>Specifies the relative path to the HTML files describing your parser.
+<DT><CODE>ZYDEBUG_PORT</CODE>
+<DD>Suggests a socket port to be used by the debugger.
+<DT><CODE>ZYDEBUG_SRCBASE</CODE>
+<DD>Specifies the relative path to the source file for your parser.
+
+</DL>
+<P>
+<A NAME="IDX193"></A>
+<H2><A NAME="SEC110" HREF="zyacc_toc.html#SEC110">Debugging Parsers Using a Textual Interface</A></H2>
+	
+Parsers can be debugged using a textual interface with a single
+process for both your program and the debugging interface, or by using a
+separate process for your program and a separate process for the debugger
+interface.  The single process alternative is fine as long as your program
+does not generate any terminal I/O.  If your program does generate terminal
+I/O, then sorting out your program's I/O from the debugger's I/O could get
+messy and multi-process debugging is to be preferred.
+<P>
+In a networked environment, the multi-process debugger also allows
+<EM>remote debugging</EM>, with the program being debugged running on one
+computer and the debugging interface running on another computer.  For this
+to work, your network environment must support BSD-style sockets, -- this
+is usually the case for most modern systems.
+<P>
+<H3><A NAME="SEC111" HREF="zyacc_toc.html#SEC111">Starting a Single Process Textual Debugger</A></H3>
+<P>
+To debug your program using a single process textual interface you must
+first compile and link your program as outlined in section <A HREF="zyacc_9.html#SEC105">Building Debugging Parsers</A>.  Then you should start your program the way your
+normally do specifying any command-line arguments required.  You should
+not specify any environmental variables.  Your program starts up as
+normal and when the parsing function <CODE>yyparse</CODE> is first entered,
+the debugger takes control and allows you to interact with it using the
+debugger commands (see section <A HREF="zyacc_9.html#SEC113">Textual Debugger Commands</A>).  (As mentioned
+earlier, if your program does any terminal I/O, then the debugger
+interaction will be interspersed with the interaction with your
+program).
+<P>
+<H3><A NAME="SEC112" HREF="zyacc_toc.html#SEC112">Starting a Multiple Process Textual Debugger</A></H3>
+<P>
+To debug your program using a textual interface with multiple processes
+you must first compile and link your program as outlined in
+section <A HREF="zyacc_9.html#SEC105">Building Debugging Parsers</A>.  To start your program, you should
+define the environmental variables described below and then start your
+program the way your normally do specifying any command-line arguments
+required.  To make the debugger start in multiple-process mode, the
+environmental variable (see section <A HREF="zyacc_9.html#SEC109">Environmental Variables</A>)
+<CODE>ZYDEBUG_PORT</CODE> must be defined when the program is started.  The
+value specified for <CODE>ZYDEBUG_PORT</CODE> should be a suggested socket
+port number to use: Zyacc merely uses it as a starting point in its
+search for a free socket and it is usually best to specify it simply as
+1.  Once it finds a free port, it outputs its number to the terminal as
+follows:
+<PRE>
+	zydebug port: 6001
+</PRE>
+Given the port number, you can start that portion of the debugger which
+communicates with your program.  To do this, you should run the
+<CODE>zydebug</CODE> program (which should have been installed along with Zyacc)
+giving it the above socket number:
+<PRE>
+	zydebug 6001
+</PRE>
+If you want to run <CODE>zydebug</CODE> on a computer different from the one where
+your program is running then simply type:
+<PRE>
+	zydebug <VAR>HOST</VAR> <VAR>PORT</VAR>
+</PRE>
+where <VAR>HOST</VAR> is the network address (hostname or dotted IP address) of
+the computer on which your program is running, and <VAR>PORT</VAR> is the port
+number output when you started your program.  For example, if I started
+the program above on host <CODE>alpha.romeo.com</CODE>, I would use:
+<PRE>
+	zydebug alpha.romeo.com 6001
+</PRE>
+<P>
+<H3><A NAME="SEC113" HREF="zyacc_toc.html#SEC113">Textual Debugger Commands</A></H3>
+<P>
+Irrespective of the manner in which you start the debugger, the commands
+it accepts are always the same: a single letter followed by an optional
+argument.  These commands allow you to specify breakpoints and
+displaypoints.  When the parser encounters a <DFN>breakpoint</DFN> the
+debugger suspends execution of the parser and allows you to interact
+with it.  When the parser encounters a <CODE>displaypoint</CODE>, the debugger
+displays information about the state of the parse.  The concepts of
+displaypoints and breakpoints are orthogonal -- i.e. it is possible to
+display information at a point in the parse without suspending parser
+execution at that point, or vice-versa.
+<P>
+The commands which are relevant to human users are the following:
+<P>
+<DL COMPACT>
+<DT><CODE>b [<VAR>breakSpec</VAR>]</CODE>
+<DD>Set or list breakpoint(s) as specified by <VAR>breakSpec</VAR>.  
+
+At a breakpoint, the parser stops and the user can type in commands
+(it may or may not display its current state, depending on whether or
+not a displaypoint is set too).  If breakSpec is omitted then list all
+breakpoints.  breakSpec can have one of the following forms with the
+specified meaning:
+
+<DL COMPACT>
+<DT><CODE><VAR>TERM</VAR></CODE>
+<DD>Terminal with name <VAR>TERM</VAR> is about to be shifted.
+<DT><CODE><VAR>NON_TERM</VAR></CODE>
+<DD>Any rule with LHS nonterminal named <VAR>NON_TERM</VAR> is about to be reduced.
+<DT><CODE><VAR>RULE_NUM</VAR></CODE>
+<DD>Rule number <VAR>RULE_NUM</VAR> is about to be reduced.
+<DT><CODE>%n</CODE>
+<DD>Reduce action on any nonterminal.
+<DT><CODE>%t</CODE>
+<DD>Shift action on any terminal.
+<DT><CODE>*</CODE>
+<DD>Both shift and reduce actions.
+</DL>
+
+<DT><CODE>B [<VAR>breakSpec</VAR>]</CODE>
+<DD>  Clear breakpoint(s) as specified by <VAR>breakSpec</VAR>.  
+
+  At a breakpoint, the parser stops and the user can type in commands
+  (it may or may not display its current state, depending on whether or
+  not a displaypoint is set too).  If <VAR>breakSpec</VAR> is omitted then clear all
+  breakpoints.  <VAR>breakSpec</VAR> is as specified for the <CODE>b</CODE> command.
+
+<DT><CODE>c [<VAR>temporaryBreakSpec</VAR>]</CODE>
+<DD>  Continue execution until a breakpoint is entered.
+
+  If <VAR>temporaryBreakSpec</VAR> is specified, then it specifies a temporary break
+  point which is automatically cleared whenever the next breakpoint is
+  entered. <VAR>temporaryBreakSpec</VAR> can have the same form as <VAR>breakSpec</VAR>
+  for the <CODE>b</CODE> command.
+
+<DT><CODE>d [<VAR>displaySpec</VAR>]</CODE>
+<DD>  Set or list displaypoint(s) as specified by <VAR>displaySpec</VAR>.  
+
+  At a displaypoint, the parser displays its current state (it may or
+  may not stop to let the user interact with it, depending on whether or
+  not a breakpoint is set too).  If displaySpec is omitted then list 
+  all displaypoints.  <VAR>displaySpec</VAR> can have the same form as
+  <VAR>breakSpec</VAR> for the <CODE>b</CODE> command.
+
+<DT><CODE>D [<VAR>displaySpec</VAR>]</CODE>
+<DD>  Clear displaypoint(s) as specified by <VAR>displaySpec</VAR>.  
+
+  At a displaypoint, the parser displays its current state (it may or
+  may not stop to let the user interact with it, depending on whether or
+  not a breakpoint is set too).  If displaySpec is omitted then clear 
+  all displaypoints.  <VAR>displaySpec</VAR> can have the same form as
+  <VAR>breakSpec</VAR> for the <CODE>b</CODE> command.
+
+<DT><CODE>h [<VAR>cmd</VAR>]</CODE>
+<DD>  Print help on single-letter command <VAR>cmd</VAR>.  If <VAR>cmd</VAR> is omitted, 
+  give help on all commands.
+
+<DT><CODE>l [<VAR>listSpec</VAR>]</CODE>
+<DD>  List terminals, non-terminals or rules as specified by <VAR>listSpec</VAR>.  
+
+  If <VAR>listSpec</VAR> is omitted, then all rules are listed.  Otherwise
+  <VAR>listSpec</VAR> can be one of the following:
+
+<DL COMPACT>
+<DT><CODE>%n</CODE>
+<DD>List all non-terminal symbols.
+<DT><CODE>%t</CODE>
+<DD>List all terminal symbols.
+<DT><CODE><VAR>RULE_NUM</VAR></CODE>
+<DD>List rule with number <VAR>RULE_NUM</VAR>.
+</DL>
+
+<DT><CODE>m [<VAR>depth</VAR>]</CODE>
+<DD>Set maximum <VAR>depth</VAR> printed for the stack.  
+
+If depth is 0 or omitted, then entire stack is printed.
+
+<DT><CODE>n</CODE>
+<DD>Execute parser till next shift action.
+
+Equivalent to <CODE>c %t</CODE>.
+
+<DT><CODE>p</CODE>
+<DD>  Print current parser state.
+
+<DT><CODE>q</CODE>
+<DD>  Quit debugger and run parser without debugging.
+<DT><CODE>s</CODE>
+<DD><DT><CODE>&#60;blank line&#62;</CODE>
+<DD>  Single-step parser to next shift or reduce action.
+
+  Equivalent to <CODE>c *</CODE>.
+
+</DL>
+<P>
+<A NAME="IDX194"></A>
+<A NAME="IDX195"></A>
+<A NAME="IDX196"></A>
+<A NAME="IDX197"></A>
+<H2><A NAME="SEC114" HREF="zyacc_toc.html#SEC114">Debugging Parsers Using a Graphical User Interface</A></H2>
+<P>
+It is also possible to use a java-based GUI to debug parsers generated by
+Zyacc.  This can be done in two ways:
+<P>
+<OL>
+
+<LI>
+The GUI can be used as a standalone java application.  To do this, you
+should have a java runtime system installed on your computer.
+
+<LI>
+The GUI can be used as an applet from within a web browser which 
+supports java.
+
+</OL>
+<P>
+<A NAME="IDX198"></A>
+<H3><A NAME="SEC115" HREF="zyacc_toc.html#SEC115">Starting a GUI Debugger as a Java Application</A></H3>
+<P>
+To debug your program using a GUI java application you must first
+compile and link your program as outlined in section <A HREF="zyacc_9.html#SEC105">Building Debugging Parsers</A>.  To use the GUI as a standalone application, you should first
+start your program the way your normally do, specifying any command-line
+arguments required.  The following environmental variables
+(see section <A HREF="zyacc_9.html#SEC109">Environmental Variables</A>) are used by your program to control
+the setup of the debugger.
+<P>
+<DL COMPACT>
+
+<DT><CODE>ZYDEBUG_PORT</CODE>
+<DD>This is required.  As discussed earlier (see section <A HREF="zyacc_9.html#SEC112">Starting a Multiple Process Textual Debugger</A>), it's value is best specified simply as
+<CODE>1</CODE>.
+
+<DT><CODE>ZYDEBUG_SRCBASE</CODE>
+<DD>This should be the relative path to the parser source file (the
+<SAMP>`.y'</SAMP> file) from the directory which is current when the parsing
+function <CODE>yyparse</CODE> is first entered.  (The directory in which
+<CODE>yyparse</CODE> is entered is usually the same
+directory in which your program executable resides, assuming that your
+program has not performed any <CODE>chdir()</CODE> calls and that you started
+the program in the directory in which it resides).  If it not specified,
+it is assumed that your parser source file lives in the directory the
+parsing function was in when it was first entered.
+
+
+</DL>
+<P>
+When your program starts it will output the port number of the socket it
+has connected to; for example:
+<PRE>
+	zydebug port: 6001
+</PRE>
+This port number will be used to connect the GUI to your executing
+program.
+<P>
+To start the GUI, you must run the java runtime system on your machine,
+telling it where to find the java classfiles referenced by
+<CODE>zdu.zydebug.ZYDebug</CODE> which form the GUI and providing it with
+arguments telling it how to connect to your executing program.  The
+exact procedures may be different on your machine, but as of this
+writing, the most common setup is as follows:
+<P>
+Java is started by simply using the command <CODE>java</CODE>.  For the <CODE>java</CODE>
+command to work it must be in your <CODE>PATH</CODE> (see section <A HREF="zyacc_9.html#SEC109">Environmental Variables</A>) or you should specify the full path name.  For java to find
+the java classfiles for the debugger, those files must be in your
+<CODE>CLASSPATH</CODE> (see section <A HREF="zyacc_9.html#SEC109">Environmental Variables</A>).  Finally, you must
+specify the port number output by your program, (optionally preceeded by
+the hostname or dotted IP address of the computer on which your program
+is running, if it is different from the one on which you are running the
+GUI).
+<P>
+The following example shows the starting a debugger GUI under a
+<CODE>csh</CODE> or derivatives.
+<P>
+<PRE>
+
+% setenv CLASSPATH /usr/local/share/classes
+% java zdu.zydebug.ZYDebug 6001 &#38;
+
+</PRE>
+<P>
+Under <CODE>sh</CODE> or derivatives, the following command can be used to
+connect to a program running on a different machine:
+<PRE>
+$ CLASSPATH=/usr/local/share/classes java zdu.zydebug.ZYDebug pear 6001 &#38;
+</PRE>
+where <CODE>pear</CODE> is the name of the machine on which the program is
+running.
+<P>
+<A NAME="IDX199"></A>
+<A NAME="IDX200"></A>
+<A NAME="IDX201"></A>
+<H3><A NAME="SEC116" HREF="zyacc_toc.html#SEC116">Starting a GUI Debugger as a Java Applet</A></H3>
+<P>
+A java applet can only be run by being embedded within an HTML file
+which provides the environment in which the applet lives.  Among other
+things, the HTML file provides the arguments to the applet.
+<P>
+The debugging applet talks to the program being debugged using a socket
+referred to by a port number.  Since this port number can vary for
+different executions of the program being debugged, it has to be
+provided as an argument to the applet.  As an applet gets its argument
+from its associated HTML file, and this particular port number argument
+can be different for different executions of the program being debugged,
+the HTML file associated with the debugging applet has to be generated
+dynamically.
+<P>
+The HTML file is generated by your enhanced program when it is started
+(actually a second HTML file is generated as well).  Using environmental
+variables (see section <A HREF="zyacc_9.html#SEC109">Environmental Variables</A>) you can specify the names of
+the HTML files, as well as paths to various other resources required by
+the applet.
+<P>
+To debug your program using a GUI java applet you must first compile and
+link your program as outlined in section <A HREF="zyacc_9.html#SEC105">Building Debugging Parsers</A>.  You
+should then start your program the way your normally do, specifying any
+command-line arguments required.  The following environmental variables
+(see section <A HREF="zyacc_9.html#SEC109">Environmental Variables</A>) are used by your program to control
+the setup of the debugger.
+<P>
+<DL COMPACT>
+
+<DT><CODE>ZYDEBUG_APPLET</CODE>
+<DD>This is required.  It specifies the root name used for the generated
+HTML documents which are used to access the debugging applet.
+
+<DT><CODE>ZYDEBUG_CODEBASE</CODE>
+<DD>This should provide the path to the debugger's java classfiles relative
+to the directory where the generated HTML documents live (relative to the
+<CODE>DOCBASE</CODE> directory in java terminology).  If not specified, then it is
+assumed that the java classfiles reside in the same directory as the
+generated HTML documents.
+
+<DT><CODE>ZYDEBUG_HTMLBASE</CODE>
+<DD>This should provide the path to the parser's HTML description files
+generated using the <CODE>--HTML</CODE> option see section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>), relative to the directory where the generated HTML documents live
+(relative to the <CODE>DOCBASE</CODE> directory in java terminology).  If not
+specified, then it is assumed that the HTML description files reside in
+the same directory as the generated HTML documents.
+
+<DT><CODE>ZYDEBUG_PORT</CODE>
+<DD>This is not required.  As discussed earlier See section <A HREF="zyacc_9.html#SEC112">Starting a Multiple Process Textual Debugger</A>, it's value is best specified simply as
+<CODE>1</CODE>.
+
+<DT><CODE>ZYDEBUG_SRCBASE</CODE>
+<DD>This is exactly as for the standalone GUI application.  It should be the
+relative path to the parser source file (the <SAMP>`.y'</SAMP> file) from the
+directory which is current when the parsing function <CODE>yyparse</CODE> is
+first entered.  (The directory in which <CODE>yyparse</CODE> is entered is
+usually the same directory in which your program executable resides,
+assuming that your program has not performed any <CODE>chdir()</CODE> calls
+and that you started the program in the directory in which it resides).
+If it not specified, it is assumed that your parser source file lives in
+the directory the parsing function was in when it was first entered.
+
+
+</DL>
+<P>
+Usually, the parser source file and the HTML description files are in
+the same directory as the program executable and all you need to specify
+are <CODE>ZYDEBUG_APPLET</CODE> and <CODE>ZYDEBUG_CODEBASE</CODE>.
+<P>
+Consider the following more complicated situation:
+<P>
+<UL>
+
+<LI>
+You would like to put the generated HTML files in <CODE>$HOME/tmp</CODE> with
+the name <CODE>XXX</CODE>.
+
+<LI>
+The java classfiles reside in <CODE>/usr/local/share/classes</CODE>.
+
+<LI>
+The HTML files describing the parser and the source file reside in the parent
+directory of the directory in which you start the program.
+
+<LI>
+Your enhanced executable program is called <CODE>foo</CODE>
+and takes a single argument <CODE>bar</CODE>.
+
+</UL>
+<P>
+Under <CODE>csh</CODE> and derivatives, you can use the following sequence of
+commands: 
+<P>
+<PRE>
+setenv ZYDEBUG_APPLET $HOME/tmp/XXX
+setenv CODEBASE /usr/local/share/classes
+setenv HTMLBASE `pwd`/..
+setenv SRCBASE `pwd`/..
+./foo bar
+</PRE>
+<P>
+Under <CODE>sh</CODE> and derivatives, the following command suffices:
+<P>
+<PRE>
+ZYDEBUG_APPLET=$HOME/tmp/XXX CODEBASE=/usr/local/share/classes \
+  HTMLBASE=`pwd`/.. SRCBASE=`pwd`/.. \
+  ./foo bar
+</PRE>
+<P>
+Having generated the HTML files, you can now use a browser to start the
+debugger's GUI and debug your parser.  There are two methods of doing
+this available in most browsers: 
+<P>
+<UL>
+
+<LI>View the generated HTML file using the local file access option
+provided by most browsers.  This will work only if you are using the
+browser on the same machine as the one on which your program is executing.
+
+<LI>View the generated HTML file as a regular remote URL.  For this to
+work, all the files required by the applet (the java classfiles, the
+parser source file, and the HTML description files) must be accessible
+by the HTTP daemon on the remote machine.  This usually requires that
+they be within a public html area.
+
+</UL>
+<P>
+<H3><A NAME="SEC117" HREF="zyacc_toc.html#SEC117">Using the Debugger GUI</A></H3>
+<P>
+As the applet is talking to your compiled program which has not been
+modified in any way, it is not possible to have the applet restart your
+program once it has completed its parse.  Instead you will have to
+restart the parser and the debugger's GUI applet.
+<P>
+The applet has four main windows.  Clockwise from the top-left they are
+the following:
+<P>
+<DL COMPACT>
+
+<DT><EM>Parse Forest Window</EM>
+<DD>
+Shows the current parse-forest.  The nodes on top are the nodes
+currently on the stack.  Terminal nodes are in red, non-terminal nodes
+are in green and error nodes are in pink.  The last active node is
+highlighted in yellow.  Each node contains text of the form
+<VAR>S</VAR><CODE>/</CODE><VAR>Sym</VAR>, where <VAR>S</VAR> is the state at which that node
+was created and <VAR>Sym</VAR> is the grammar symbol or token semantics
+corresponding to the node.  <EM>The nodes in the top row correspond to
+nodes currently on the parse stack</EM>.
+
+Each non-leaf node in the forest is clickable.  Clicking on such a node
+hides all its subtrees; clicking again on that node displays the subtrees
+again.  This can be useful as the parse tree typically gets pretty large for
+practical parsers.
+
+<DT><EM>Trace Window</EM>
+<DD>
+Shows the parse stack in gray (each entry is
+in the same format as a parse tree node), the current lookahead in red
+and the following action in blue.
+
+<DT><EM>Breakpoint Window</EM>
+<DD>This allows you to set/clear breakpoints
+on all or selected nonterminals and terminals.  Clicking a line in the
+window sets a breakpoint on the symbol displayed on that line; clicking
+it again clears the breakpoint.  The currently selected breakpoints
+are highlighted.
+
+<DT><EM>Source Window</EM>
+<DD> Shows the parser source file.  During a
+reduction, the line corresponding to the reduction is highlighted.
+
+</DL>
+<P>
+The debugger is controlled by the following controls:
+<P>
+<DL COMPACT>
+
+<DT><EM>Shadows Checkbox</EM>
+<DD>This checkbox controls whether or not the
+parser shows crude shadows while displaying the parse forest.  It is
+useful to avoid having shadows cluttering up the display of large forests.
+
+<DT><EM>Update Checkbox</EM>
+<DD>Selecting this checkbox results in the parser displaying the current
+state in the LR(0) machine in a browser frame.  For this to work, the
+parser should have been generated using the <CODE>--HTML</CODE> option
+(see section <A HREF="zyacc_10.html#SEC119">Invoking Zyacc</A>), and the environmental variable
+<CODE>ZYDEBUG_HTMLBASE</CODE> should have been specified when the parser was
+started.
+
+<DT><EM>Step Button</EM>
+<DD>Steps the parser by a single step.
+
+<DT><EM>Next Button</EM>
+<DD>Steps the parser to the next shift action.
+
+<DT><EM>Continue Button</EM>
+<DD>Steps the parser till the next breakpoint.
+If no breakpoints are set, then the parser runs to completion.
+As mentioned above, it is not possible to restart the parser.
+
+
+</DL>
+<P>
+<H2><A NAME="SEC118" HREF="zyacc_toc.html#SEC118">Tradeoffs between Debugging Approaches</A></H2>
+<P>
+The popular adage "a picture is worth a thousand words" may be true in
+the real world, but with the primitive visualization techniques used by
+the GUI debugger, it may not hold for the GUI debugger.  For practical
+parsers, the parse forest displayed by the debugger rapidly becomes
+unmanageable, even after hiding many large subtrees.  If the large
+amount of screen real estate taken up by the parse forest was occupied
+instead by words more information might be conveyed.
+<P>
+It is probably best to use the GUI debugger only under the following
+conditions: 
+<P>
+<UL>
+
+<LI>
+Only a limited amount of text is being parsed -- this prevents
+inordinate growth of the displayed parse forest.
+
+<LI>
+To explain and understand the operation of parsers in general and
+LALR(1) parsers in particular.
+
+<LI>
+You are a novice and don't feel like climbing the learning curve hillock
+represented by the textual commands.
+
+</UL>
+<P>
+Another problem with GUI debugging is that it can be quite slow as the
+java GUI has to build up the parse forest, trace output, etc.  I have
+not had a chance to analyze its performance, but I would not be
+surprised if it is spending a fair amount of time merely collecting
+garbage.
+<P>
+For debugging most practical parsers, I would recommend the textual
+interface. 
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_8.html">previous</A>, <A HREF="zyacc_10.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

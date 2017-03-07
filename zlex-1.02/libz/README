@@ -1,0 +1,16 @@
+This directory contains the source files for libz: a personal library.
+It contains the following modules:
+
+area:		Dynamically sized memory arrays.
+bset:		Bit-sets (needs work).
+ccport:		Definitions to hide dependencies on compilers & libraries.
+error:		Error routines.
+findfile:	Search for a file.
+memalloc:	Memory allocation with error checking and debugging support.
+osport:		A header which takes care of minor OS porting issues.
+parseopt:	A table-driven parser for command-line options.
+strspace:	String-space for interning strings.
+textid:		Association of small integers (IDS) with strings.
+xassert:	A multi-level assert feature (of doubtful usefulness).
+
+The corresponding header files can be found in the subdirectory include.

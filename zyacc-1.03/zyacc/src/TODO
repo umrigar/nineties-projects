@@ -1,0 +1,14 @@
+WISHLIST:
+
+Allow backtracking in the generated parser.
+
+It would be nice if a symbol which is not declared and has no rules for it
+is implicitly declared to be a terminal with a warning.  Currently it is
+implicitly declared to be a nonterminal resulting in an error.
+
+Redo the frontend, taking care of the above and getting rid of the wall
+between the grammar frontend and the named attributes frontend.
+
+Bison seems to allow %type to be used to declare the types of a terminal
+symbol, even tho' the documentation is quite specific that %type is used
+only for nonterminals.  Maybe zyacc should allow that too.

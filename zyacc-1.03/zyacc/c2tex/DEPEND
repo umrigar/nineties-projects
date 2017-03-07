@@ -1,0 +1,5 @@
+#Automatically generated dependencies.
+c2tex.o: c2tex.c ../../libz/area.h ../../libz/ccport.h \
+ ../../libz/error.h ../../libz/errorz.h ../../libz/ids.h \
+ ../../libz/parseopt.h
+scanlib.o: scanlib.c

@@ -1,0 +1,8 @@
+This directory contains a small program which converts fragments of C source
+files to TeXInfo.  It is not made by default, since it is only needed to
+generate the documentation.  It contains a configured Makefile --- to
+make it, simply type `make' in this directory.
+
+If you modify the source file c2tex.l, you will need zlex to regenerate the
+c2tex.c which is distributed.
+

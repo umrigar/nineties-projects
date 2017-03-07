@@ -1,0 +1,56 @@
+Enter file name: Makefile
+Finding `Makefile' with search list= `:../:/usr/bin:$FIND_FILE_PATH'.
+	./Makefile
+Finding `Makefile' with search list= `../::/usr/bin:$FIND_FILE_PATH'.
+	../Makefile
+Finding `Makefile' with search list= `..:/usr/bin:$FIND_FILE_PATH:'.
+	../Makefile
+Finding `Makefile' with search list= `..:/usr/bin:$FIND_FILE_PATH:.'.
+	../Makefile
+Finding `Makefile' with search list= `'.
+Not found.
+Enter file name: utfltest.in
+Finding `utfltest.in' with search list= `:../:/usr/bin:$FIND_FILE_PATH'.
+	./utfltest.in
+Finding `utfltest.in' with search list= `../::/usr/bin:$FIND_FILE_PATH'.
+	./utfltest.in
+Finding `utfltest.in' with search list= `..:/usr/bin:$FIND_FILE_PATH:'.
+	./utfltest.in
+Finding `utfltest.in' with search list= `..:/usr/bin:$FIND_FILE_PATH:.'.
+	./utfltest.in
+Finding `utfltest.in' with search list= `'.
+Not found.
+Enter file name: cc
+Finding `cc' with search list= `:../:/usr/bin:$FIND_FILE_PATH'.
+	/usr/bin/cc
+Finding `cc' with search list= `../::/usr/bin:$FIND_FILE_PATH'.
+	/usr/bin/cc
+Finding `cc' with search list= `..:/usr/bin:$FIND_FILE_PATH:'.
+	/usr/bin/cc
+Finding `cc' with search list= `..:/usr/bin:$FIND_FILE_PATH:.'.
+	/usr/bin/cc
+Finding `cc' with search list= `'.
+Not found.
+Enter file name: stdio.h
+Finding `stdio.h' with search list= `:../:/usr/bin:$FIND_FILE_PATH'.
+	/usr/include/stdio.h
+Finding `stdio.h' with search list= `../::/usr/bin:$FIND_FILE_PATH'.
+	/usr/include/stdio.h
+Finding `stdio.h' with search list= `..:/usr/bin:$FIND_FILE_PATH:'.
+	/usr/include/stdio.h
+Finding `stdio.h' with search list= `..:/usr/bin:$FIND_FILE_PATH:.'.
+	/usr/include/stdio.h
+Finding `stdio.h' with search list= `'.
+Not found.
+Enter file name: xxx
+Finding `xxx' with search list= `:../:/usr/bin:$FIND_FILE_PATH'.
+Not found.
+Finding `xxx' with search list= `../::/usr/bin:$FIND_FILE_PATH'.
+Not found.
+Finding `xxx' with search list= `..:/usr/bin:$FIND_FILE_PATH:'.
+Not found.
+Finding `xxx' with search list= `..:/usr/bin:$FIND_FILE_PATH:.'.
+Not found.
+Finding `xxx' with search list= `'.
+Not found.
+Enter file name: 

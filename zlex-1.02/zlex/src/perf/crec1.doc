@@ -1,0 +1,2 @@
+crec1:	A C-scanner which simply RECOGNIZES tokens; it uses start-states 
+	for processing comments.

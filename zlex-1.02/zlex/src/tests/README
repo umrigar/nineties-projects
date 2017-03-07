@@ -1,0 +1,12 @@
+This directory contains regression tests for zlex.  They are not run
+during the usual installation, as they take a while.  They are useful
+during zlex maintenance and development.
+
+To run all the tests, simply type `make' in this directory.
+
+To run a subset of the tests, which have a chance of completing in a
+reasonable time, do `make QUICK' in this directory.
+
+
+
+

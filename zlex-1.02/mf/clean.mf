@@ -1,0 +1,17 @@
+#CLEANING TARGETS
+
+#Remove any garbage.
+clean:		FORCE
+		$(RM) *.o *~ core t.* t t[0-9]* *.bak lex.yy.c *.tmp tmp.* \
+		      *.output 
+
+#Remove all files not in distribution.
+distclean:	clean FORCE
+		$(RM) $(TARGET) Makefile makefile
+
+
+#Remove all non-source files.  May need special tools to rebuild.
+maintainer-clean: 	distclean FORCE
+		$(RM) $(NON_SRC_FILES)
+
+FORCE:

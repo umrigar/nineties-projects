@@ -1,0 +1,11 @@
+#Automatically generated dependencies.
+out.o: out.c options.h ../libz/ccport.h out.h scan.h ../libz/area.h \
+ ../libz/error.h ../libz/errorz.h ../libz/zutil.h
+profout.o: profout.c ../libz/ccport.h
+sig.o: sig.c
+scanlib.o: scanlib.c
+parse.o: parse.c options.h ../libz/ccport.h out.h scan.h \
+ ../libz/area.h ../libz/error.h ../libz/errorz.h ../libz/hashtab.h \
+ ../libz/ids.h ../libz/parseopt.h
+scan.o: scan.c options.h ../libz/ccport.h out.h scan.h ../libz/error.h \
+ ../libz/errorz.h ../libz/ids.h ../libz/memalloc.h parse.h

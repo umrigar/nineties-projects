@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1 (Feb 5, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="sigplan">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="sigplan.css">
+</HEAD>
+<BODY LANG="EN">
+ <A NAME="tex2html26" HREF="node2.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html24" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html18" HREF="sigplan.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html27" HREF="node2.html">The Basic Idea</A>
+<B>Up:</B> <A NAME="tex2html25" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html19" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<BR> <P>
+<H1><A NAME="SECTION00010000000000000000">Introduction</A></H1>
+<P>
+There are two aspects to the dimensional analysis of computer
+programs:
+<P>
+<OL><LI> Verifying the dimensional integrity of expressions.  This
+prevents nonsense like adding mass to time.<LI> Provide automatic scaling between quantities.  For example,
+if a quantity in inches is added to a quantity in centimeters, one
+of the quantities needs to be scaled appropriately before the
+addition can be performed.
+<P>
+</OL>
+<P>
+The proposed method provides (1).  It circumvents the need for
+(2), by representing all quantities internally using only a single
+reference unit (specified by the programmer) for each
+dimension.<A NAME="tex2html1" HREF="footnode.html#170"><IMG  ALIGN=BOTTOM ALT="gif" SRC="http://localhost/~zdu/icons/foot_motif.gif"></A>
+<P>
+The method allows static checking of the dimensional consistency
+of expressions involving the usual arithmetic and relational
+operators with negligible run-time overhead (in theory).  It is
+also possible to specify dimensioned literals using arbitrary
+units, as well as do I/O of dimensioned quantities with full
+static checking.  The term <EM>static checking</EM> means that the
+checking is done before run-time: usually at compile-time, but
+sometimes at link-time.
+<P>
+The sequel assumes that the reader has some familiarity with C++.
+<P>
+<HR><A NAME="tex2html26" HREF="node2.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://localhost/~zdu/icons/next_motif.gif"></A> <A NAME="tex2html24" HREF="sigplan.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://localhost/~zdu/icons/up_motif.gif"></A> <A NAME="tex2html18" HREF="sigplan.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://localhost/~zdu/icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html27" HREF="node2.html">The Basic Idea</A>
+<B>Up:</B> <A NAME="tex2html25" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<B> Previous:</B> <A NAME="tex2html19" HREF="sigplan.html">Fully Static Dimensional Analysis </A>
+<P><ADDRESS>
+<I>zerksis umrigar (zdu@acm.org) <BR>
+Fri Aug  8 15:41:40 EDT 1997</I>
+</ADDRESS>
+</BODY>
+</HTML>

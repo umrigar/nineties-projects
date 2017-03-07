@@ -1,0 +1,4 @@
+001: %option yylineno
+002: %%
+003: .+	printf("%03d: %s\n", yylineno, yytext);
+004: \n

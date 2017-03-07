@@ -1,0 +1,142 @@
+#include "comptab.h"
+#include "dfa.h"
+#include "eqclass.h"
+#include "options.h"
+#include "outvec.h"
+#include "patterns.h"
+
+#include "area.h"
+#include "bset.h"
+#include "memalloc.h"
+
+#include <assert.h>
+#include <stdlib.h>	/* for qsort(). */
+
+static struct {
+  Index2 maxBase;	/* Max entry in base[] vector. */
+  Count2 nContextStarts;/* # of context start-states for var-context pats. */
+  Count2 nIn;		/* # of inputs for DFA. */
+  Count2 nInitialStates;/* # of start-states (including '^' states). */
+  Count2 nIntraStates;	/* # of states with intra-tok actions. */
+  Count2 nNonFinalStates; /* # of states which are non-accepting. */
+  Count2 nSigStates;	/* # of significant states. */
+  Count2 nStates;	/* Total number of states. */
+  Index2 rejActN;	/* Number for special reject action. */
+  Count2 rejSize;	/* # of elements in rejects table. */
+  Index2 sentinelState;	/* State to perform sentinel processing. */
+} globals;
+#define G globals
+
+#define SENTINEL_ACT	0
+
+
+/*			  DFA STATES.					*/
+
+typedef Index2 Transition;
+typedef Index2 State;
+
+typedef struct {
+  Index2 input;		/* Equiv-class or character. */
+  State nextState;	/* Index in states. */
+} Trans;
+
+static AREA (trans, Trans, 2048);	/* State transitions. */
+#define TRANS	(A_BASE(trans, Trans))
+typedef struct {
+  BSet val;		/* Set of pattern positions.			*/
+  BSet actions;		/* Action #s if accepting; NIL if not accepting.*/
+  Transition transLo;	/* Starting index in transitions.		*/
+  Transition transHi;	/* Transitions are in [transLo, transHi).	*/
+  State sentinelSucc;	/* Actual successor of state on sentinel input.	*/
+                        /* (NIL if no successor).			*/
+  union {
+    Index2 succ;	/* Next entry in hash-chain.			*/
+    State alt;		/* Alternate state for intra-token patterns. 	*/
+  } u;
+  Boolean addIntraTok;	/* If true, intra-token pattern added to this 
+			 * state and its successors. 
+			 */
+} DFAState;
+
+
+static AREA (states, DFAState, 256);	/* Table of DFA states. */
+#define STATES 	A_BASE(states, DFAState)
+
+enum { 
+  STATES_HASH_SIZE= 139
+};
+
+static Index2 statesHashTab[STATES_HASH_SIZE];
+
+static VOID 
+initStates(VOID_ARGS) 
+{
+  Index i;
+  /* Initialize states hash-table. */
+  for (i= 0; i < STATES_HASH_SIZE; i++) {
+    statesHashTab[i]= NIL;
+  }
+  VOID_RET();
+}
+
+static State
+newState(VOID_ARGS)
+{
+  Index s= A_NEXT(states);
+  STATES[s].val= STATES[s].actions= BAD_BSET;
+  STATES[s].transLo= STATES[s].transHi= 0;
+  STATES[s].sentinelSucc= NIL; STATES[s].addIntraTok= FALSE;
+  return s;
+}
+
+
+static State 
+getState(BSet s0, Boolean addIntraTok) 
+/* Get unique state for pattern-positions in set s.  Delete set s if 
+ * already in states table.
+ */
+{
+  BSet s= (addIntraTok) ? unionBSet(s0, getIntraFirsts()) : s0;
+  CONST Index h= hashSumBSet(s) % STATES_HASH_SIZE;
+  Index i;
+  for (i= statesHashTab[h]; i != NIL; i= STATES[i].u.succ) {
+    if (compareBSet(s, STATES[i].val) == 0) { 
+      delBSet(s); 
+      assert(STATES[i].addIntraTok == addIntraTok);
+      return i; 
+    }
+  }
+  i= newState();
+  STATES[i].val= s; 
+  STATES[i].addIntraTok= addIntraTok;
+  STATES[i].u.succ= statesHashTab[h]; statesHashTab[h]= i;
+  return i;
+}
+
+
+/*			    START STATES.				*/
+
+Count 
+setupStartStates(VOID_ARGS)
+/* Establish start-states.  If '^' anchor is used, then set up 2 states
+ * for each start-state, with the even numbered state corresponding to
+ * those patterns without any '^', and the odd-numbered state corresponding
+ * to all (including '^') patterns.  Return the total number of states
+ * created.
+ *
+ * It is possible that some of the created states are redundant, in
+ * that they are identical.  In that case, still create the redundant
+ * state but with val == BAD_BSET.  Don't chain it on the hash-table
+ * chain, but point its hash-succ-link to the non-redundant identical
+ * state.
+ *
+ * Note that for redundant states, the corresponding first sets delivered
+ * by the patterns module will be deleted and replaced.
+ */
+{
+  Count nSS= nStartStates();
+  Count nStatesPerSS= hasStartLinePat() ? 2 : 1;
+  Index i;
+  assert(A_INDEX(states) == 0);
+  for (i= 0; i < nSS; i++) {
+    Index j;

@@ -1,0 +1,222 @@
+<HTML><HEAD>
+<TITLE>Introduction to Recursive Descent Parsing</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Introduction to Recursive Descent Parsing</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/30 13:50:05 umrigar"
+</FONT>
+
+<P> This is a brief intuitive introduction to recursive descent parsing.
+Any compiler text should provide more details.  A elementary introduction to
+<A HREF="gramintro.html">grammars and language analysis</A> is also
+available.
+
+<P> Given a grammar, consider how one could write a parser for it.  One
+possible approach would proceed as follows:
+
+<P>We know that all strings in the language must be derived from the start
+nonterminal <VAR>S</VAR>.  Hence if we can write a procedure <CODE>S()</CODE>
+which matches all strings derived from <VAR>S</VAR>, then we are done.
+But how do we do this?
+
+<P> Let's generalize the above question somewhat.  Instead of merely posing
+the problem of writing a procedure which matches strings derived from the
+specific start nonterminal <VAR>S</VAR>, let's look at the more general
+problem of writing a procedure which matches strings derived from any
+nonterminal <VAR>N</VAR>; i.e., for each nonterminal <VAR>N</VAR>, we would
+like to construct a parsing procedure <CODE>N()</CODE> which matches all
+strings derived from <VAR>N</VAR>.
+
+<P> If a nonterminal <VAR>N</VAR> has only a single grammar rule, then its
+parsing procedure is easy to write.  To match the rule we know that we need
+to match each grammar symbol on its right-hand side (RHS).  There are two
+possibilities:
+
+<OL>
+
+<LI> If the RHS symbol is a terminal symbol, check that the current
+lookahead matches that terminal symbol.  If it does, then advance the input,
+setting the current lookahead to the next input symbol.  If it does not,
+signal an error.
+
+<LI> For each occurrence of a nonterminal symbol on the RHS, call the
+corresponding parsing procedure.  If the parsing procedure works as posited
+above, then it will match a prefix of the input with a rule for the
+nonterminal.
+
+</OL>
+
+If a nonterminal <VAR>N</VAR> has multiple grammar rules, then the parsing
+procedure will need to decide which rule to use.  It can do so by looking at
+the current lookahead token to see which of the candidate rules can start
+with the lookahead.  If only a single rule can start with the lookahead,
+then that rule is chosen.  If it is always possible to predict a unique rule
+for any nonterminal by looking ahead by at most one token, then the grammar
+is said to be LL(1).
+
+<P> Hence a parsing function <CODE>N()</CODE> for nonterminal <VAR>N</VAR>
+will simply contain logic to pick a rule based on the current lookahead,
+followed by code to match each individual rule.  Its structure will look
+something like the following:
+
+<PRE>
+	N() {
+	  if (lookahead can start first rule for <VAR>N</VAR>) {
+	    match rule 1 for <VAR>N</VAR>
+	  }
+	  else if (lookahead can start second rule for <VAR>N</VAR>) {
+	    match rule 2 for <VAR>N</VAR>
+	  }
+	  ...		...
+          else if (lookahead can start <VAR>n</VAR>'th rule for <VAR>N</VAR>) {
+	    match rule <VAR>n</VAR> for <VAR>N</VAR>
+	  else {
+	    error();
+	  }
+	}
+</PRE>        
+
+
+<P> Unfortunately, there are some problems with this simple scheme.  A
+grammar rule is said to be <EM>directly left recursive</EM> if the first
+symbol on the RHS is identical to the LHS nonterminal. Hence, after a
+directly left recursive rule has been selected, the first action of the
+corresponding parsing procedure, will be to call itself immediately, without
+consuming any of the input.  It should be clear that such a recursive call
+will never terminate.  Hence a recursive descent parser cannot be written
+for a grammar which contains such directly (or indirectly) left recursive
+rules; in fact, the grammar cannot be LL(1) in the presence of such rules.
+
+<P> Fortunately, it is possible to transform the grammar to remove left
+recursive rules.  Consider the left recursive nonterminal <VAR>A</VAR>
+defined by the following rules:
+
+<PRE>
+	<VAR>A</VAR>: <VAR>A</VAR> <VAR>alpha</VAR>
+	<VAR>A</VAR>: <VAR>beta</VAR>
+</PRE>
+
+where <VAR>alpha</VAR> is nonempty and <VAR>alpha</VAR> and <VAR>beta</VAR>
+stand for any sequence of terminal and nonterminal grammar symbols.  Looking
+at the above rules, it is clear that any string derived from <VAR>A</VAR>
+must ultimately start with <VAR>beta</VAR>.  After the <VAR>beta</VAR>, the
+<I>rest of the string</I> must either be empty or consist of a sequence of
+one or more <VAR>alpha</VAR>'s.  Using a new nonterminal <VAR>A'</VAR> to
+represent the <I>rest of the string</I> we can represent the transformed
+grammar as follows:
+
+<PRE>
+	<VAR>A</VAR>: <VAR>beta</VAR> <VAR>A'</VAR>
+	<VAR>A'</VAR>:/* empty */
+	<VAR>A'</VAR>: <VAR>alpha</VAR> <VAR>A'</VAR>
+</PRE>
+The above rules are not left recursive.
+
+<H3>An Example</H3>
+
+<P> Consider the following simple grammar for assignment statements with
+expressions involving addition or subtraction:
+
+<PRE>
+1)	stmt:	ID ':=' expr
+2)	expr:	expr '+' NUM
+3)	expr:	expr '-' NUM
+4)	expr:	NUM
+</PRE>
+This grammar allows statements like <CODE>a:= 1 + 2 - 3</CODE>.
+Since the rules for <CODE>expr</CODE> are left recursive, we need to
+transform the grammar to the following:
+<PRE>
+1)	stmt:		ID ':=' expr
+2)	expr:		NUM exprRest
+3)	exprRest:	'+' NUM exprRest
+4)	exprRest:	'-' NUM exprRest
+5)	exprRest:	/* empty */
+</PRE>
+
+Assuming that the current lookahead is in a global variable
+<CODE>tok</CODE>, we can write the parsing procedures in pseudo-C as
+follows:
+
+<PRE>
+stmt() {
+  match(ID); match(':='); expr();
+}
+
+expr() {
+  match(NUM); exprRest();
+}
+
+exprRest() {
+  if (tok == '+') { /* rule 3 */
+    match('+'); match(NUM); exprRest();
+  }
+  else if (tok == '-') { /* rule 4 */
+    match('-'); match(NUM); exprRest();
+  }
+  else { /* rule 5 */
+  }
+}
+</PRE>
+
+Note that <CODE>exprRest()</CODE> chooses rule 5 if the lookahead cannot
+match any of the other rules for <CODE>exprRest</CODE>.  It would have also
+been correct to choose rule 5 only if the current lookahead was a token
+which can <EM>follow</EM> <CODE>exprRest</CODE>, but the method used above
+is simpler with the sole disadvantage that errors are detected later.
+
+<P>The <CODE>match()</CODE> procedure merely needs to check if the current
+lookahead in <CODE>tok</CODE> matches its argument and advance the input:
+
+<PRE>
+match(Token t) {
+  if (tok == t) {
+    tok= nextToken();
+  }
+  else {
+    error():
+  }
+}
+</PRE>
+
+where we assume that <CODE>nextToken()</CODE> is the interface to the
+scanner and returns the next token from the input stream.
+
+<P> All that remains is to make sure we startup and terminate the parser
+correctly:
+
+<PRE>
+parse() {
+  tok= nextToken();
+  stmt();
+  match('&lt;EOF&gt;');
+}
+</PRE>
+
+The first line merely primes the global variable used for the lookahead
+token.  The second line calls the parsing procedure for <CODE>stmt</CODE>.
+Finally, assuming that <CODE>'&lt;EOF&gt;'</CODE> is the token used to
+represent the end of the input stream, the last line ensures that no garbage
+follows a legal <CODE>stmt</CODE>.
+
+<P> <FONT Color=#00FF00>Copyright (C) 1997 Zerksis D. Umrigar</FONT>
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+
+<A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+<NOFRAMES>
+<!-- this noframes tag doesn't work as expected in Netscape 3.0 -->
+<A TARGET="_parent" HREF="recframe.html">Recursive Descent Parsing Page</A>
+</NOFRAMES>
+
+</BODY>
+
+</HTML>

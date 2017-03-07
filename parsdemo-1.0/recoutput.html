@@ -1,0 +1,53 @@
+<HTML><HEAD>
+<TITLE>Recursive Descent Parser Applet: Output Windows</TITLE>
+</HEAD>
+<BODY BGCOLOR="#BFBFBF" TEXT="#000000" LINK="#0000ef" VLINK="#55188a"
+    ALINK="#FF0000"> 
+<H1>Recursive Descent Parser Applet: Output Windows</H1>
+<P> <FONT SIZE= -2 COLOR=#008080>
+Last Update Time-stamp: "97/06/27 19:17:11 umrigar"
+</FONT>
+
+<P>The recursive descent parser displays its output in three windows:
+
+<DL>
+
+<LI><DT><A NAME="tree"><B>Parse Tree Window</B></A><DD>
+
+The top window displays the parse tree as it is being constructed.  Nodes
+are shown in green while their subtrees are still being built (tracing the
+green nodes from the bottom to the top gives the contents of the stack).
+When all the subtrees of a node have been built, the color of the node is
+changed to red.  As the parser is stepped, the window will always display
+the current node of interest which is highlighted in yellow.
+
+<LI><DT><A NAME="program"><B>Program Window</B></A><DD>
+
+This shows the recursive descent parsing program in java.  At each step, the
+parser highlights the line it is currently executing.
+
+<LI><DT><A NAME="trace"><B>Trace Window</B></A><DD>
+
+This window shows the trace history in the format used in classical compiler
+texts.  Each trace line consists of the stack (in green) followed by the
+input (in black) which is yet to be processed.  The current lookahead token
+is always the first token in the unexpended input.  The stack shows the
+control stack --- i.e., it contains the parsing functions which have been
+called but have not yet returned.  They correspond to the green nodes in the
+parse tree.
+
+</DL>
+
+<P> Each window displays a brief description of itself for a short period
+after the mouse pointer enters it.
+
+<HR>
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P><A TARGET="_parent" HREF="index.html">Up to Parsing Demos Main Page</A>
+
+</BODY>
+
+</HTML>

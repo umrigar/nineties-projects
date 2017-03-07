@@ -1,0 +1,63 @@
+Last Update Time-stamp: "97/07/29 21:11:20 zdu"
+
+8/29/96: zyacc 1.03: bug fixes + changes.
+
+Minor bug fixes: 
+
+Enhancements:
+Added support for interactive debugging using a java GUI.
+
+Changed definition of %look declarations to a stronger definition.
+
+Verified correct operation of yylloc.
+
+------------------------------------------------------------------------
+4/03/96: zyacc 1.02: bug fixes + changes.  Inconsistent token types
+declaration still not caught.
+
+Bug Fixes:
+Fixed incorrect RR conflict resolution.
+Fixed initialization problem for table compression.
+
+Unhancements:
+Removed support for embedded scanner, since it appeared to be of limited
+utility and too featuritis oriented.
+
+Enhancements:
+1.  Added automatic declarations of multi-character literal tokens which had
+C identifier names.  With the addition of the --term-suffix option, it
+is possible to implicitly declare tokens like reserved words which have no
+semantics.
+
+2.  Instead of generating one massive html file, the --html (-H) option
+now generates several different files.  This should hopefully make the
+html output usable without getting the browsers bogged down figuring
+out intra-file references.
+------------------------------------------------------------------------
+3/29/96: zyacc 1.01: minor portability and bug fixes.  Inconsistent token
+types declaration still not caught.
+
+1.  In a desire to produce identical parser tables on different platforms, 
+setup qsort() comparison routines so as to never return 0.  In a couple 
+of cases, I had to add an extra field to the elements being compared
+which I could use for comparison when the real values were ==.
+
+2.  Went thru header files and verified all global var declarations were
+extern.  Needed to add extern for optionsP in options.h and yytext in
+scan.h.
+
+3.  While fixing (1), I fixed a couple of minor printout bugs:
+
+a) In lalr.c a d format specifier was missing the % in "TEST SET #d".
+b) In lalr.c:printHTMLStateActions(), tho' testOuts was allocated, it was
+never being computed! (with no test-sets being printed). 
+c) In gram.c:endRule() added a test around assignment to actN of an internal
+action rule so as not to change it if the internal action rule corresponded
+to a test.
+
+4.  Setup and added this file to the distribution.
+------------------------------------------------------------------------
+3/24/96: zyacc 1.0: release to cs572 students.  Known bug: inconsistent
+token types not caught as error.
+------------------------------------------------------------------------
+July 95: zyacc 0.1 private prerelease

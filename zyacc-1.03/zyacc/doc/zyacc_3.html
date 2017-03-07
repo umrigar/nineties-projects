@@ -1,0 +1,1498 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.31
+     from zyacc.texi on 2 August 1997 -->
+
+<TITLE>Zyacc - Examples</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_2.html">previous</A>, <A HREF="zyacc_4.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+<HR>
+<A NAME="IDX28"></A>
+<A NAME="IDX29"></A>
+<H1><A NAME="SEC12" HREF="zyacc_toc.html#SEC12">Examples</A></H1>
+<P>
+Now we show and explain six sample programs written using Zyacc. The
+first three examples illustrate features of Zyacc which are also present
+in yacc. These are a reverse polish notation calculator, an algebraic
+(infix) notation calculator, and a multi-function calculator.  The last
+three illustrate features which are unique in Zyacc: these include a
+differently sugared implementation of the multi-function calculator, a
+calculator which evaluates polynomials and a lazy person's calculator
+which allows omitting some sets of parentheses.  
+<P>
+The code shown in this manual has been extracted automatically from code
+which has been tested. These examples are simple, but Zyacc grammars for
+real programming languages are written the same way.
+<P>
+If you have access to the Zyacc distribution, you will find these
+examples under the <CODE>doc</CODE> directory.
+<P>
+<A NAME="IDX30"></A>
+<A NAME="IDX31"></A>
+<A NAME="IDX32"></A>
+<A NAME="IDX33"></A>
+<H2><A NAME="SEC13" HREF="zyacc_toc.html#SEC13">Reverse Polish Notation Calculator</A></H2>
+<P>
+The first example is that of a simple double-precision <DFN>reverse polish
+notation</DFN> calculator (a calculator using postfix operators).  This example
+provides a good starting point, since operator precedence is not an issue.
+The second example will illustrate how operator precedence is handled.
+<P>
+The source code for this calculator is named <TT>`rpcalc.y'</TT>.  The
+<SAMP>`.y'</SAMP> extension is a convention used for Zyacc input files.
+<P>
+<H3><A NAME="SEC14" HREF="zyacc_toc.html#SEC14">Declarations for <CODE>rpcalc</CODE></A></H3>
+<P>
+Here are the C and Zyacc declarations for the reverse polish notation
+calculator.  As in C, comments are placed between <SAMP>`/*...*/'</SAMP>.
+<P>
+<PRE>
+/* Reverse polish notation calculator. */
+
+%{
+#<B>include</B> &#60;math.h&#62;
+#<B>include</B> &#60;stdio.h&#62;
+
+#<B>define</B> YYSTYPE <B>double</B>
+
+<B>int</B> yylex(<B>void</B>);
+<B>void</B> yyerror(<B>const</B> <B>char</B> *errMsg);
+
+%}
+
+%<B>token</B> NUM_TOK
+
+%% /* Grammar rules and actions follow */
+
+</PRE>
+<P>
+The C declarations section (see section <A HREF="zyacc_4.html#SEC39">The C Declarations Section</A>) contains two preprocessor directives.
+<P>
+The <CODE>#define</CODE> directive defines the macro <CODE>YYSTYPE</CODE>, thus
+specifying the C data type for semantic values of both tokens and groupings
+(see section <A HREF="zyacc_4.html#SEC47">Data Types of Semantic Values</A>).  The Zyacc parser will use whatever type
+<CODE>YYSTYPE</CODE> is defined as; if you don't define it, <CODE>int</CODE> is the
+default.  Because we specify <CODE>double</CODE>, each token and each expression
+has an associated value, which is a floating point number.
+<P>
+The <CODE>#include</CODE> directive is used to declare the exponentiation
+function <CODE>pow</CODE>.
+<P>
+The second section, Zyacc declarations, provides information to Zyacc
+about the token types (see section <A HREF="zyacc_4.html#SEC40">The Zyacc Declarations Section</A>).  Each terminal symbol that is not a
+single-character literal must be declared here.  (Single-character
+literals normally don't need to be declared.)  In this example, all the
+arithmetic operators are designated by single-character literals, so the
+only terminal symbol that needs to be declared is <CODE>NUM_TOK</CODE>, the
+token type for numeric constants (since Zyacc will <CODE>#define</CODE>
+<CODE>NUM_TOK</CODE> adding the <SAMP>`_TOK'</SAMP> suffix prevents it from clashing
+with identifiers used for other purposes).
+<P>
+<H3><A NAME="SEC15" HREF="zyacc_toc.html#SEC15">Grammar Rules for <CODE>rpcalc</CODE></A></H3>
+<P>
+Here are the grammar rules for the reverse polish notation calculator.
+<P>
+<PRE>
+input
+  : /* empty */
+  | input line
+  ;
+
+line
+  : '\n'
+  | exp '\n'    { printf ("\t%.10g\n", $1); }
+  ;
+
+exp
+  : NUM_TOK
+  | exp exp '+' { $$= $1 + $2; }
+  | exp exp '-' { $$= $1 - $2; }
+  | exp exp '*' { $$= $1 * $2; }
+  | exp exp '/' { $$= $1 / $2; }
+    /* Exponentiation */
+  | exp exp '^' { $$= pow ($1, $2); }
+    /* Unary minus    */
+  | exp 'n'     { $$= -$1; }
+  ;
+%%
+
+</PRE>
+<P>
+The groupings of the rpcalc "language" defined here are the expression
+(given the name <CODE>exp</CODE>), the line of input (<CODE>line</CODE>), and the
+complete input transcript (<CODE>input</CODE>).  Each of these nonterminal
+symbols has several alternate rules, joined by the <SAMP>`|'</SAMP> punctuator
+which is read as "or".  The following sections explain what these rules
+mean.
+<P>
+The semantics of the language is determined by the actions taken when a
+grouping is recognized.  The actions are the C code that appears inside
+braces.  See section <A HREF="zyacc_4.html#SEC49">Actions</A>.
+<P>
+You must specify these actions in C, but Zyacc provides the means for
+passing semantic values between the rules.  In each action, the
+pseudo-variable <CODE>$$</CODE> stands for the semantic value for the grouping
+that the rule is going to construct.  Assigning a value to <CODE>$$</CODE> is the
+main job of most actions.  The semantic values of the components of the
+rule are referred to as <CODE>$1</CODE>, <CODE>$2</CODE>, and so on.
+<P>
+<H4><A NAME="SEC16" HREF="zyacc_toc.html#SEC16">Explanation of <CODE>input</CODE></A></H4>
+<P>
+Consider the definition of <CODE>input</CODE>:
+<P>
+<PRE>
+input
+  : /* empty */
+  | input line
+  ;
+</PRE>
+<P>
+This definition reads as follows: "A complete input is either an empty
+string, or a complete input followed by an input line".  Notice that
+"complete input" is defined in terms of itself.  This definition is said
+to be <DFN>left recursive</DFN> since <CODE>input</CODE> appears always as the
+leftmost symbol in the sequence.  See section <A HREF="zyacc_4.html#SEC45">Recursive Rules</A>.
+<P>
+The first alternative is empty because there are no symbols between the
+colon and the first <SAMP>`|'</SAMP>; this means that <CODE>input</CODE> can match an
+empty string of input (no tokens).  We write the rules this way because it
+is legitimate to type <KBD>Ctrl-d</KBD> right after you start the calculator.
+It's conventional to put an empty alternative first and write the comment
+<SAMP>`/* empty */'</SAMP> in it.
+<P>
+The second alternate rule (<CODE>input line</CODE>) handles all nontrivial input.
+It means, "After reading any number of lines, read one more line if
+possible."  The left recursion makes this rule into a loop.  Since the
+first alternative matches empty input, the loop can be executed zero or
+more times.
+<P>
+The parser function <CODE>yyparse</CODE> continues to process input until a
+grammatical error is seen or the lexical analyzer says there are no more
+input tokens; we will arrange for the latter to happen at end of file.
+<P>
+<H4><A NAME="SEC17" HREF="zyacc_toc.html#SEC17">Explanation of <CODE>line</CODE></A></H4>
+<P>
+Now consider the definition of <CODE>line</CODE>:
+<P>
+<PRE>
+line
+  : '\n'
+  | exp '\n'  { printf ("\t%.10g\n", $1); }
+  ;
+</PRE>
+<P>
+The first alternative is a token which is a newline character; this means
+that rpcalc accepts a blank line (and ignores it, since there is no
+action).  The second alternative is an expression followed by a newline.
+This is the alternative that makes rpcalc useful.  The semantic value of
+the <CODE>exp</CODE> grouping is the value of <CODE>$1</CODE> because the <CODE>exp</CODE> in
+question is the first symbol in the alternative.  The action prints this
+value, which is the result of the computation the user asked for.
+<P>
+This action is unusual because it does not assign a value to <CODE>$$</CODE>.  As
+a consequence, the semantic value associated with the <CODE>line</CODE> is
+uninitialized (its value will be unpredictable).  This would be a bug if
+that value were ever used, but we don't use it: once rpcalc has printed the
+value of the user's input line, that value is no longer needed.
+<P>
+<H4><A NAME="SEC18" HREF="zyacc_toc.html#SEC18">Explanation of <CODE>expr</CODE></A></H4>
+<P>
+The <CODE>exp</CODE> grouping has several rules, one for each kind of expression.
+The first rule handles the simplest expressions: those that are just numbers.
+The second handles an addition-expression, which looks like two expressions
+followed by a plus-sign.  The third handles subtraction, and so on.
+<P>
+<PRE>
+exp
+  : NUM_TOK
+  | exp exp '+'     { $$ = $1 + $2;    }
+  | exp exp '-'     { $$ = $1 - $2;    }
+  ...
+  ;
+</PRE>
+<P>
+Note that there is no semantic action specified in the case when a
+<CODE>exp</CODE> is a <CODE>NUM_TOK</CODE>.  That is because if a rule has no
+associated semantic action, then Zyacc automatically generates the
+implicit action <CODE>{ $$= $1; }</CODE>, which is exactly what we need in
+this case.
+<P>
+We have used <SAMP>`|'</SAMP> to join all the rules for <CODE>exp</CODE>, but we could
+equally well have written them separately:
+<P>
+<PRE>
+exp
+  : NUM_TOK 
+  ;
+exp
+  : exp exp '+'     { $$ = $1 + $2;    } 
+  ;
+exp
+  : exp exp '-'     { $$ = $1 - $2;    } 
+  ;
+  ...
+</PRE>
+<P>
+Most of the rules have actions that compute the value of the expression in
+terms of the value of its parts.  For example, in the rule for addition,
+<CODE>$1</CODE> refers to the first component <CODE>exp</CODE> and <CODE>$2</CODE> refers to
+the second one.  The third component, <CODE>'+'</CODE>, has no meaningful
+associated semantic value, but if it had one you could refer to it as
+<CODE>$3</CODE>.  When <CODE>yyparse</CODE> recognizes a sum expression using this
+rule, the sum of the two subexpressions' values is produced as the value of
+the entire expression.  See section <A HREF="zyacc_4.html#SEC49">Actions</A>.
+<P>
+You don't have to give an action for every rule.  When a rule has no
+action, Zyacc by default copies the value of <CODE>$1</CODE> into <CODE>$$</CODE>.
+This is what happens in the first rule (the one that uses <CODE>NUM_TOK</CODE>).
+<P>
+The formatting shown here is the recommended convention, but Zyacc does
+not require it.  You can add or change whitespace as much as you wish.
+For example, this:
+<P>
+<PRE>
+exp   : NUM_TOK | exp exp '+' {$$ = $1 + $2; } | ... ;
+</PRE>
+<P>
+means the same thing as this:
+<P>
+<PRE>
+exp
+  : NUM_TOK
+  | exp exp '+'    { $$ = $1 + $2; }
+  ...
+  ;
+</PRE>
+<P>
+The latter, however, is much more readable.
+<P>
+<A NAME="IDX34"></A>
+<A NAME="IDX35"></A>
+<H3><A NAME="SEC19" HREF="zyacc_toc.html#SEC19">The <CODE>rpcalc</CODE> Lexical Analyzer</A></H3>
+<P>
+The lexical analyzer's job is low-level parsing: converting characters or
+sequences of characters into tokens.  The Zyacc parser gets its tokens by
+calling the lexical analyzer.  See section <A HREF="zyacc_5.html#SEC79">The Lexical Analyzer Function <CODE>yylex</CODE></A>.
+<P>
+Only a simple lexical analyzer is needed for the RPN calculator.  This
+lexical analyzer skips blanks and tabs, then reads in numbers as
+<CODE>double</CODE> and returns them as <CODE>NUM_TOK</CODE> tokens.  Any other character
+that isn't part of a number is a separate token.  Note that the token-code
+for such a single-character token is the character itself.
+<P>
+The return value of the lexical analyzer function is a numeric code which
+represents a token type.  The same text used in Zyacc rules to stand for
+this token type is also a C expression for the numeric code for the type.
+This works in two ways.  If the token type is a character literal, then its
+numeric code is the ASCII code for that character; you can use the same
+character literal in the lexical analyzer to express the number.  If the
+token type is an identifier, that identifier is defined by Zyacc as a C
+macro whose definition is the appropriate number.  In this example,
+therefore, <CODE>NUM_TOK</CODE> becomes a macro for <CODE>yylex</CODE> to use.
+<P>
+The semantic value of the token (if it has one) is stored into the global
+variable <CODE>yylval</CODE>, which is where the Zyacc parser will look for it.
+(The C data type of <CODE>yylval</CODE> is <CODE>YYSTYPE</CODE>, which was defined
+at the beginning of the grammar; see section <A HREF="zyacc_3.html#SEC14">Declarations for <CODE>rpcalc</CODE></A>.)
+<P>
+A token type code of zero is returned if the end-of-file is encountered.
+(Zyacc recognizes any nonpositive value as indicating the end of the
+input.)
+<P>
+Here is the code for the lexical analyzer:
+<P>
+<PRE>
+/* Lexical analyzer returns a double floating point
+<TT> * </TT>number in yylval and the token NUM_TOK, or the ASCII
+<TT> * </TT>character read if not a number.  Skips all blanks
+<TT> * </TT>and tabs, returns 0 for EOF. 
+ */
+
+#<B>include</B> &#60;ctype.h&#62;
+
+<B>int</B>
+yylex(<B>void</B>)
+{
+  <B>int</B> c;
+
+  /* skip white space  */
+  <B>while</B> ((c = getchar ()) == ' ' || c == '\t')
+    ;
+  /* process numbers   */
+  <B>if</B> (c == '.' || isdigit (c)) {
+     ungetc(c, stdin);
+     scanf("%lf", &#38;yylval);
+     <B>return</B> NUM_TOK;
+  }
+  /* return end-of-file  */
+  <B>if</B> (c == EOF)
+    <B>return</B> 0;
+  /* return single chars */
+  <B>return</B> c;
+}
+
+</PRE>
+<P>
+<A NAME="IDX36"></A>
+<A NAME="IDX37"></A>
+<H3><A NAME="SEC20" HREF="zyacc_toc.html#SEC20">The Controlling Function</A></H3>
+<P>
+In keeping with the spirit of this example, the controlling function is
+kept to the bare minimum.  The only requirement is that it call
+<CODE>yyparse</CODE> to start the process of parsing.
+<P>
+<PRE>
+<B>int</B> 
+main()
+{
+  <B>return</B> yyparse();
+}
+
+</PRE>
+<P>
+<A NAME="IDX38"></A>
+<H3><A NAME="SEC21" HREF="zyacc_toc.html#SEC21">The Error Reporting Routine</A></H3>
+<P>
+When <CODE>yyparse</CODE> detects a syntax error, it calls the error reporting
+function <CODE>yyerror</CODE> to print an error message (usually but not always
+<CODE>"parse error"</CODE>).  It is up to the programmer to supply <CODE>yyerror</CODE>
+(see section <A HREF="zyacc_5.html#SEC77">Parser C-Language Interface</A>), so here is the definition we will use:
+<P>
+<PRE>
+
+/* Called by yyparse on error */
+<B>void</B>
+yyerror(<B>const</B> <B>char</B> *s)  
+{
+  printf("%s\n", s);
+}
+
+</PRE>
+<P>
+After <CODE>yyerror</CODE> returns, the Zyacc parser may recover from the error
+and continue parsing if the grammar contains a suitable error rule
+(see section <A HREF="zyacc_7.html#SEC99">Error Recovery</A>).  Otherwise, <CODE>yyparse</CODE> returns nonzero.  We
+have not written any error rules in this example, so any invalid input will
+cause the calculator program to exit.  This is not clean behavior for a
+real calculator, but it is adequate in the first example.
+<P>
+<A NAME="IDX39"></A>
+<H3><A NAME="SEC22" HREF="zyacc_toc.html#SEC22">Running Zyacc to Make the Parser</A></H3>
+<P>
+Before running Zyacc to produce a parser, we need to decide how to arrange
+all the source code in one or more source files.  For such a simple example,
+the easiest thing is to put everything in one file.  The definitions of
+<CODE>yylex</CODE>, <CODE>yyerror</CODE> and <CODE>main</CODE> go at the end, in the
+"additional C code" section of the file (see section <A HREF="zyacc_2.html#SEC11">The Overall Layout of a Zyacc Grammar</A>).
+<P>
+For a large project, you would probably have several source files, and use
+<CODE>make</CODE> to arrange to recompile them.
+<P>
+With all the source in a single file, you use the following command to
+convert it into a parser file:
+<P>
+<PRE>
+zyacc <VAR>file_name</VAR>.y
+</PRE>
+<P>
+In this example the file was called <TT>`rpcalc.y'</TT> (for "Reverse Polish
+CALCulator").  Zyacc produces a file named <TT>`<VAR>file_name</VAR>.tab.c'</TT>,
+removing the <SAMP>`.y'</SAMP> from the original file name. The file output by
+Zyacc contains the source code for <CODE>yyparse</CODE>.  The additional
+functions in the input file (<CODE>yylex</CODE>, <CODE>yyerror</CODE> and <CODE>main</CODE>)
+are copied verbatim to the output.
+<P>
+<A NAME="IDX40"></A>
+<H3><A NAME="SEC23" HREF="zyacc_toc.html#SEC23">Compiling the Parser File</A></H3>
+<P>
+Here is how to compile and run the parser file:
+<P>
+<PRE>
+# List files in current directory.
+% ls
+rpcalc.tab.c  rpcalc.y
+
+# Compile the Zyacc parser.
+# <SAMP>`-lm'</SAMP> tells compiler to search math library for <CODE>pow</CODE>.
+% cc rpcalc.tab.c -lm -o rpcalc
+
+# List files again.
+% ls
+rpcalc  rpcalc.tab.c  rpcalc.y
+</PRE>
+<P>
+The file <TT>`rpcalc'</TT> now contains the executable code.  Here is an
+example session using <CODE>rpcalc</CODE>.
+<P>
+<PRE>
+$ rpcalc
+4 9 +
+        13
+3 7 + 3 4 5 *+-
+        -13
+3 7 + 3 4 5 * + - n              Note the unary minus, <SAMP>`n'</SAMP>
+        13
+5 6 / 4 n +
+        -3.166666667
+3 4 ^                           Exponentiation
+        81
+^D                               End-of-file indicator
+$
+</PRE>
+<P>
+On an error, <CODE>rpcalc</CODE> simply gives up after printing an error
+message as shown below:
+<PRE>
+$ rpcalc
+1 2 + +
+parse error
+$ echo $?
+1
+$ 
+</PRE>
+The <CODE>echo $?</CODE> makes the shell (the Bourne shell or Korn shell)
+print the exit code of the last command (<CODE>rpcalc</CODE>) in this case.
+The value 1 is the value returned by the <CODE>return yyparse()</CODE>
+statement in <CODE>main()</CODE>.
+<P>
+<A NAME="IDX41"></A>
+<A NAME="IDX42"></A>
+<A NAME="IDX43"></A>
+<H2><A NAME="SEC24" HREF="zyacc_toc.html#SEC24">Infix Notation Calculator: <CODE>calc</CODE></A></H2>
+<P>
+We now modify rpcalc to handle infix operators instead of postfix.  Infix
+notation involves the concept of operator precedence and the need for
+parentheses nested to arbitrary depth.  Here is the Zyacc code for
+<TT>`calc.y'</TT>, an infix desk-top calculator.
+<P>
+<PRE>
+/* Infix notation calculator--calc */
+
+%{
+#<B>include</B> &#60;math.h&#62;
+#<B>include</B> &#60;stdio.h&#62;
+
+#<B>define</B> YYSTYPE <B>double</B>
+
+<B>int</B> yylex(<B>void</B>);
+<B>void</B> yyerror(<B>const</B> <B>char</B> *errMsg);
+%}
+
+/* zyacc declarations */
+%<B>token</B> NUM_TOK
+%<B>left</B> '-' '+'
+%<B>left</B> '*' '/'
+%<B>left</B> NEG       /* negation--unary minus */
+%<B>right</B> '^'      /* exponentiation   */
+
+/* Grammar follows */
+%%
+input
+  : /* empty */
+  | input line
+  ;
+
+line
+  : '\n'
+  | exp '\n'            { printf ("\t%.10g\n", $1); }
+  ;
+
+exp
+  : NUM_TOK
+  | exp '+' exp         { $$= $1 + $3; }
+  | exp '-' exp         { $$= $1 - $3; }
+  | exp '*' exp         { $$= $1 * $3; }
+  | exp '/' exp         { $$= $1 / $3; }
+  | '-' exp  %<B>prec</B> NEG  { $$= -$2; }
+  | exp '^' exp         { $$= pow ($1, $3); }
+  | '(' exp ')'         { $$= $2; }
+  ;
+%%
+
+</PRE>
+<P>
+The functions <CODE>yylex</CODE>, <CODE>yyerror</CODE> and <CODE>main</CODE> can be the same
+as before.
+<P>
+There are two important new features shown in this code.
+<P>
+In the second section (Zyacc declarations), <CODE>%left</CODE> declares token
+types and says they are left-associative operators.  The declarations
+<CODE>%left</CODE> and <CODE>%right</CODE> (right associativity) take the place of
+<CODE>%token</CODE> which is used to declare a token type name without
+associativity.  (These tokens are single-character literals, which
+ordinarily don't need to be declared.  We declare them here to specify
+the associativity.)
+<P>
+Operator precedence is determined by the line ordering of the
+declarations; the higher the line number of the declaration (lower on
+the page or screen), the higher the precedence.  Hence, exponentiation
+has the highest precedence, unary minus (<CODE>NEG</CODE>) is next, followed
+by <SAMP>`*'</SAMP> and <SAMP>`/'</SAMP>, and so on.  See section <A HREF="zyacc_6.html#SEC89">Operator Precedence</A>.
+<P>
+The other important new feature is the <CODE>%prec</CODE> in the grammar section
+for the unary minus operator.  The <CODE>%prec</CODE> simply instructs Zyacc that
+the rule <SAMP>`| '-' exp'</SAMP> has the same precedence as <CODE>NEG</CODE>---in this
+case the next-to-highest.  See section <A HREF="zyacc_6.html#SEC94">Context-Dependent Precedence</A>.
+<P>
+Here is a sample run of <TT>`calc.y'</TT>:
+<P>
+<PRE>
+$ calc
+4 + 4.5 - (34/(8*3+-3))
+        6.880952381
+-56 + 2
+        -54
+3 ^ 2
+        9
+</PRE>
+<P>
+<A NAME="IDX44"></A>
+<H2><A NAME="SEC25" HREF="zyacc_toc.html#SEC25">Simple Error Recovery</A></H2>
+<P>
+Up to this point, this manual has not addressed the issue of <DFN>error
+recovery</DFN>---how to continue parsing after the parser detects a syntax
+error.  All we have handled is error reporting with <CODE>yyerror</CODE>.  Recall
+that by default <CODE>yyparse</CODE> returns after calling <CODE>yyerror</CODE>.  This
+means that an erroneous input line causes the calculator program to exit.
+Now we show how to rectify this deficiency.
+<P>
+The Zyacc language itself includes the reserved word <CODE>error</CODE>, which
+may be included in the grammar rules.  In the example below it has
+been added to one of the alternatives for <CODE>line</CODE>:
+<P>
+<PRE>
+line
+  : '\n'
+  | exp '\n'    { printf ("\t%.10g\n", $1); }
+  | error '\n'  { yyerrok; }
+  ;
+</PRE>
+<P>
+This addition to the grammar allows for simple error recovery in the event
+of a parse error.  If an expression that cannot be evaluated is read, the
+error will be recognized by the third rule for <CODE>line</CODE>, and parsing
+will continue.  (The <CODE>yyerror</CODE> function is still called upon to print
+its message as well.)  The action executes the statement <CODE>yyerrok</CODE>, a
+macro defined automatically by Zyacc; its meaning is that error recovery is
+complete (see section <A HREF="zyacc_7.html#SEC99">Error Recovery</A>).  Note the difference between
+<CODE>yyerrok</CODE> and <CODE>yyerror</CODE>; neither one is a misprint.<P>
+This form of error recovery deals with syntax errors.  There are other
+kinds of errors; for example, division by zero, which raises an exception
+signal that is normally fatal.  A real calculator program must handle this
+signal and use <CODE>longjmp</CODE> to return to <CODE>main</CODE> and resume parsing
+input lines; it would also have to discard the rest of the current line of
+input.  We won't discuss this issue further because it is not specific to
+Zyacc programs.
+<P>
+<A NAME="IDX45"></A>
+<A NAME="IDX46"></A>
+<A NAME="IDX47"></A>
+<H2><A NAME="SEC26" HREF="zyacc_toc.html#SEC26">Multi-Function Calculator: <CODE>mfcalc</CODE></A></H2>
+<P>
+Now that the basics of Zyacc have been discussed, it is time to move on to
+a more advanced problem.  The above calculators provided only five
+functions, <SAMP>`+'</SAMP>, <SAMP>`-'</SAMP>, <SAMP>`*'</SAMP>, <SAMP>`/'</SAMP> and <SAMP>`^'</SAMP>.  It would
+be nice to have a calculator that provides other mathematical functions such
+as <CODE>sin</CODE>, <CODE>cos</CODE>, etc.
+<P>
+It is easy to add new operators to the infix calculator as long as they are
+only single-character literals.  The lexical analyzer <CODE>yylex</CODE> passes
+back all non-number characters as tokens, so new grammar rules suffice for
+adding a new operator.  But we want something more flexible: built-in
+functions whose syntax has this form:
+<P>
+<PRE>
+<VAR>function_name</VAR> (<VAR>argument</VAR>)
+</PRE>
+<P>
+At the same time, we will add memory to the calculator, by allowing you
+to create named variables, store values in them, and use them later.
+Here is a sample session with the multi-function calculator:
+<P>
+<PRE>
+$ mfcalc
+pi = 3.141592653589
+        3.141592654
+sin(pi)
+        7.932657935e-13
+alpha = beta1 = 2.3
+        2.3
+alpha
+        2.3
+ln(alpha)
+        0.8329091229
+exp(ln(beta1))
+        2.3
+$
+</PRE>
+<P>
+Note that multiple assignment and nested function calls are permitted.
+<P>
+The implementation given below has the scanner first <EM>intern</EM>
+identifiers into a separate <EM>string-space</EM> so that identifiers with
+the same spelling share the same string-space entry.  The scanner
+returns the intern'd representation of the identifier to the parser.
+The parser uses the intern'd representation to access a symbol table
+which keeps track of the properties of the identifier (whether it is a
+variable or function, the value associated with the identifier).
+<P>
+<H3><A NAME="SEC27" HREF="zyacc_toc.html#SEC27">Declarations for <CODE>mfcalc</CODE></A></H3>
+<P>
+The previous grammars had only a single semantic type: the <CODE>double</CODE>
+value associated with <CODE>NUM_TOK</CODE>s and <CODE>exp</CODE>s.  However, now we
+will have identifiers used for variables and functions: they will need a
+semantic type different from <CODE>double</CODE>.  The C and Zyacc
+declarations given below for the multi-function calculator use a couple
+of new Zyacc features to allow multiple semantic types (see section <A HREF="zyacc_4.html#SEC48">More Than One Value Type</A>).
+<P>
+<PRE>
+%{
+#<B>include</B> &#60;ctype.h&#62;
+#<B>include</B> &#60;math.h&#62;
+#<B>include</B> &#60;stdio.h&#62;
+
+<B>int</B> yylex(<B>void</B>);
+<B>void</B> yyerror(<B>const</B> <B>char</B> *errMsg);
+
+/* Typedef typical unary &#60;math.h&#62; function. */
+<B>typedef</B> <B>double</B> (*MathFnP)(<B>double</B> input);
+
+/* Interface to symbol table. */
+<B>static</B> <B>double</B> getIDVal(<B>const</B> <B>char</B> *name);
+<B>static</B> MathFnP getIDFn(<B>const</B> <B>char</B> *name);
+<B>static</B> <B>void</B> setIDVal(<B>const</B> <B>char</B> *name, <B>double</B> val);
+<B>static</B> <B>void</B> setIDFn(<B>const</B> <B>char</B> *name, MathFnP fnP);
+
+%}
+%<B>union</B> {
+  <B>double</B> val;           /* For returning numbers. */
+  <B>const</B> <B>char</B> *id;       /* For returning identifiers. */
+}
+
+%<B>token</B> &#60;val&#62;  NUM_TOK   /* Double precision number */
+%<B>token</B> &#60;id&#62;   ID_TOK    /* Identifiers. */
+%<B>type</B>  &#60;val&#62;  exp
+
+%<B>right</B> '='
+%<B>left</B> '-' '+'
+%<B>left</B> '*' '/'
+%<B>left</B> NEG               /* Negation--unary minus */
+%<B>right</B> '^'              /* Exponentiation */
+
+/* Grammar follows */
+%%
+
+</PRE>
+<P>
+The <CODE>%union</CODE> declaration specifies the entire list of possible
+types; this is instead of defining <CODE>YYSTYPE</CODE>.  The allowable types
+are now double-floats (for <CODE>exp</CODE> and <CODE>NUM_TOK</CODE>) and <CODE>char
+*</CODE> pointers for the names of variables and functions. See section <A HREF="zyacc_4.html#SEC67">The Collection of Value Types</A>.
+<P>
+Since values can now have various types, it is necessary to associate a
+type with each grammar symbol whose semantic value is used.  These
+symbols are <CODE>NUM_TOK</CODE>, <CODE>ID_TOK</CODE>, and <CODE>exp</CODE>.  Their
+declarations are augmented with information about their data type
+(placed between angle brackets).
+<P>
+The Zyacc construct <CODE>%type</CODE> is used for declaring nonterminal
+symbols, just as <CODE>%token</CODE> is used for declaring token types.  We
+have not used <CODE>%type</CODE> before because nonterminal symbols are
+normally declared implicitly by the rules that define them.  But
+<CODE>exp</CODE> must be declared explicitly so we can specify its value type.
+See section <A HREF="zyacc_4.html#SEC68">Nonterminal Symbols</A>.
+<P>
+The C declarations section above also declares the functions used to
+interface to the symbol table.  The symbol table is a mapping from
+identifiers to either <CODE>double</CODE> values (for identifiers which are
+variables) or function pointers (for identifiers whicha re functions).
+The <SAMP>`get'</SAMP> functions are used to get the value associated with an
+identifier; the <SAMP>`set'</SAMP> functions are used to change the value.
+<P>
+<H3><A NAME="SEC28" HREF="zyacc_toc.html#SEC28">Grammar Rules for <CODE>mfcalc</CODE></A></H3>
+<P>
+The grammar rules for the multi-function calculator are
+identical to those for <CODE>calc</CODE> except for three additional rules
+for <CODE>exp</CODE> shown below:
+<P>
+<PRE>
+exp
+  : ID_TOK              { $$= getIDVal($1); }
+  | ID_TOK '=' exp      { setIDVal($1, $3); $$= $3; }
+  | ID_TOK '(' exp ')'  { $$= (*(getIDFn($1)))($3); }
+
+</PRE>
+<P>
+The above additional rules correspond to the cases when an expression is
+an identifier, an assignment or a function application respectively.  
+<UL>
+<LI>
+If
+an expression is an identifier, we merely lookup its value in the symbol
+table using <CODE>getIDVal()</CODE>.  
+
+<LI>
+If an expression is an assignment statement, we use
+the symbol table interface to set the value of the left-hand side
+identifier to the value of the right-hand side expression using
+<CODE>setIDVal()</CODE>. 
+
+<LI>
+If an expression is a function application, we lookup the function
+pointer associated with the identifier in the symbol table using
+<CODE>getIDFn</CODE> and apply the corresponding function to the value of the
+expression.
+
+</UL>
+<P>
+<A NAME="IDX48"></A>
+<H3><A NAME="SEC29" HREF="zyacc_toc.html#SEC29">The <CODE>mfcalc</CODE> Symbol Table</A></H3>
+<P>
+The multi-function calculator requires a symbol table to keep track of the
+names and meanings of variables and functions.  This doesn't affect the
+grammar rules (except for the actions) or the Zyacc declarations, but it
+requires some additional C functions for support.
+<P>
+The symbol table itself consists of a linked list of records.  It
+provides for either functions or variables to be placed in the table.
+Its definition is as follows:
+<P>
+<PRE>
+/* Symbol table ADT. */
+
+/* Possible types for symbols. */
+<B>typedef</B> <B>enum</B> { VAR_SYM, FN_SYM } SymType;
+
+<B>typedef</B> <B>struct</B> Sym {
+  <B>const</B> <B>char</B> *name;     /* Name of symbol. */
+  SymType type;         /* Type of symbol. */
+  <B>union</B> {
+    <B>double</B> var;         /* Value of a VAR_SYM. */
+    MathFnP fn;         /* Value of a FN_SYM. */
+  } value;
+  <B>struct</B> Sym *succ;     /* Link field. */
+} Sym;
+
+/* The symbol table: a chain of Sym's.*/
+<B>static</B> Sym *symTab;
+
+
+</PRE>
+<P>
+The <CODE>Sym</CODE> type contains the <CODE>name</CODE> of the identifier and a
+<CODE>type</CODE> field which classifies the symbol as either a variable
+(<CODE>type == VAR_SYM</CODE>) or function (<CODE>type == FN_SYM</CODE>).  Depending
+on this <CODE>type</CODE> field, the symbol's <CODE>value</CODE> is in the
+<CODE>union</CODE> field <CODE>var</CODE> for a variable or in <CODE>fn</CODE> for a
+function.  The <CODE>succ</CODE> field is used to chain all symbols together
+in a LIFO chain.
+<P>
+The heart of the symbol table module is the <CODE>getSym()</CODE> routine
+shown below:
+<PRE>
+/* Search symTab for name.  If doCreate, then create an entry for
+<TT> * </TT>it if it is not there.  Return pointer to Sym entry.
+ */
+<B>static</B> Sym *
+getSym(<B>const</B> <B>char</B> *name, <B>unsigned</B> <B>do</B>Create) 
+{
+  Sym *p;
+  <B>for</B> (p= symTab; p != NULL &#38;&#38; p-&#62;name != name; p= p-&#62;succ) ;
+  <B>if</B> (p == NULL &#38;&#38; <B>do</B>Create) {
+    p= malloc(<B>sizeof</B>(Sym)); 
+    p-&#62;name= name; p-&#62;succ= symTab; symTab= p;
+  }
+  <B>return</B> p;
+}
+
+</PRE>
+<P>
+<CODE>getSym()</CODE> searches the linear chain of <CODE>Sym</CODE>s rooted in
+<CODE>symTab</CODE> for an
+identifier with a specified <CODE>name</CODE>.  If it finds one, it returns a
+pointer to the corresponding <CODE>Sym</CODE>; otherwise if <CODE>doCreate</CODE> is
+zero it simply returns <CODE>NULL</CODE>; if <CODE>doCreate</CODE> is
+non-zero it creates a new entry for <CODE>name</CODE> and links it in at the
+head of the <CODE>symTab</CODE> chain.
+<P>
+To get the value or function associated with an identifier, the symbol
+table interface routines <CODE>getIDVal()</CODE> and <CODE>getIDFn()</CODE> shown
+below can be used:
+<PRE>
+/* Get value associated with name; signal error if not ok. */
+<B>static</B> <B>double</B> 
+getIDVal(<B>const</B> <B>char</B> *name)
+{
+  <B>const</B> Sym *p= getSym(name, 0);
+  <B>double</B> val= 1.0; /* A default value. */
+  <B>if</B> (!p) fprintf(stderr, "No value for %s.\n", name);
+  <B>else</B> <B>if</B> (p-&#62;type != VAR_SYM) 
+    fprintf(stderr, "%s is not a variable.\n", name);
+  <B>else</B> val= p-&#62;value.var;
+  <B>return</B> val;
+}
+
+/* Get function associated with name; signal error if not ok. */
+<B>static</B> MathFnP 
+getIDFn(<B>const</B> <B>char</B> *name)
+{
+  <B>const</B> Sym *p= getSym(name, 0);
+  MathFnP fn= sin; /* A default value. */
+  <B>if</B> (!p) fprintf(stderr, "No value for %s.\n", name);
+  <B>else</B> <B>if</B> (p-&#62;type != FN_SYM) 
+    fprintf(stderr, "%s is not a function.\n", name);
+  <B>else</B> fn= p-&#62;value.fn;
+  <B>return</B> fn;
+}
+
+</PRE>
+<P>
+The routines take care of printing out a error message if the
+<CODE>name</CODE> is not found or is of an inappropriate type.
+<P>
+Changing the values of a symbol is done in a straight-forward manner as
+shown below:
+<PRE>
+/* Unconditionally set name to a VAR_SYM with value val. */
+<B>static</B> <B>void</B> 
+setIDVal(<B>const</B> <B>char</B> *name, <B>double</B> val)
+{
+  Sym *p= getSym(name, 1);
+  p-&#62;type= VAR_SYM; p-&#62;value.var= val;
+}
+
+/* Unconditionally set name to a FN_SYM with fn ptr fnP. */
+<B>static</B> <B>void</B> 
+setIDFn(<B>const</B> <B>char</B> *name, MathFnP fnP)
+{
+  Sym *p= getSym(name, 1);
+  p-&#62;type= FN_SYM; p-&#62;value.fn= fnP;
+}
+
+</PRE>
+<P>
+It is necessary to preload the symbol table with the functions which
+will be provided by <CODE>mfcalc</CODE>.  This is done as shown below:
+<PRE>
+/* Initial functions. */
+<B>struct</B> { 
+  <B>const</B> <B>char</B> *name;     /* Name of function. */
+  MathFnP fn;           /* Corresponding &#60;math.h&#62; function. */
+} initFns[]= {
+  { "sin", sin },
+  { "cos", cos },
+  { "atan", atan },
+  { "ln", log },
+  { "exp", exp },
+  { "sqrt", sqrt }
+};
+
+<B>static</B> <B>void</B>
+initSyms(<B>void</B>)
+{
+  <B>const</B> <B>unsigned</B> n= <B>sizeof</B>(initFns)/<B>sizeof</B>(initFns[0]);
+  <B>unsigned</B> i;
+  <B>for</B> (i= 0; i &#60; n; i++) {
+    setIDFn(getID(initFns[i].name), initFns[i].fn);
+  }
+}
+
+</PRE>
+<P>
+By simply editing the initialization list and adding the necessary include
+files, you can add additional functions to the calculator.
+<P>
+The new version of <CODE>main</CODE> includes a call to <CODE>initSyms</CODE>, the
+function defined above which initializes the symbol table:
+<PRE>
+<B>int</B> main()
+{
+  initSyms();
+  <B>return</B> yyparse();
+}
+
+</PRE>
+<P>
+<H3><A NAME="SEC30" HREF="zyacc_toc.html#SEC30">The <CODE>mfcalc</CODE> Scanner</A></H3>
+<P>
+The function <CODE>yylex</CODE> must now recognize numeric values,
+single-character arithmetic operators and identifiers.  The recognition
+of numeric values and single-character arithmetic operators is exactly
+as before.  In order to recognize identifiers, the following code
+fragment is added to <CODE>yylex()</CODE> after the code for recognizing
+numbers:
+<P>
+<PRE>
+  /* Char starts an identifier =&#62; read the name.  */
+  <B>if</B> (isalpha(c)) {
+    ungetc(c, stdin);
+    yylval.id= readID();
+    <B>return</B> ID_TOK;
+  }
+
+</PRE>
+<P>
+After checking if the current character is a letter, the code fragment
+calls <CODE>readID()</CODE> after pushing back the current character.
+<CODE>readID()</CODE> reads the current character into a dynamically sized
+buffer as shown below.  After completing the read, <CODE>readID()</CODE> calls
+<CODE>getID()</CODE> routine which interfaces to the string-space.
+<CODE>getID()</CODE> will return a unique <CODE>char *</CODE> pointer for the
+identifier.  If the returned <CODE>char *</CODE> pointer is not equal to the
+dynamically allocated buffer, then the identifier had been seen
+previously and the dynamic buffer is freed.
+<P>
+<PRE>
+/* Read alphanumerics from stdin into a buffer.  Check
+<TT> * </TT>if identical to previous ident: if so return pointer
+<TT> * </TT>to previous, else return pointer to new buffer.
+<TT> * </TT>Assumes char after ident is not an EOF.
+ */
+<B>static</B> <B>const</B> <B>char</B> *
+readID(<B>void</B>)
+{
+  <B>enum</B> { SIZE_INC= 40 };
+  <B>unsigned</B> size= SIZE_INC;
+  <B>char</B> *buf= malloc(size);
+  <B>unsigned</B> i= 0;
+  <B>int</B> c;        
+  <B>const</B> <B>char</B> *ident;
+    
+  <B>do</B> { /* Accumulate stdin into strSpace. */
+    c= getchar();
+    <B>if</B> (i &#62;= size) buf= realloc(buf, size*= 2);
+    buf[i++]= c;
+  } <B>while</B> (isalnum(c));
+
+  ungetc(c, stdin); buf[i - 1]= '\0'; /* Undo extra read. */
+  buf= realloc(buf, i); /* Resize buf to be only as big as needed. */
+
+  ident= getID(buf);    /* Search string-space. */
+
+  <B>if</B> (ident != buf) free(buf); /* Previously existed. */
+  <B>return</B> ident;
+}
+
+</PRE>
+<P>
+<H3><A NAME="SEC31" HREF="zyacc_toc.html#SEC31">The <CODE>mfcalc</CODE> String Space</A></H3>
+<P>
+The string-space is maintained as a linked list of <CODE>Ident</CODE>s as
+shown below.  The <CODE>getID()</CODE> function does a linear search through
+the linked list for its <CODE>name</CODE> argument: if found it returns a
+pointer to the previously entered <CODE>name</CODE>, if not found, it adds a
+new entry at the head of the list and returns the <CODE>name</CODE> argument.
+<P>
+<PRE>
+/* String space ADT to map identifiers into IDNums. */
+<B>typedef</B> <B>struct</B> Ident {
+  <B>const</B> <B>char</B> *name;     /* NUL-terminated chars of identifier. */
+  <B>struct</B> Ident *succ;   /* Next entry in linear chain. */
+} Ident;
+
+/* The string space is a chain of Ident's. */
+<B>static</B> Ident *strSpace;
+
+<B>static</B> <B>const</B> <B>char</B> *
+getID(<B>const</B> <B>char</B> *name)
+{
+  Ident *p;
+  <B>for</B> (p= strSpace; p != NULL; p= p-&#62;succ) {
+    <B>if</B> (strcmp(name, p-&#62;name) == 0) <B>break</B>;
+  }
+  <B>if</B> (!p) {
+    p= malloc(<B>sizeof</B>(Ident));
+    p-&#62;name= name;
+    p-&#62;succ= strSpace; strSpace= p;
+  }
+  <B>return</B> p-&#62;name;
+}
+
+
+</PRE>
+<P>
+<H3><A NAME="SEC32" HREF="zyacc_toc.html#SEC32">Why a Separate String Space</A></H3>
+<P>
+It is possible to design <CODE>mfcalc</CODE> so that the scanner interns
+identifiers directly using the symbol table, avoiding the need for a
+separate string space.  Though that is adequate for <CODE>mfcalc</CODE>, such
+an approach may be unwieldy for more complex applications because of the
+reasons outlined below.
+<P>
+A symbol table is a mapping from identifiers to objects like variables
+and functions; in many applications (like programming languages with
+separate name-spaces or multiple scopes) this mapping is typically
+one-to-many.  Hence maintaining a symbol table usually requires
+understanding the context within which a identifier is used.  If the
+scanner is solely responsible for maintaining the symbol table, then it
+must keep track of the context within which an identifier is used ---
+this complicates the scanner.  If other higher level modules like the
+parser share the maintenance of the symbol table with the scanner, then
+the symbol table interface may become complex due to order-dependencies
+and feedback between modules.  
+<P>
+The separate string table avoids some of these complications.  Though
+the implementation given for <CODE>mfcalc</CODE> required two searches for
+each identifier (one within the string space, the other within the
+symbol table), it is possible to get by with a single search.
+<P>
+<H2><A NAME="SEC33" HREF="zyacc_toc.html#SEC33">The Multi Function Calculator Using a Sugared Syntax</A></H2>
+<P>
+One disadvantage of the <CODE>$<VAR>i</VAR></CODE> syntax used for specifying the
+semantic attributes of grammar symbols is that correctly specifying the
+<VAR>i</VAR> is often tedious, especially with long rules.  More seriously,
+if a rule changes then the <VAR>i</VAR> in a <CODE>$<VAR>i</VAR></CODE> may also change:
+this can make maintaining such grammars error-prone.
+<P>
+Another disadvantage is that the attributes of grammar symbols are
+declared in section 1 of the grammar file (using <CODE>%union</CODE>,
+<CODE>%type</CODE> and other declarations), rather than near where they are
+actually used in section 2.  This conflicts with modern software
+engineering practice, where entities are declared near or at the point
+of first use.
+<P>
+Zyacc permits syntactic sugar which overcomes these deficiencies.  It
+allows named attribute variables to refer to the semantic attributes,
+thus making it possible to refer to semantic attributes without having
+to count grammar symbols.  It also allows the semantic attributes of a
+nonterminal to be declared on the left-hand side of rules for that
+nonterminal.
+<P>
+The syntax is illustrated by repeating the grammar for the <CODE>mfcalc</CODE>
+using the new syntax:
+<PRE>
+input
+  : /* empty */
+  | input line
+  ;
+
+line
+  : '\n'
+  | exp($v) '\n'                { printf ("\t%.10g\n", $v); }
+  | error '\n'                  { yyerrok; }
+  ;
+
+exp(<B>double</B> $v)
+  : ID_TOK($id)                 { $v= getIDVal($id); }
+  | ID_TOK($id) '=' exp($v)     { setIDVal($id, $v); }
+  | ID_TOK($id) '(' exp($v1) ')'{ $v= (*(getIDFn($id)))($v1); }
+  | NUM_TOK($v)
+  | exp($v1) '+' exp($v2)       { $v= $v1 + $v2; }
+  | exp($v1) '-' exp($v2)       { $v= $v1 - $v2; }
+  | exp($v1) '*' exp($v2)       { $v= $v1 * $v2; }
+  | exp($v1) '/' exp($v2)       { $v= $v1 / $v2; }
+  | '-' exp($v1)  %<B>prec</B> NEG     { $v= -$v1; }
+  | exp($v1) '^' exp($v2)       { $v= pow($v1, $v2); }
+  | '(' exp($v1) ')'            { $v= $v1; }
+  ;
+/* End of grammar */
+%%
+
+</PRE>
+<P>
+The semantic attributes of a grammar symbol are written within
+parentheses following the grammar symbols using a positional notation
+similar to that of function application in C.  The types of the
+semantic attributes for a nonterminal are declared on the left-hand
+side of a rule using a syntax similar to that for function prototype
+declarations in C.
+<P>
+In the above example, <CODE>exp</CODE> has a single semantic attribute which
+represents the value of the expression; its value is computed on-the-fly
+as an <CODE>exp</CODE> is parsed.  This attribute is named <CODE>$v</CODE> and is
+declared to be of type <CODE>double</CODE> on the common left-hand side of the
+rules for <CODE>exp</CODE>.  This declaration is similar to that of a formal
+parameter in a function definition.
+<P>
+The attributes of right-hand side symbols detail the flow of semantic
+information among the grammatical constructs constituting the rule.  For
+example in the first rule for <CODE>exp</CODE> repeated below, the terminal
+<CODE>ID_TOK</CODE> representing a variable has an attribute referred to
+<CODE>$id</CODE> within that rule.  The action for that rule computes the
+attribute <CODE>$v</CODE> for the left-hand side <CODE>exp</CODE> in terms of this
+<CODE>$id</CODE> using the function <CODE>getIDVal()</CODE> which looks up the value
+of the variable using the current symbol table.
+<PRE>
+exp(<B>double</B> $v)
+  : ID_TOK($id)                 { $v= getIDVal($id); }
+  | ID_TOK($id) '=' exp($v)     { setIDVal($id, $v); }
+
+</PRE>
+<P>
+Similarly, in the second rule which describes an assignment expression,
+the <CODE>$v</CODE> for the left-hand side <CODE>exp</CODE> is computed via the
+<CODE>exp</CODE> on the right-hand side: this is indicated by using the same
+name <CODE>$v</CODE> for both occurrences.
+<P>
+The sugared syntax allows the attributes of a nonterminal to be
+declared when that nonterminal occurs on the left-hand side of a rule.
+Since this can never happen for a terminal symbol, the attributes of
+terminal symbols must still be declared in section 1 of the Zyacc file
+as follows:
+<PRE>
+%<B>token</B> &#60;val&#62;(<B>double</B> $v) NUM_TOK         /* Double precision number */
+%<B>token</B> &#60;id&#62;(<B>const</B> <B>char</B> *$id) ID_TOK     /* Identifiers. */
+
+</PRE>
+<P>
+We have enhanced the <CODE>&#60;val&#62;</CODE> type tag previously used for a
+<CODE>NUM_TOK</CODE> by a parenthesized list containing declarations for its
+semantic attributes, namely a single attribute named <CODE>$v</CODE> of type
+<CODE>double</CODE>.  Similarly an <CODE>ID_TOK</CODE> has a semantic type with type
+tag <CODE>&#60;id&#62;</CODE> with a single <CODE>const char *</CODE> semantic attribute
+named <CODE>$id</CODE>.
+<P>
+If the sugared syntax is used for the entire grammar, then there is no
+need for a <CODE>%union</CODE> directive.  In fact, Zyacc generates one
+automatically; for the above grammar, it will generate something similar
+to:
+<PRE>
+<B>typedef</B> <B>union</B> {
+  <B>struct</B> { <B>double</B> v; } val;      /* NUM_TOK */
+  <B>struct</B> { <B>const</B> <B>char</B> *id; } id; /* ID_TOK */
+} YYSTYPE;
+</PRE>
+<P>
+The <CODE>union</CODE> has a separate <CODE>struct</CODE> field for each sugared
+<CODE>%token</CODE> declaration and for each nonterminal.  
+<P>
+The semantic attributes of a terminal are stored in the field in the
+<CODE>union</CODE> which has a name identical to the <CODE>&#60;<VAR>type</VAR>&#62;</CODE> tag
+used in the <CODE>%token</CODE> declaration for that terminal.  The fields in
+the <CODE>struct</CODE> are identical to the attributes declared for that
+<CODE>&#60;<VAR>type</VAR>&#62;</CODE> tag in the token declaration, except that the
+<SAMP>`$'</SAMP>s are removed.  Hence the above <CODE>%token</CODE> declarations
+result in the fields <CODE>val</CODE> and <CODE>id</CODE> in the union, with each of
+them being a <CODE>struct</CODE> containing the fields <CODE>v</CODE> and <CODE>id</CODE>
+repectively.
+ 
+Since the programmer controls the names used in the fields in the
+<CODE>union</CODE> for terminals, the programmer should use the same names
+when setting up semantic information for the terminals in the scanner.
+For the above grammar, the only change necessary in the scanner is to
+change assignments to <CODE>yylval</CODE> to access the appropriate fields in
+the <CODE>union</CODE>.  Specifically, the code for numbers
+and identifiers in <CODE>yylex()</CODE> is changed to:
+<PRE>
+  /* Char starts a number =&#62; parse the number.    */
+  <B>if</B> (c == '.' || isdigit (c)) {
+    ungetc (c, stdin);
+    scanf ("%lf", &#38;yylval.val.v);
+    <B>return</B> NUM_TOK;
+  }
+
+  /* Char starts an identifier =&#62; read the name.  */
+  <B>if</B> (isalpha(c)) {
+    ungetc(c, stdin);
+    yylval.id.id= readID();
+    <B>return</B> ID_TOK;
+  }
+
+</PRE>
+<P>
+<P>
+The semantic attributes for each nonterminal are stored in a separate
+<CODE>struct</CODE> field within the <CODE>union</CODE>.  The types of the fields
+used within the <CODE>struct</CODE> for a nonterminal are identical to the
+types declared for the attributes of that nonterminal.  However, the
+names used for and within this field are implementation defined; that
+should not be a problem, as there is no need for the programmer to
+access them directly.
+<P>
+Using these named attributes overcomes the disadvantages mentioned
+earlier for the numeric <CODE>$</CODE>-variables.  However, the resulting
+grammars tend to be somewhat more verbose.  The new notation does not by
+itself add anything to the power of the grammars, which is why we refer
+to it as syntactic sugar.  However when used in conjunction with the
+features mentioned in the next couple of sections, the named attribute
+variables do add to the power of the grammars.
+<P>
+<H2><A NAME="SEC34" HREF="zyacc_toc.html#SEC34">A Multi Function Calculator Which Evaluates Polynomials</A></H2>
+<P>
+Consider enhancing our calculator with an evaluation operator <CODE>@</CODE>,
+which evaluates a polynomial.  This operator can be used as in <CODE>x
+@ [5, 2, 3]</CODE> to denote the polynomial <CODE>5*x^2 + 2*x + 3</CODE>.  The
+polynomial coefficients within the square brackets are allowed to be
+arbitrary expressions (including nested polynomial evaluations).  The
+<CODE>@</CODE> operator should associate to the left and have the highest
+precedence (greater than that of exponentiation).  An example of the use
+of this polynomial calculator is shown below:
+<PRE>
+$ polycalc
+3@[4, 5, 1]
+        52
+2 * 3@[4, 5, 1]
+        104
+3@[4, 2@[8, 4, 2, 1], 1]
+        292
+$ 
+</PRE>
+<P>
+It is easy enough to force the <CODE>@</CODE> operator to have the required
+precedence by simply adding a <CODE>%left</CODE> declaration after the
+declaration for the exponentiation operator as shown below.
+<PRE>
+%<B>right</B> '^'              /* Exponentiation */
+%<B>left</B> '@'               /* Polynomial application */
+
+</PRE>
+<P>
+Unfortunately, evaluating the polynomial is not that easy.
+<P>
+One solution to this problem is to not evaluate the polynomial as its
+coefficients are being parsed, but to merely store its coefficient
+values in some data structure which will be the semantic attribute for
+the coefficient list.  Once the coefficient list has been parsed, the
+data structure containing the coefficients and the value of the point at
+which evaluation is requested can be passed to some action routine which
+evaluates the polynomial at that point.  Assuming that the coefficients
+have been evaluated into an (<CODE>n+1</CODE>)-element array <CODE>coeffs[]</CODE>,
+a scheme like the following is typical for the action routine:
+<PRE>
+/* Evaluate nth-degree polynomial 
+<TT> * </TT>coeffs[n]*point^n + coeffs[n-1]*point^(n-1) + ... + coeffs[0]
+ */
+<B>double</B> evalPoly(<B>double</B> point, <B>double</B> coeffs[], <B>int</B> n)
+{
+  <B>double</B> sum= 0;
+  <B>int</B> i;
+  <B>for</B> (i= n; i &#62;= 0; i--) sum= sum*point + coeffs[i];
+  <B>return</B> sum;
+}
+
+</PRE>
+ Unfortunately, this requires auxiliary storage and a non-trivial data
+structure to handle nested polynomials.  Fortunately in Zyacc, the
+computation represented by the above code can be performed on-the-fly
+during parsing using a special type of semantic attributes known as
+<EM>inherited attributes</EM> described below.
+<P>
+All the attributes seen in the previous examples are known as
+<EM>synthesized attributes</EM>.  An attribute for a construct is said to
+be a <EM>synthesized attribute</EM> if the value of that attribute
+directly depends only on the semantic attributes of the constituents of
+that construct and not on the semantic attributes of a surrounding
+construct.  For example, the value of a <CODE>exp</CODE> is independent of the
+larger <CODE>exp</CODE> within which it may appear.
+<P>
+A little reflection shows that synthesized attributes are not sufficient
+to evaluate polynomials on-the-fly during parsing: the contribution made
+by each coefficient to the final value depends not only on the value of
+the coefficient but also on the point at which the polynomial is being
+evaluated (the value of the expression before the <CODE>@</CODE> operator),
+as well as the position of the coefficient in the list of polynomial
+coefficients.
+<P>
+Inherited attributes allow us to get around this problem: they allow us
+to pass in information about the surrounding context to a grammatical
+construct.  Inherited attributes are declared using the <CODE>%in</CODE>
+keyword as shown in the following extract of the <CODE>polycalc</CODE>
+grammar: 
+<PRE>
+coeffs(%<B>in</B> <B>double</B> $sum, %<B>in</B> <B>double</B> $point, %<B>out</B> <B>double</B> $v)
+  : exp($v1)                    { $v= $sum*$point + $v1; }
+  | coeffs($sum, $point, $v1)  
+    ',' exp($v2)                { $v= $v1*$point + $v2; }
+  ;
+
+exp(<B>double</B> $v)
+  : exp($v1) '@' 
+    '[' coeffs(0.0, $v1, $v) ']'
+
+</PRE>
+<P>
+<CODE>polycalc</CODE> is derived from <CODE>mfcalc</CODE>.  Besides adding an
+operator declaration for <CODE>@</CODE> as described above, these rules
+represent the only other addition needed to <CODE>mfcalc</CODE>.
+<CODE>coeffs</CODE> is a new nonterminal used to represent a comma-separated
+list of polynomial coefficient expressions.  It has three semantic
+attributes: the first two are inherited attributes <CODE>$sum</CODE> and
+<CODE>$point</CODE> and correspond to the variables with the same name used in
+the <CODE>evalPoly</CODE> C-function.  The last attribute is a synthesized
+attribute declared using <CODE>%out</CODE> (the <CODE>%out</CODE> is <EM>usually</EM>
+optional) which is the value of the entire polynomial at point.
+<P>
+The first rule for <CODE>coeffs</CODE> 
+<PRE>
+coeffs(%in double $sum, %in double $point, %out double $v)
+  : exp($v1)                    { $v= $sum*$point + $v1; }
+</PRE>
+deals with the situation where there is only a single polynomial
+coefficient which has not been processed: in that case the value of the
+polynomial is the value of the polynomial so far (<CODE>$sum</CODE>)
+multiplied by the value of the point (<CODE>$point</CODE>) plus the value of
+the coefficient (<CODE>$v1</CODE>).
+<P>
+The second rule 
+<PRE>
+coeffs(%in double $sum, %in double $point, %out double $v)
+  : coeffs($sum, $point, $v1)  
+    ',' exp($v2)                { $v= $v1*$point + $v2; }
+</PRE>
+deals with the situation when there is more than one remaining
+coefficient.  In that case, the remaining coefficients can be decomposed
+into all but the last coefficient (described by the first <CODE>coeffs</CODE>
+on the right-hand side) and the last coefficient (described by the
+<CODE>','</CODE> followed by <CODE>exp</CODE>).  If we assume that the value of the
+polynomial represented by all but the last coefficient is <CODE>$v1</CODE>,
+then the value of the entire polynomial is <CODE>$v1*$point + $v2</CODE> where
+<CODE>$v2</CODE> is the value of the last coefficient.
+<P>
+Notice that the computation performed by the above rules is identical to
+the computation performed within the <CODE><B>for</B></CODE>-loop of the
+<CODE>evalPoly</CODE> function.  The initialization of <CODE>sum</CODE> to <CODE>0</CODE>
+is performed in the rule for <CODE>exp</CODE> 
+<PRE>
+exp(double $v)
+  : exp($v1) '' 
+    '[' coeffs(0.0, $v1, $v) ']'
+</PRE>
+which passes in a value of <CODE>0.0</CODE> for the <CODE>$sum</CODE> inherited
+attribute of <CODE>coeffs</CODE> and the value of the point (<CODE>$v1</CODE>) for
+the <CODE>$point</CODE> inherited attribute.  The synthesized attribute
+<CODE>$v</CODE> computed for <CODE>coeffs</CODE> is the value of the left-hand side
+<CODE>exp</CODE>. 
+<P>
+<H2><A NAME="SEC35" HREF="zyacc_toc.html#SEC35">A Calculator Which Omits Some Parentheses</A></H2>
+<P>
+The previously developed multi-function calculator <CODE>mfcalc</CODE>
+requires its (single) function argments to be within parentheses.
+Consider enhancing it for lazy people who prefer not to type those
+parentheses, as illustrated by the following interaction log:
+<PRE>
+$
+lazycalc 
+exp ln 7
+        7
+pi = 3.141592653589
+        3.141592654
+sin pi/4
+        0.7071067812
+(sin pi/4)^2 + (cos pi/4)^2
+        1
+$ 
+</PRE>
+A first attempt may be to simply declare a right-associative precedence
+level for function application between that of binary addition and
+multiplication operators as shown below (without any semantic
+attributes):
+<PRE>
+ ...
+%right '='
+%left '-' '+'
+%right FN               /* Prefix function application. */
+%left '*' '/'
+%left NEG               /* Negation--unary minus */
+%right '^'              /* Exponentiation */
+ ...
+%%
+ ...
+exp
+  : ID_TOK exp %prec FN
+ ...
+</PRE>
+Unfortunately, a little reflection shows that this is not enough.  Given
+simply the token sequence <CODE>ID_TOK - ID_TOK</CODE>, a human would not know
+whether the sequence represents a function (given by the first
+<CODE>ID_TOK</CODE>) applied to a unary minus expression (<CODE>- ID_TOK</CODE>), or
+a subtraction of the variable represented by the second <CODE>ID_TOK</CODE>
+from the variable represented by the first <CODE>ID_TOK</CODE>.  If a human
+being cannot distinguish between these two meanings purely on the basis
+of syntax, then there is no way that Zyacc can do so.
+<P>
+The way a human would distinguish between the above two sequences would
+be to consider the semantics for the first <CODE>ID_TOK</CODE>.  If the first
+<CODE>ID_TOK</CODE> represents a function, then the sequence would correspond
+to a function application, else to a subtraction expression.  However,
+this means that the way a token sequence is parsed depends on the
+semantics of the tokens in the sequence.
+<P>
+Generic yacc does not allow any way for the semantics to affect a parse.
+However, Zyacc allows arbitrary semantic predicates to affect a parse.
+A <EM>semantic predicate</EM> can be any arbitrary C expression <VAR>E</VAR>
+written on the right-hand side of a rule as <CODE>%test(<VAR>E</VAR>)</CODE>.  If
+at parse time, the rule in which a semantic predicate occurs is
+potentially applicable, then the predicate is evaluated: if the
+predicate succeeds (returns non-zero), then the rule in which the
+<CODE>%test</CODE> is embedded wins out over other rules.  So for our
+<CODE>lazycalc</CODE> example, the rule for function application becomes
+<PRE>
+exp(<B>double</B> $v)
+  : ID_TOK($id)  %<B>test</B>(isFn($id))
+    exp($v1) %<B>prec</B> FN           { $v= (*(getIDFn($id)))($v1); }
+
+</PRE>
+<P>
+<CODE>isFn()</CODE> is a trivial C function which interfaces to the symbol
+table, returning 1 iff its argument is a function.
+<PRE>
+/* Return nonzero iff name is a function. */
+<B>static</B> <B>unsigned</B>
+isFn(<B>const</B> <B>char</B> *name)
+{
+  Sym *p= getSym(name, 0);
+  <B>return</B> (p != NULL &#38;&#38; p-&#62;type == FN_SYM);
+}
+
+</PRE>
+<P>
+Semantic predicates allow relatively clean solutions to problems which
+are otherwise rather painful to solve.  They should not be overused.  In
+particular, they should not be used when simpler mechanisms suffice as
+they make a Zyacc grammar harder to understand -- to understand Zyacc's
+parsing decisions when semantic predicates are used it is no longer
+sufficient to merely consider the statically-defined grammar rules, but
+it is also necessary to consider the semantics defined at parse time.
+<P>
+<A NAME="IDX49"></A>
+<H2><A NAME="SEC36" HREF="zyacc_toc.html#SEC36">Exercises</A></H2>
+<P>
+These example programs are both powerful and flexible. You may easily
+add new functions, and it is a simple job to modify this code to install
+predefined variables such as <CODE>pi</CODE> or <CODE>e</CODE> as well.  The
+following exercises suggest several simple enhancements.
+<P>
+<OL>
+<LI>
+Add some new functions from <TT>`math.h'</TT> to the initialization list for
+<CODE>mfcalc</CODE>.
+
+<LI>
+Modify <CODE>mfcalc</CODE> to add another array that contains constants and
+their values.  Then modify <CODE>initSyms</CODE> to add these constants to the
+symbol table.  It will be easiest to give the constants type
+<CODE>VAR_SYM</CODE>.
+
+<LI>
+Modify your solution to the previous exercise, so that the values of
+constants cannot be modified.  (Hint: introduce a new symbol type
+<CODE>CONST_SYM</CODE>).
+
+<LI>Is it possible to modify <CODE>mfcalc</CODE> so as to allow implicit
+multiplication: i.e. your calculator should allow <CODE>2 + 3 x</CODE> as
+equivalent to <CODE>2 + 3*x</CODE>?  
+
+<LI>
+How would you modify <CODE>mfcalc</CODE> to add array variables such that an
+array is accessed using <CODE><VAR>arrayName</VAR>(<VAR>index</VAR>)</CODE> where
+<VAR>arrayName</VAR> is an <CODE>ID_TOK</CODE> representing the name of the array
+and <VAR>index</VAR> is an <CODE>exp</CODE> representing the value used to index
+the array.
+Syntactically, an array access is identical to a function application,
+and your answer should concentrate on how your parser can distinguish
+between the two.
+
+</OL>
+<P>
+<!-- Zerksis D. Umrigar -->
+
+<P><B>Feedback</B>: Please email any feedback to <A
+HREF=mailto:zdu@acm.org>zdu@acm.org</A>.
+
+<P>
+<HR>
+Go to the <A HREF="zyacc_1.html">first</A>, <A HREF="zyacc_2.html">previous</A>, <A HREF="zyacc_4.html">next</A>, <A HREF="zyacc_16.html">last</A> section, <A HREF="zyacc_toc.html">table of contents</A>.
+</BODY>
+</HTML>

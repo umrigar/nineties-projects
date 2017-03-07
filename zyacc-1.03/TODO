@@ -1,0 +1,35 @@
+Support for backtracking --- add %back declarations to rules.  If a conflict
+occurs at a %back declaration, then it is not a conflict.  The parser pushes
+a choicepoint and continues parsing, but does not execute regular actions,
+only certain limited (side-effect free) actions.  If a error occurs then
+backup to choice point and attempt alternate.  When the parser is sure
+(maybe by means of a declaration), it commits to the decision and executes
+all actions.  Syntactically how do we represent the different kinds of
+actions? 
+
+Try to make the GUI debugger more useful.  Let the user follow tree edges by
+clicking on them.  The current GridLocator can be used to pickup mouse
+clicks on lines; make the object managed by a Locator arbitrary objects
+which implement an isInside() interface.  
+
+Draw the tree on a rubber sheet so the entire tree can be seen at once, and
+details of a particular node are also visible.
+
+Add debugging support for printing semantics of nonterminals.  Similar
+interface to current YY_SEM_FN, but instead pass nonterminal # (< 0) +
+pointer to special semantic record which contains both %in and %out
+attributes of nonterminal.  Will do this action after the reduction of the
+rule; setup the call individually for each rule.  Output declarations for
+the types of each nonterminal so that the user can cast the pointer passed
+in to the appropriate type.
+
+The frontend needs to be redone.  The attribs module was added onto the
+grammar module, and I tried to have them be independent.  They should be
+combined.  Currently, if a symbol is not declared it is assumed to be a 
+nonterminal.  It may be better to make it be a terminal and deduce its
+type --- hence even less stuff would need to be declared in section 1, but
+it would reduce the redundancy which can catch errors.
+
+EBNF --- how does one handle attributes and actions?
+
+

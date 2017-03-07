@@ -1,0 +1,441 @@
+#Makefile.in produced automatically using GNU-m4.
+
+#Name of program.
+PROGRAM=		zyacc
+VERSION=		1.03
+
+#DIRECTORIES FOR SOURCES AND BUILD.
+#Source directory controlled by this makefile.
+srcdir=			@srcdir@
+
+#Define VPATH to ensure that source files found even if build directory is
+#different from srcdir.
+VPATH=			@srcdir@
+
+#Top-level source directory for entire package.
+topdir=			@top_srcdir@
+
+#Top-level build directory for package.
+builddir=		@builddir@
+
+#INSTALLATION PATHS.
+#Prefix of path where all architecture-independent files are installed.
+prefix=			@prefix@
+
+#Prefix of path where architecture-dependent files are installed.
+exec_prefix=		@exec_prefix@
+
+#Path where executables are installed.
+bindir=			$(exec_prefix)/bin
+
+#Path where skeleton file and library sources are installed.
+datadir=		$(prefix)/share/$(PROGRAM)
+
+#Path where include files are installed.
+includedir=		$(prefix)/include
+
+#Path where info files are installed.
+infodir=		$(prefix)/info
+
+#Path where libraries are installed.
+libdir=			$(exec_prefix)/lib
+
+#Path where java classes are installed.
+classdir=		$(prefix)/share/classes
+
+#Path where manuals are installed (section $N in $(mandir)/man$N).
+mandir=			$(prefix)/man
+
+#Path where library sources and skeleton are installed.
+libsrcdir=		$(datadir)
+
+#Path where html files are installed.
+htmldir=		$(prefix)/doc/html
+
+SHELL=			/bin/sh
+RM=			rm -f
+AR=			ar
+LN=			ln -f
+MV=			mv
+CAT=			cat
+CMP=			cmp
+SED=			sed
+GZIP=			gzip -f
+DEPEND_CMD=		gcc -MM $(CPPFLAGS) $(DFLAGS)
+MAKE_MF_IN=		$(GM4) --include=$(topdir)/mf \
+		        Makefile.m4 >$(srcdir)/Makefile.in
+MAKEINFO=		makeinfo
+TEXI2DVI=		texi2dvi
+TEXI2HTML=		texi2html
+DVI2PS=			dvips
+GM4=			gm4 --prefix-builtins
+RANLIB=			@RANLIB@
+INSTALL=		@INSTALL@
+INSTALL_PROGRAM=	@INSTALL_PROGRAM@
+INSTALL_DATA=		@INSTALL_DATA@
+ZLEX=			zlex
+ZYACC=			zyacc
+ZYACCFLAGS=
+ZLEXFLAGS=
+
+
+#COMPILER CONTROL
+#Make variables which define compiler invocation.
+CC=			@CC@
+
+#Flags to control optimization/debugging.
+CFLAGS=			@CFLAGS@
+
+#Header file search directory and other misc. options for cpp/cc.
+CPPFLAGS=		-I$(srcdir) -I$(LIBZ_SRC) -I$(builddir)
+
+#Extra debugging and optimization options for the C compiler.
+CXXFLAGS=		@CXXFLAGS@
+
+#-D options passed to the C-compiler by configure.
+DEFS=			@DEFS@
+
+#Compose DEFFLAGS as combination of above (plus others if needed).
+#XFLAGS should be project or directory specific flags. DFLAGS are
+#intended to be passed in via the command-line; 
+DEFFLAGS=		$(DEFS) $(XFLAGS) $(DFLAGS)
+
+#Library search used.
+ZLIBS=			-L$(LIBZ_BIN) -lz
+
+XLIBS=			@XLIBS@
+
+LDFLAGS=		@LDFLAGS@
+
+@SET_MAKE@
+
+#Flags to be passed down to recursive compilation makes; 
+#many makes don't do it correctly thru the environment.
+REC_MAKE_FLAGS=	\
+  CFLAGS='$(CFLAGS)' \
+  DFLAGS='$(DFLAGS)' \
+  PROGRAM='$(PROGRAM)' \
+  VERSION='$(VERSION)' \
+  SIGNATURE='Zerksis'
+
+REC_MAKE=	$(MAKE) $(REC_MAKE_FLAGS)
+
+#This ends the configuration section.
+
+#The libz directory is a sibling of the main package directory.
+LIBZ_SRC=		$(topdir)/libz
+LIBZ_BIN=		$(builddir)/libz
+
+
+
+ZYACC_PATH=		.
+ZYACC_SEARCH_PATH=	.
+ZLEX_LIBSRC_DIR=	/usr/local/share/zlex
+
+PRG_LIBSRC_DIR=		/$(PROGRAM)
+
+LIBS=			$(ZLIBS) $(XLIBS)
+
+#SUFFIX RULES.
+.SUFFIXES:
+
+.SUFFIXES:	.o .c .y .l
+
+.c.o:
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $<
+
+.c:
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $< $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+
+
+#The following targets use ZYACC_PATH and ZYACC_SEARCH_PATH.  If ZYACC_PATH is
+#defined, it should not end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+
+ZYACCFLAGS=	-d -v
+
+.y.c:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+
+.y.o:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.y:
+		if test -z "$(ZYACC_PATH)"; then sep=""; else sep="/"; fi; \
+		ZYACC_SEARCH_PATH=$(ZYACC_SEARCH_PATH) \
+		$(ZYACC_PATH)$${sep}$(ZYACC) $(ZYACCFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+#The following targets use ZLEX_PATH and ZLEX_SEARCH_PATH.  If ZLEX_PATH is
+#defined, it should not end with a '/'.  If it is not defined the current $PATH
+#is used to search for zyacc.
+.l.c:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+
+.l.o:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c
+
+.l:
+		if test -z "$(ZLEX_PATH)"; then sep=""; else sep="/"; fi; \
+		ZLEX_SEARCH_PATH=$(ZLEX_SEARCH_PATH) \
+		$(ZLEX_PATH)$${sep}$(ZLEX) $(ZLEXFLAGS) $< -o $*.c
+		$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) \
+		      $(CFLAGS) $*.c $(ZLIBS) $(XLIBS) $(LDFLAGS) -o $*
+		$(RM) $*.c
+
+
+
+
+#Main target to be built in this directory.
+TARGET=		zyacc
+SKEL=		zyaccskl.c
+DEBUG=		zydebug
+
+#Extra -D option passed to the C-compiler.
+XFLAGS=	-DZYACC_SEARCH_PATH=\"$$''ZYACC_SEARCH_PATH:.:$$''HOME:$(libsrcdir)\" \
+	-DVERSION=\"$(VERSION)\"
+
+#FILE DESCRIPTIONS.
+#Human-generated C files.
+C_SRC_FILES= \
+  attribs.c buildrec.c comptab.c gcolor.c gram.c lalr.c \
+  main.c mkoptinf.c mkopttab.c \
+  opttab0.c options.c outvec.c xset.c zydebug.c
+
+#Computer-generated C files.
+C_NON_SRC_FILES= \
+  opttab.c parse.c scan.c scanlib.c
+
+#All C files.
+CFILES= \
+  $(C_SRC_FILES) $(C_NON_SRC_FILES)
+
+#Human-generated header files.
+H_SRC_FILES= \
+  attribs.h buildrec.h comptab.h gcolor.h gram.h lalr.h main.h \
+  options.h outvec.h \
+  port.h scan.h xset.h zparse.h
+
+#Computer-generated header files.
+H_NON_SRC_FILES= \
+  outfns.h parse.h
+
+#All header files.
+HFILES= \
+  $(H_SRC_FILES) $(H_NON_SRC_FILES)
+
+#All human-generated files to be distributed.
+SRC_FILES= \
+  $(C_SRC_FILES) $(H_SRC_FILES) scan.l parse.y \
+  Makefile.m4 $(SKEL)m4 README TODO
+
+#All computer-generated files to be distributed.
+NON_SRC_FILES= \
+  $(C_NON_SRC_FILES) $(H_NON_SRC_FILES) \
+  opttab.texi Makefile.in DEPEND $(SKEL)
+
+#All files to be distributed.
+DIST_FILES= \
+  $(SRC_FILES) $(NON_SRC_FILES)
+
+#Object files for zyacc.
+OFILES= \
+  attribs.o buildrec.o comptab.o gcolor.o gram.o lalr.o \
+  main.o options.o outvec.o \
+  parse.o scan.o scanlib.o xset.o
+
+
+all:		$(TARGET) $(SKEL) $(DEBUG)
+
+install:	$(TARGET) $(SKEL) $(DEBUG)
+		@$(topdir)/install-chk $(SIGNATURE) $(bindir)/$(TARGET) \
+		&& $(INSTALL_PROGRAM) $(TARGET) $(bindir)/$(TARGET)
+		@$(topdir)/install-chk $(SIGNATURE) $(libsrcdir)/$(SKEL) \
+		&& $(INSTALL_DATA) $(srcdir)/$(SKEL) $(libsrcdir)/$(SKEL); \
+		if grep '#define[ \t]*HAVE_SYS_SOCKET_H[ \t]*1' \
+			$(builddir)/config.h >/dev/null ; \
+		then \
+		 $(topdir)/install-chk $(SIGNATURE) $(bindir)/$(DEBUG) \
+		 && $(INSTALL_PROGRAM) $(srcdir)/$(DEBUG) $(bindir)/$(DEBUG); \
+		fi
+uninstall:
+		$(topdir)/install-chk $(SIGNATURE) $(bindir)/$(TARGET) \
+		&& $(RM) $(bindir)/$(TARGET)
+		$(topdir)/install-chk $(SIGNATURE) $(bindir)/$(DEBUG) \
+		&& $(RM) $(bindir)/$(DEBUG)
+		$(topdir)/install-chk $(SIGNATURE) $(libsrcdir)/$(SKEL) \
+		&& $(RM) $(libsrcdir)/$(SKEL)
+
+check:		$(TARGET) parse.y 
+		@echo -n "Using zyacc to build zyacc parser ... " ; \
+		$(ZYACC_PATH)/$(TARGET) $(ZYACCFLAGS) parse.y -o t$$$$.c ; \
+		$(SED) -e "s/t$$$$.c/parse.c/g" t$$$$.c >t.c ; \
+		$(RM) t$$$$.* ; \
+		if $(CMP) parse.c t.c >/dev/null 2>&1 ; \
+		then \
+		  echo OK ; $(RM) t.c ; \
+		else \
+		  $(MV) t.c parse.ERR ; \
+		  echo FAILED ; \
+		  echo "Suggest diff'ing error log in parse.ERR with " \
+		       "distributed parse.c" ; \
+		fi
+
+$(TARGET):	$(OFILES) $(SKEL) $(LIBZ_BIN)/libz.a
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) $(CFLAGS) \
+	-DBUILD_CMD='"$(CC) $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) $(CFLAGS)"' \
+		  buildrec.c
+		$(CC) $(LDFLAGS) $(OFILES) $(LIBS) -o $@ 
+
+$(SKEL) outfns.h: $(SKEL)m4 $(srcdir)/../libzyacc/libzyacc.h
+		$(GM4) -I$(srcdir) $(srcdir)/$(SKEL)m4 >$(srcdir)/$(SKEL)
+
+$(DEBUG):	$(DEBUG).o
+		$(CC) $(LDFLAGS) $(DEBUG).o $(LIBS) -o $@ 
+
+
+#We compile scan.c without $(CFLAGS) specified; this should turn off
+#optimization to ensure that no library function calls get optimized out.
+scanlib.c:	scan.c
+		$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $(DEFFLAGS) $? -o fullscan.o
+		$(ZLEX_LIBSRC_DIR)/mklibsrc fullscan.o $@
+		$(RM) fullscan.o
+		touch $@
+
+mkopttab:	mkopttab.o
+		$(CC) $(LDFLAGS) mkopttab.o $(ZLIBS) $(XLIBS)  -o $@ 
+
+opttab.c:	
+		$(REC_MAKE) mkopttab
+		./mkopttab >$@
+
+mkoptinf:	mkoptinf.o
+		$(CC) $(LDFLAGS) mkoptinf.o $(ZLIBS) $(XLIBS)  -o $@ 
+
+opttab.texi:	mkoptinf
+		./mkoptinf >$@
+
+#CLEANING TARGETS
+#Remove any garbage.
+clean:		FORCE
+		$(RM) *.o *~ core t.* t t[0-9]* lex.yy.c *.tmp tmp.* \
+		      *.output 
+
+#Remove all files not in distribution.
+distclean:	clean FORCE
+		$(RM) $(TARGET) Makefile makefile
+
+
+#Remove all non-source files.  May need special tools to rebuild.
+maintainer-clean: 	distclean FORCE
+		$(RM) $(NON_SRC_FILES) *.bak
+
+FORCE:
+
+
+
+Makefile.in:	Makefile.m4 DEPEND FORCE
+		$(MAKE_MF_IN)
+
+#Dependency generation.
+#Make dependencies to insert into Makefile.in.
+DEPEND:		$(CFILES) $(HFILES)
+		echo "#Automatically generated dependencies." >$(srcdir)/DEPEND
+		$(DEPEND_CMD) $(CFILES) >>$(srcdir)/DEPEND
+
+
+
+#Make distribution in $(topdir)/$(DIST_DIR).
+dist:		$(NON_SRC_FILES)
+		@for f in $(DIST_FILES) ; \
+		do \
+		  $(LN) $(srcdir)/$$f $(topdir)/$(DIST_DIR)/$$f ; \
+		done
+
+
+
+#Output headers used from libz
+libzhdr:	$(CFILES) $(HFILES)
+		@echo "LIBZ: \
+		  `$(DEPEND_CMD) $(CFILES) | \
+		   tr ' ' '\n' | grep libz | sed -e 's@.*/@@' | sort -u | \
+		   tr '\n' ' ' `"
+
+
+
+#All the object files depend on config.h.  Not put into automatic
+#dependencies as we don't know the directory for config.h till build-time.
+$(OFILES):	$(builddir)/config.h
+
+scan.c:		scan.l
+parse.c:	parse.y  $(SKEL)
+parse.h:	parse.y  $(SKEL)
+
+#Automatically generated dependencies.
+attribs.o: attribs.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gcolor.h gram.h lalr.h scan.h ../../libz/area.h \
+ ../../libz/iset.h ../../libz/error.h ../../libz/errorz.h \
+ ../../libz/ids.h ../../libz/memalloc.h
+buildrec.o: buildrec.c buildrec.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+comptab.o: comptab.c comptab.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/memalloc.h ../../libz/error.h \
+ ../../libz/errorz.h
+gcolor.o: gcolor.c gcolor.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h ../../libz/memalloc.h ../../libz/error.h \
+ ../../libz/errorz.h
+gram.o: gram.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gram.h options.h scan.h zparse.h \
+ ../../libz/area.h ../../libz/iset.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h
+lalr.o: lalr.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h comptab.h ../../libz/error.h ../../libz/errorz.h \
+ gram.h lalr.h options.h outvec.h scan.h xset.h ../../libz/area.h \
+ ../../libz/autobuf.h ../../libz/memalloc.h ../../libz/iset.h \
+ ../../libz/zutil.h
+main.o: main.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h buildrec.h gram.h lalr.h main.h options.h \
+ outfns.h ../../libz/parseopt.h scan.h zparse.h ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h \
+ ../../libz/zutil.h
+mkoptinf.o: mkoptinf.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c
+mkopttab.o: mkopttab.c ../../libz/parseopt.h ../../libz/ccport.h \
+ opttab0.c
+opttab0.o: opttab0.c ../../libz/parseopt.h ../../libz/ccport.h
+options.o: options.c main.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h options.h ../../libz/error.c ../../libz/error.h \
+ ../../libz/errorz.h ../../libz/ids.h ../../libz/memalloc.h \
+ ../../libz/parseopt.h ../../libz/zutil.h opttab.c
+outvec.o: outvec.c outvec.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h
+xset.o: xset.c xset.h port.h ../../libz/ccport.h ../../libz/osport.h \
+ ../../libz/area.h ../../libz/error.h ../../libz/errorz.h
+zydebug.o: zydebug.c port.h ../../libz/ccport.h ../../libz/osport.h
+opttab.o: opttab.c
+parse.o: parse.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gram.h lalr.h options.h scan.h zparse.h \
+ ../../libz/error.h ../../libz/errorz.h
+scan.o: scan.c attribs.h port.h ../../libz/ccport.h \
+ ../../libz/osport.h gram.h options.h scan.h zparse.h \
+ ../../libz/area.h ../../libz/error.h ../../libz/errorz.h \
+ ../../libz/ids.h ../../libz/zutil.h parse.h
+scanlib.o: scanlib.c
+
+
