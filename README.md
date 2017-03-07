@@ -2,18 +2,26 @@
 
 **Unmaintained** archive of projects worked on in the 1990s. 
 
-Though most of the code will need rework to run on modern systems, the
-documentation is quite extensive and may prove useful.  For example,
-the
-[zlex manual](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html)
-gives a
+Though most of the code will need non-trivial rework to run on modern
+systems, the documentation is quite extensive and may prove useful.
+For example, the
+zprof tutorial
+documents the development of a [C basic-block profiler](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.pdf), the
+[zlex manual](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html) gives a
 [regular expression for C comments](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html#SEC47),
 the
 [zyacc manual](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html)
 gives multiple enhancements useful for bottom-up parser generators,
 etc.
 
-(Good old Netscape Navigator gray background HTML).
+The only additions made when putting up this repository were to
+automatically generate PDF's from the existing Postscript or HTML
+documentation and to add this README.  All files other than this file
+are unchanged from the 1990's.  Hence external links will not work.
+You also get to see vintage Netscape Navigator style gray backgrounds!
+
+The [dist](./dist) directory contains the original distribution
+archives.
 
 ## Dimensional Analysis with C++
 
@@ -33,10 +41,13 @@ Original [README](https://rawgit.com/zerksis/90s-projects/master/ch4_pl/README).
 
 A Java 1.02 applet which demonstrates
 [recursive-descent parsing](https://rawgit.com/zerksis/90s-projects/master/parsdemo-1.0/recframe.html),
-[LL(1) parsing](https://rawgit.com/zerksis/90s-projects/master/parsdemo-1.0/ll1frame.html) and
-[shift-reduce parsing](https://rawgit.com/zerksis/90s-projects/master/parsdemo-1.0/srframe.html) on a simple expression
-grammar.  Shows the currently constructed parse tree/forest, the
-current parse table/program and a trace of the parse.  Original
+[LL(1) parsing](https://rawgit.com/zerksis/90s-projects/master/parsdemo-1.0/ll1frame.html)
+and
+[shift-reduce parsing](https://rawgit.com/zerksis/90s-projects/master/parsdemo-1.0/srframe.html)
+on a simple expression grammar.  Shows the currently constructed parse
+tree/forest, the current parse table/program and a trace of the parse.
+This will not work with modern browsers since they will not run Java
+applets (quite a contrast with the hype of the late 90s).  Original
 [README](https://rawgit.com/zerksis/90s-projects/master/parsdemo-1.0/README).
 
 
@@ -51,7 +62,7 @@ itch!  I hope to redo this program in the near future.
 ## zlex Scanner Generator
 
 A lex-compatible scanner generator.
-[Manual](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html),  original
+[Manual](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html), [PDF](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.pdf),  original
 [README](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/README).
 
 ## zyacc Parser Generator
@@ -100,7 +111,7 @@ nonterminal semantics written into the generated `.h` file
   to be specified from within the parser file.
 
 
-[Manual](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html),  original [README](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html).
+[Manual](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html), [PDF](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.pdf),  original [README](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html).
 
 ## zprof Profiler
 
@@ -110,6 +121,10 @@ programs.  Given a simple primes-computation program
 [annotate](./zprof-0.1/zprof/primes.c.bb) each basic block with its
 execution count.
 
-Used as a [tutorial](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.html) for zlex and
-zyacc.  [man page](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.html), original
+Used as a
+[tutorial](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.html)
+for zlex and zyacc
+([PDF](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.pdf)).
+[man page](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.html),
+original
 [README](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/README).
