@@ -6,10 +6,10 @@
 
 ## Dimensional Analysis with C++
 
-[Source code](./dim) for the SIGPLAN paper
-[Fully Static Dimensional Analysis with C++](<./dim-1.02/sigplan/sigplan.html>).
+[Source code](./dim-1.02) for the SIGPLAN paper
+[Fully Static Dimensional Analysis with C++](https://rawgit.com/zerksis/90s-projects/master/dim-1.02/sigplan/sigplan.html).
 Based on early C++ templates (C++ 2.0).  Original
-[README](./dim-1.02/README).
+[README](https://rawgit.com/zerksis/90s-projects/master/dim-1.02/README).
 
 ## Partial Evaluator
 
@@ -99,6 +99,6 @@ programs.  Given a simple primes-computation program
 [annotate](./zprof-0.1/zprof/primes.c.bb) each basic block with its
 execution count.
 
-Used as a [tutorial](zprof/zprof/NOTES.html) for zlex and
+Used as a [tutorial](./zprof/zprof/NOTES.html) for zlex and
 zyacc.  [man page](./zprof-0.1/zprof/zprof.html), original
 [README](./zprof-0.1/README).
