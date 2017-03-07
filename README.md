@@ -111,7 +111,7 @@ nonterminal semantics written into the generated `.h` file
   to be specified from within the parser file.
 
 
-[Manual](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html), [PDF](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.pdf),  original [README](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html).
+[Manual](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html), [PDF](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc.pdf),  original [README](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html).
 
 ## zprof Profiler
 
