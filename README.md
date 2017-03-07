@@ -2,6 +2,17 @@
 
 **Unmaintained** archive of projects worked on in the 1990s. 
 
+Though most of the code will need rework to run on modern systems, the
+documentation is quite extensive and may prove useful.  For example,
+the
+[zlex manual](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html)
+gives a
+[regular expression for C comments](https://rawgit.com/zerksis/90s-projects/master/zlex-1.02/zlex/doc/zlex.html#SEC47),
+the
+[zyacc manual](https://rawgit.com/zerksis/90s-projects/master/zyacc-1.03/zyacc/doc/zyacc_toc.html)
+gives multiple enhancements useful for bottom-up parser generators,
+etc.
+
 (Good old Netscape Navigator gray background HTML).
 
 ## Dimensional Analysis with C++
@@ -99,6 +110,6 @@ programs.  Given a simple primes-computation program
 [annotate](./zprof-0.1/zprof/primes.c.bb) each basic block with its
 execution count.
 
-Used as a [tutorial](https://rawgit.com/zerksis/90s-projects/master/zprof/zprof/NOTES.html) for zlex and
+Used as a [tutorial](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.html) for zlex and
 zyacc.  [man page](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.html), original
 [README](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/README).
