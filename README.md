@@ -125,6 +125,6 @@ Used as a
 [tutorial](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.html)
 for zlex and zyacc
 ([PDF](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/NOTES.pdf)).
-[man page](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.html), [PDF]((https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.pdf),
+[man page](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.html), [PDF](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/zprof/zprof.pdf),
 original
 [README](https://rawgit.com/zerksis/90s-projects/master/zprof-0.1/README).
